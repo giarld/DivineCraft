@@ -29,7 +29,7 @@ SOURCES += main.cpp\
     camera.cpp \
     block.cpp \
     glkernel/chunkmesh.cpp \
-    chunk.cpp
+    chunkmap.cpp
 
 HEADERS  += dcview.h \
     glkernel/glextensions.h \
@@ -39,7 +39,7 @@ HEADERS  += dcview.h \
     block.h \
     glkernel/glmeshs.h \
     glkernel/chunkmesh.h \
-    chunk.h
+    chunkmap.h
 
 
 wince*: {
