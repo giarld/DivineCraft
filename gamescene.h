@@ -53,12 +53,19 @@ private:
     QVector<BlockListNode *> mBlockList;                                                            //存储所有类型方块的物理属性
 };
 
-class WorldThread : public QThread                                                          //负责加载、保存、重建地图和区块的线程
+//--负责加载、保存、重建地图和区块的线程--//
+class WorldThread : public QThread
 {
     Q_OBJECT
 
 public:
     WorldThread(QObject *parent=0);
+
+protected:
+    virtual void run();
+
+private:
+    bool isRun;
 };
 
 #endif // GAMESCENE_H

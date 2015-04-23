@@ -280,3 +280,8 @@ WorldThread::WorldThread(QObject *parent)
 {
 
 }
+
+void WorldThread::run()
+{
+
+}
