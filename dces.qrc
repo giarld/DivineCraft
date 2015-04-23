@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/res/divinecraft">
+        <file>shader/basic.fsh</file>
+        <file>shader/basic.vsh</file>
+        <file>shader/plain.fsh</file>
+        <file>shader/block.fsh</file>
+        <file>shader/block.vsh</file>
+        <file>textures/block_texture.png</file>
+        <file>textures/texture_index.list</file>
+        <file>block.list</file>
+    </qresource>
+</RCC>
