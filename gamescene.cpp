@@ -277,11 +277,22 @@ void GameScene::makeBuildList()
 //==========================================================================//
 
 WorldThread::WorldThread(QObject *parent)
+    :QThread(parent)
+    ,isRun(false)
 {
-
 }
 
 void WorldThread::run()
 {
+    isRun=true;
+    count=0;
+    while(isRun){
+        qWarning()<<count++;
+    }
+}
 
+void WorldThread::stop()
+{
+    isRun=false;
+    this->wait();
 }

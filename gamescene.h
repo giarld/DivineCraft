@@ -11,6 +11,7 @@
 
 #define PI 3.14159265358979
 
+class WorldThread;
 
 class GameScene : public QGraphicsScene
 {
@@ -64,8 +65,12 @@ public:
 protected:
     virtual void run();
 
+public slots:
+    void stop();
+
 private:
     bool isRun;
+    int count;
 };
 
 #endif // GAMESCENE_H
