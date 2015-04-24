@@ -46,6 +46,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
     //    view.rotate(q );
     view(2, 3) -= 30.0;
+    view.translate(0,-2,0);
     renderBlocks(view);
     defaultStates();
     painter->endNativePainting();
@@ -188,10 +189,8 @@ void GameScene::initGame()
         exit(1);
     }
 
-    block=new Block(QVector3D(0.0,0.0,0.0),mBlockList[2]);
-    block2=new Block(QVector3D(0.0,1.0,0.0),mBlockList[10]);
-    block->setBrother(Block::TOP,block2);
-    block2->setBrother(Block::DOWN,block);
+    block=new Block(QVector3D(0.0,1.0,0.0),mBlockList[2]);
+    block2=new Block(QVector3D(0.0,2.0,0.0),mBlockList[16]);
 
     buildList=glGenLists(1);
     disChunk=new DisplayChunk(QVector3D(0,0,0));
@@ -201,13 +200,12 @@ void GameScene::initGame()
 
     for(int i=0;i<16;i++)
         for(int j=0;j<16;j++){
-            Block *block3=new Block(QVector3D(i,j,15),mBlockList[10]);
-            for(int k=0;k<Block::MAX_FACE_SUM;k++){
-                block3->setBrother(k,disChunk->getBlock(block3->vicinityPosition(k)));
+            for(int k=0;k<16;k++){
+            Block *block3=new Block(QVector3D(i,k,j),mBlockList[4]);
+            disChunk->addBlock(block3,false);
             }
-            disChunk->addBlock(block3,true);
         }
-    //    makeBuildList();
+    disChunk->update();
 }
 
 void GameScene::loadmBlockList()
@@ -273,25 +271,6 @@ void GameScene::loadmBlockList()
     //    foreach (BlockListNode *a, mBlockList) {
     //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
     //    }
-}
-
-void GameScene::makeBuildList()
-{
-    glNewList(buildList,GL_COMPILE);
-    int hs=block->getShowFaceSum()+block2->getShowFaceSum();
-    //    qWarning()<<hs;
-    ChunkMesh *mesh=new ChunkMesh(hs);
-    for(int i=0;i<block->faceSum();i++){
-        if(!block->isFaceHide(i))
-            mesh->addFace(block->getFace(i));
-    }
-    for(int i=0;i<block2->faceSum();i++){
-        if(!block2->isFaceHide(i))
-            mesh->addFace(block2->getFace(i));
-    }
-    mesh->draw();
-    delete mesh;
-    glEndList();
 }
 
 //==========================================================================//

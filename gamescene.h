@@ -39,7 +39,6 @@ signals:
 private:
     void initGame();                                                                    //初始化游戏场景
     void loadmBlockList();                                                          //加载方块列表和纹理描述文件
-    void makeBuildList();
 
 private:
     GLTexture2D *blockTexture;                                  //方块材质

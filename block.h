@@ -54,14 +54,7 @@ public:
     bool isAir();               //是空气？
     void reSetBlock(BlockListNode const*mb, QVector3D position);                                                  //重设方块
     Face *getFace(int site);                                        //给出面
-    bool setBrother(int site,Block *b);                     //设置兄弟
-    bool removeBrother(int site);                           //移除兄弟记录
-    void updateFace();                                                          //更新面的显示，可再增加兄弟和去除兄弟后执行。
-    void hideFace(int site,bool hide=true);                      //设置面site的隐藏状态，hide为是否隐藏
-    void hideAll();                                                                 //隐藏所有
-    void showAll();                                                                     //显示所有
-    void showFace(int site);                                                    //显示面，功能同hideFace(site,false);
-    bool isFaceHide(int site);                                                      //面site是否隐藏
+
     bool isCollide();                                                       //返还可碰撞状态
     bool isTrans();                                                             //是否透明
     int faceSum();                                                          //面数
@@ -87,7 +80,6 @@ private:
     QString bName;                                                                  //方块名字（实在的）
 
     BlockListNode const *mBlock;                                  //当前方块所拥有的物理属性
-    QVector<Block *>brothers;                               //兄弟方块，周围6个
 };
 
 #endif // BLOCK_H

@@ -105,6 +105,8 @@ bool DisplayChunk::isOk()
 
 Block *DisplayChunk::getBlock(QVector3D bPos)
 {
+    if(calcChunckPos(bPos)!=dcPosition)
+        return NULL;
     int key=calcKey(bPos);
     return blocks.value(key);
 }
@@ -152,30 +154,47 @@ int DisplayChunk::calcKey(QVector3D bPos)
     return key;
 }
 
+///
+/// \brief DisplayChunk::updateDisplayList
+///
 void DisplayChunk::updateDisplayList()
 {
     int faceSum=0;
+    QVector<Face *> faces;
     QMapIterator<int,Block*> mi(blocks);
     while(mi.hasNext()){        //计算可绘制的面数
         Block *temp=mi.next().value();
         if(!temp || temp->isAir()) continue;             //空气方块跳过
-       faceSum+=temp->getShowFaceSum();
+        for(int i=0;i<temp->faceSum();i++){
+            Block *vis=getBlock(temp->vicinityPosition(i));
+            if(vis==NULL){
+                faces<<temp->getFace(i);
+                faceSum+=1;
+                continue;
+            }
+            if(temp->getType()==1){
+                faces<<temp->getFace(i);
+                faceSum+=1;
+                continue;
+            }
+            if(temp->getId()==vis->getId())
+                continue;
+            if(vis->isTrans()==false)
+                continue;
+
+            faces<<temp->getFace(i);
+            faceSum+=1;
+        }
     }
     qDebug()<<"Face Sum = "<<faceSum;
 
-    QMapIterator<int,Block*> mj(blocks);
     ChunkMesh *mesh=new ChunkMesh(faceSum);
     glNewList(displayListID,GL_COMPILE);
-        while(mj.hasNext()){
-            Block *temp=mj.next().value();
-            if(!temp || temp->isAir()) continue;
-            for(int i=0;i<temp->faceSum();i++){
-                if(temp->isFaceHide(i)==false){
-                    mesh->addFace(temp->getFace(i));
-                }
-            }
-        }
-        mesh->draw();
+    foreach (Face *f, faces) {
+        mesh->addFace(f);
+    }
+    mesh->draw();
     glEndList();
     delete mesh;
+    faces.clear();
 }

@@ -99,10 +99,6 @@ Block::~Block()
         if(f)
             delete f;
     }
-    foreach (Block *b, brothers) {
-        if(b)
-            delete b;
-    }
 }
 
 bool Block::isAir()
@@ -117,10 +113,6 @@ void Block::reSetBlock(const BlockListNode *mb, QVector3D position)
     this->position=position;
     mBlock=mb;
 
-    for(int i=FRONT;i<=DOWN;i++)
-    {
-        brothers<<NULL;
-    }
     bName="";
     face.clear();
     if( mb && mb->id!=0)   //不为空气方块，创建面
@@ -193,77 +185,10 @@ void Block::setBName(const QString &name)
     bName = name;
 }
 
-
 Face *Block::getFace(int site)
 {
     if(site<Block::FRONT || site>=face.length()) return NULL;
     return face[site];
-}
-
-bool Block::setBrother(int site, Block *b)
-{
-    if(site<Block::FRONT || site>=face.length())return false;
-    brothers[site]=b;
-    updateFace();
-    return true;
-}
-
-bool Block::removeBrother(int site)
-{
-    if(site<Block::FRONT || site>=face.length())return false;
-    if(!brothers[site]) return false;
-    brothers[site]=NULL;
-    updateFace();
-    return true;
-}
-
-void Block::updateFace()
-{
-    if(mBlock==NULL || mBlock->type==1 || mBlock->id==0)            //自己是一个1类的四面方块或者是空气方块不更新面的隐藏
-        return;
-    showAll();                                                                                  //先显示全部再逐一隐藏
-    for(int i=0;i<face.length();i++){
-        if(!brothers[i]) continue;                                  //没有方块，跳过
-        if(brothers[i]->getType()==1)                           //对面是个1类方块，跳过
-            continue;
-        if( brothers[i]->isTrans()==false){           //不是透明方块 则隐藏这个面
-            hideFace(i);
-        }
-        else if(getId()==brothers[i]->getId()){        //都是透明方块，隐藏面
-            hideFace(i);
-        }
-    }
-}
-
-void Block::hideFace(int site, bool hide)
-{
-    if(site < Block::FRONT || site>=face.length()) return ;
-    face[site]->ishide=hide;
-}
-
-void Block::hideAll()
-{
-    foreach (Face *f, face) {
-        f->ishide=true;
-    }
-}
-
-void Block::showAll()
-{
-    foreach (Face *f, face) {
-        f->ishide=false;
-    }
-}
-
-void Block::showFace(int site)
-{
-    hideFace(site,false);
-}
-
-bool Block::isFaceHide(int site)
-{
-    if(site<Block::FRONT || site>=face.length()) return true;
-    return face[site]->ishide;
 }
 
 bool Block::isCollide()
