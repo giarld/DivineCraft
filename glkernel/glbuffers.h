@@ -165,7 +165,6 @@ public:
         glGenBuffers(1, &m_buffer);
         glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
         glBufferData(GL_ARRAY_BUFFER, (m_length = length) * sizeof(T), data, mode);
-
     }
 
     ~GLVertexBuffer()

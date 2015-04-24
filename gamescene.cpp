@@ -2,9 +2,11 @@
 #include <QTextStream>
 #include <QMessageBox>
 
+//================================================//
+//
+//================================================//
 float rot=0;
-GameScene::GameScene(int width, int height, int maxTextureSize)
-    :g_maxTextureSize(maxTextureSize)
+GameScene::GameScene(int width, int height)
 {
     setSceneRect(0,0,width,height);
     initGame();
@@ -20,6 +22,9 @@ GameScene::~GameScene()
         delete t;
     }
     delete blockTexture;
+    delete blockVertexShader;
+    delete blockFragmentShader;
+    delete blockProgram;
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -40,7 +45,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     //    float angle = 00.0;
     //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
     //    view.rotate(q );
-    view(2, 3) -= 3.0;
+    view(2, 3) -= 30.0;
     renderBlocks(view);
     defaultStates();
     painter->endNativePainting();
@@ -65,6 +70,7 @@ void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void GameScene::keyPressEvent(QKeyEvent *event)
 {
     QGraphicsScene::keyPressEvent(event);
+
 }
 
 void GameScene::setStates()
@@ -182,11 +188,26 @@ void GameScene::initGame()
         exit(1);
     }
 
-    block=new Block(mBlockList[2],QVector3D(-1.0,-1.0,0.0));
-    block2=new Block(mBlockList[16],QVector3D(-1.0,0.0,0.0));
+    block=new Block(QVector3D(0.0,0.0,0.0),mBlockList[2]);
+    block2=new Block(QVector3D(0.0,1.0,0.0),mBlockList[10]);
     block->setBrother(Block::TOP,block2);
     block2->setBrother(Block::DOWN,block);
-    makeBuildList();
+
+    buildList=glGenLists(1);
+    disChunk=new DisplayChunk(QVector3D(0,0,0));
+    disChunk->setDisplayListID(buildList);
+    disChunk->addBlock(block,true);
+    disChunk->addBlock(block2,true);
+
+    for(int i=0;i<16;i++)
+        for(int j=0;j<16;j++){
+            Block *block3=new Block(QVector3D(i,j,15),mBlockList[10]);
+            for(int k=0;k<Block::MAX_FACE_SUM;k++){
+                block3->setBrother(k,disChunk->getBlock(block3->vicinityPosition(k)));
+            }
+            disChunk->addBlock(block3,true);
+        }
+    //    makeBuildList();
 }
 
 void GameScene::loadmBlockList()
@@ -256,10 +277,9 @@ void GameScene::loadmBlockList()
 
 void GameScene::makeBuildList()
 {
-    buildList=glGenLists(1);
     glNewList(buildList,GL_COMPILE);
     int hs=block->getShowFaceSum()+block2->getShowFaceSum();
-    qWarning()<<hs;
+    //    qWarning()<<hs;
     ChunkMesh *mesh=new ChunkMesh(hs);
     for(int i=0;i<block->faceSum();i++){
         if(!block->isFaceHide(i))

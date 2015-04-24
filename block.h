@@ -42,15 +42,16 @@ class Block
 {
 public:
     enum{//face Enum
-        FRONT=0,BACK=1,LEFT=2,RIGHT=3,TOP=4,DOWN=5
+        FRONT=0,BACK=1,LEFT=2,RIGHT=3,TOP=4,DOWN=5,MAX_FACE_SUM=6
     };
     enum{
         SIXBLOCK=0x0,FOURBLOCK=0x1
     };
     Block(QVector3D position);
-    Block(BlockListNode const*mb, QVector3D position);                 //创建一个默认的b_id方块。坐标为position，faceType代表6面方块或4面装饰物
+    Block(QVector3D position,BlockListNode const*mb);                 //创建一个默认的b_id方块。坐标为position，faceType代表6面方块或4面装饰物
     ~Block();
 
+    bool isAir();               //是空气？
     void reSetBlock(BlockListNode const*mb, QVector3D position);                                                  //重设方块
     Face *getFace(int site);                                        //给出面
     bool setBrother(int site,Block *b);                     //设置兄弟
@@ -68,6 +69,14 @@ public:
     int getId();                                                                    //给出物理id（不是方块的编号）
     int getType();                                                                //给出类型
 
+    QString getBName() const;
+    void setBName(const QString &name);
+
+    QVector3D getPosition() const;
+    void setPosition(const QVector3D &value);
+
+    QVector3D vicinityPosition(int site) const;                                //计算上下左右前后6个方向的邻近方块坐标
+
 private:
     void createBlock();                                 //创建方块的面纹理等
 
@@ -75,6 +84,7 @@ private:
 //    int b_id;                   //方块的所属id（属于那个方块）
     QVector3D position;         //方块坐标,左下角
     QVector<Face *> face;               //面
+    QString bName;                                                                  //方块名字（实在的）
 
     BlockListNode const *mBlock;                                  //当前方块所拥有的物理属性
     QVector<Block *>brothers;                               //兄弟方块，周围6个

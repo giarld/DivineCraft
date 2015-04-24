@@ -1,6 +1,6 @@
 #include "block.h"
 
-QVector3D posAOffsets[][4]={
+QVector3D posAOffsets[][4]={        //0类方块顶点偏移
     {//FRONT
      QVector3D(0.0,1.0,0.0),QVector3D(0.0,0.0,0.0),
      QVector3D(1.0,0.0,0.0),QVector3D(1.0,1.0,0.0)
@@ -32,7 +32,7 @@ QVector3D posAOffsets[][4]={
     }
 };
 
-QVector3D posBOffsets[][4]={
+QVector3D posBOffsets[][4]={                //1类方块顶点偏移
     {//FRONT
      QVector3D(0.0,1.0,0.0),QVector3D(0.0,0.0,0.0),
      QVector3D(1.0,0.0,-1.0),QVector3D(1.0,1.0,-1.0)
@@ -54,13 +54,13 @@ QVector3D posBOffsets[][4]={
     },
 };
 
-QVector3D Anormals[]={
+QVector3D Anormals[]={              //0类方块法线
     QVector3D(0.0,0.0,1.0),QVector3D(0.0,0.0,-1.0),
     QVector3D(-1.0,0.0,0.0),QVector3D(1.0,0.0,0.0),
     QVector3D(0.0,1.0,0.0),QVector3D(0.0,-1.0,0.0)
 };
 
-QVector3D Bnormals[]={
+QVector3D Bnormals[]={              //1类方块法线
     QVector3D(1.0,0.0,1.0),QVector3D(-1.0,0.0,-1.0),
     QVector3D(-1.0,0.0,1.0),QVector3D(1.0,0.0,-1.0)
 };
@@ -74,21 +74,21 @@ float texRevise[4][2]={
     {0.001,0.001},{0.001,-0.001},{-0.001,-0.001},{-0.001,0.001}
 };              //材质的修正
 
+//向四周一个单位的偏移
+QVector3D vicinityOffset[]={
+    QVector3D(0,0,1),QVector3D(0,0,-1),
+    QVector3D(-1,0,0),QVector3D(1,0,0),
+    QVector3D(0,1,0),QVector3D(0,-1,0)
+};
+
 //标准1×1×1方块类
 
 Block::Block(QVector3D position)                            //构造一个空气方块
-    :position(position)
-    ,mBlock(NULL)
 {
-    for(int i=FRONT;i<=DOWN;i++)
-    {
-        brothers<<NULL;
-    }
+    reSetBlock(NULL,position);
 }
 
-Block::Block(const BlockListNode *mb, QVector3D position)
-    :position(position)
-    ,mBlock(mb)
+Block::Block(QVector3D position, const BlockListNode *mb)
 {
     reSetBlock(mb,position);
 }
@@ -105,19 +105,33 @@ Block::~Block()
     }
 }
 
+bool Block::isAir()
+{
+    if(mBlock==NULL || mBlock->id==0)
+        return true;
+    return false;
+}
+
 void Block::reSetBlock(const BlockListNode *mb, QVector3D position)
 {
+    this->position=position;
+    mBlock=mb;
+
     for(int i=FRONT;i<=DOWN;i++)
     {
         brothers<<NULL;
     }
-    if(mb->id!=0)   //不为空气方块，创建面
+    bName="";
+    face.clear();
+    if( mb && mb->id!=0)   //不为空气方块，创建面
+    {
+        bName=mb->name;
         createBlock();
+    }
 }
 
 void Block::createBlock()
 {
-    face.clear();
     if(mBlock->type==0){
         int n=DOWN;
         for(int i=FRONT;i<=n;i++){
@@ -151,6 +165,34 @@ void Block::createBlock()
         }
     }
 }
+QVector3D Block::getPosition() const
+{
+    return position;
+}
+
+void Block::setPosition(const QVector3D &value)
+{
+    position = value;
+}
+
+QVector3D Block::vicinityPosition(int site) const
+{
+    if(site<Block::FRONT || site>=face.length()){
+        return this->getPosition();
+    }
+    return this->getPosition()+vicinityOffset[site];
+}
+
+QString Block::getBName() const
+{
+    return bName;
+}
+
+void Block::setBName(const QString &name)
+{
+    bName = name;
+}
+
 
 Face *Block::getFace(int site)
 {
@@ -177,7 +219,7 @@ bool Block::removeBrother(int site)
 
 void Block::updateFace()
 {
-    if(mBlock->type==1 || mBlock==NULL || mBlock->id==0)            //自己是一个1类的四面方块或者是空气方块不更新面的隐藏
+    if(mBlock==NULL || mBlock->type==1 || mBlock->id==0)            //自己是一个1类的四面方块或者是空气方块不更新面的隐藏
         return;
     showAll();                                                                                  //先显示全部再逐一隐藏
     for(int i=0;i<face.length();i++){

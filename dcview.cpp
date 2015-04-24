@@ -11,8 +11,7 @@ DCView::DCView()
     int w=dWidth*0.618;
     int h=dHeight*0.618;
     this->setGeometry((dWidth-w)/2,(dHeight-h)/2,w,h);              //窗口居中，黄金比例。
-    int maxTextureSize = 1024;
-    s=new GameScene(w,h,maxTextureSize) ;
+    s=new GameScene(w,h) ;
     this->setScene(s);
 //    this->setMouseTracking(true);
 }

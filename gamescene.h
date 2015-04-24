@@ -8,6 +8,7 @@
 #include "glkernel/glmeshs.h"
 #include "glkernel/glbuffers.h"
 #include "block.h"
+#include "chunkmap.h"
 
 #define PI 3.14159265358979
 
@@ -18,7 +19,7 @@ class GameScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    GameScene(int width,int height,int maxTextureSize);
+    GameScene(int width, int height);
     ~GameScene();
     virtual void drawBackground(QPainter *painter, const QRectF &);
 
@@ -36,18 +37,18 @@ protected:
 signals:
 
 private:
-    void initGame();
-    void loadmBlockList();
+    void initGame();                                                                    //初始化游戏场景
+    void loadmBlockList();                                                          //加载方块列表和纹理描述文件
     void makeBuildList();
 
 private:
-    int g_maxTextureSize;
     GLTexture2D *blockTexture;                                  //方块材质
     QGLShader *blockVertexShader;                           //方块顶点着色器
     QGLShader *blockFragmentShader;                     //方块片段着色器
     QGLShaderProgram *blockProgram;                     //方块着色器程序
     Block *block;
     Block *block2;
+    DisplayChunk *disChunk;
 
     GLuint buildList;
 

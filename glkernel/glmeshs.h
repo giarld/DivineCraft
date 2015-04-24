@@ -71,7 +71,6 @@ public:
         int type = GL_UNSIGNED_INT;
         if (sizeof(TIndex) == sizeof(char)) type = GL_UNSIGNED_BYTE;
         if (sizeof(TIndex) == sizeof(short)) type = GL_UNSIGNED_SHORT;
-
         m_vb.bind();
         m_ib.bind();
         glDrawElements(GL_QUADS, m_ib.length(), type, BUFFER_OFFSET(0));                    //绘制四边形网络
