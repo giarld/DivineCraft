@@ -128,7 +128,6 @@ void Block::createBlock()
         int n=DOWN;
         for(int i=FRONT;i<=n;i++){
             Face *nf=new Face;
-            nf->ishide=false;
             for(int j=0;j<4;j++){
                 nf->vert[j].position=posAOffsets[i][j]+position;                 //实际坐标
                 nf->vert[j].normal=Anormals[i];                                              //法线
@@ -144,7 +143,6 @@ void Block::createBlock()
         int n=RIGHT;
         for(int i=FRONT;i<=n;i++){
             Face *nf=new Face;
-            nf->ishide=false;
             for(int j=0;j<4;j++){
                 nf->vert[j].position=posBOffsets[i][j]+position;                 //实际坐标
                 nf->vert[j].normal=Bnormals[i];                                              //法线
@@ -206,13 +204,6 @@ int Block::faceSum()
     return face.length();
 }
 
-int Block::getShowFaceSum()
-{
-    int i,sum=0;
-    for(i=0;i<face.length();i++)
-        if(!face[i]->ishide) sum++;
-    return sum;
-}
 
 int Block::getId()
 {

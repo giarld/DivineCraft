@@ -1,7 +1,7 @@
 #include "gamescene.h"
 #include <QTextStream>
 #include <QMessageBox>
-
+#include "ctime"
 //================================================//
 //
 //================================================//
@@ -10,8 +10,9 @@ GameScene::GameScene(int width, int height)
 {
     setSceneRect(0,0,width,height);
     initGame();
+    lastTime=QTime::currentTime();
     QTimer *timer=new QTimer;
-    timer->setInterval(10);
+    timer->setInterval(20);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
     timer->start();
 }
@@ -32,6 +33,8 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     float width=float(painter->device()->width());
     float height=float(painter->device()->height());
 
+    QTime lT=QTime::currentTime();
+
     painter->beginNativePainting();
     setStates();
 
@@ -46,9 +49,10 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
     //    view.rotate(q );
     view(2, 3) -= 30.0;
-    view.translate(0,-2,0);
+    view.translate(-8,-8,0);
     renderBlocks(view);
     defaultStates();
+//    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
 }
 
@@ -71,7 +75,6 @@ void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void GameScene::keyPressEvent(QKeyEvent *event)
 {
     QGraphicsScene::keyPressEvent(event);
-
 }
 
 void GameScene::setStates()
@@ -150,12 +153,17 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
     }
     glLoadMatrixf(view.constData());
 
-    rot+=0.5;
+
+    rot+=lastTime.msecsTo(QTime::currentTime())*0.01;
+    lastTime=QTime::currentTime();
+
     glRotatef(rot,1.0,1.0,0.5);
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
     blockProgram->setUniformValue("view",view);
-    glCallList(buildList);
+
+    glCallList(disChunk->getDisplayListID());
+    glCallList(disChunk2->getDisplayListID());
 
     blockProgram->release();
 
@@ -192,20 +200,25 @@ void GameScene::initGame()
     block=new Block(QVector3D(0.0,1.0,0.0),mBlockList[2]);
     block2=new Block(QVector3D(0.0,2.0,0.0),mBlockList[16]);
 
-    buildList=glGenLists(1);
     disChunk=new DisplayChunk(QVector3D(0,0,0));
-    disChunk->setDisplayListID(buildList);
+//    disChunk->setDisplayListID(buildList);
     disChunk->addBlock(block,true);
     disChunk->addBlock(block2,true);
+    qsrand(time(0));
 
     for(int i=0;i<16;i++)
         for(int j=0;j<16;j++){
             for(int k=0;k<16;k++){
-            Block *block3=new Block(QVector3D(i,k,j),mBlockList[4]);
-            disChunk->addBlock(block3,false);
+                disChunk->addBlock(new Block(QVector3D(i,k,j),mBlockList[qrand()%34]),false);
             }
         }
     disChunk->update();
+
+    disChunk2=new DisplayChunk(QVector3D(-1,0,0));
+    for(int i=0;i>=-20;i--){
+        disChunk2->addBlock(new Block(QVector3D(i,0,0),mBlockList[qrand()%34]),false);
+    }
+    disChunk2->update();
 }
 
 void GameScene::loadmBlockList()

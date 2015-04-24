@@ -42,7 +42,8 @@ public:
 private:
     int calcKey(QVector3D bPos);                                    //通过方块坐标计算其存储的key
     void updateDisplayList();                                       //更新显示列表
-
+    void genDisplayList();                                                  //创建显示列表(无的前提下)
+    void deleteDisplayList();                                          //移除显示列表
 private:
     QVector3D dcPosition;                     //显示区块坐标（x16=首区块坐标）
     QMap<int,Block*> blocks;               //方块列表16*16*16，key=0 to 4095 ( key=(16*16)*y+16*z+x. (0<=x,y,z<16) ; x,y,z=Block.(x,y,z)/16)

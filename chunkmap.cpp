@@ -40,7 +40,7 @@ DisplayChunk::DisplayChunk(QVector3D dcPos)
 
 DisplayChunk::~DisplayChunk()
 {
-
+    deleteDisplayList();
 }
 
 void DisplayChunk::resetDisplayChunk()
@@ -89,8 +89,9 @@ bool DisplayChunk::removeBlock(QVector3D pos)
 
 void DisplayChunk::update()
 {
-    if(! isOk() || displayListID==0)            //非就绪区块或者未分配显示列表不进行视图刷新
+    if(! isOk())            //非就绪区块或者未分配显示列表不进行视图刷新
         return ;
+    genDisplayList();
     updateDisplayList();
 }
 
@@ -197,4 +198,16 @@ void DisplayChunk::updateDisplayList()
     glEndList();
     delete mesh;
     faces.clear();
+}
+
+void DisplayChunk::genDisplayList()
+{
+    if(displayListID==0)
+        displayListID=glGenLists(1);
+}
+
+void DisplayChunk::deleteDisplayList()
+{
+    if(displayListID!=0)
+        glDeleteLists(displayListID,1);
 }

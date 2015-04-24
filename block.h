@@ -30,7 +30,7 @@ struct Vertex{
 struct Face
 {
 //    int site;                   //哪个面，详见Block的Face Enum
-    bool ishide;                    //是否隐藏
+//    bool ishide;                    //是否隐藏
     Vertex vert[4];             //四个顶点，以逆时针排序，正对着观察从左上角开始。
 };
 
@@ -58,7 +58,6 @@ public:
     bool isCollide();                                                       //返还可碰撞状态
     bool isTrans();                                                             //是否透明
     int faceSum();                                                          //面数
-    int getShowFaceSum();                                           //可绘制的面数
     int getId();                                                                    //给出物理id（不是方块的编号）
     int getType();                                                                //给出类型
 
