@@ -228,7 +228,7 @@ void GameScene::initGame()
     for(int i=0;i<16;i++)
         for(int j=0;j<256;j++)
             for(int k=16;k<32;k++){
-                chunk1->addBlock(new Block(QVector3D(i,j,k),mBlockList[1]),false);
+                chunk1->addBlock(new Block(QVector3D(i,j,k),mBlockList[10]),false);
             }
     chunk1->updateAll();
     chunk1->removeBlock(QVector3D(4,18,18),true);
