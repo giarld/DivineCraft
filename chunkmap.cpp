@@ -31,6 +31,11 @@ ChunkMap::~ChunkMap()
 
 }
 
+DisplayChunk *ChunkMap::getDisplayChunk()
+{
+
+}
+
 //=============================================//
 
 DisplayChunk::DisplayChunk()

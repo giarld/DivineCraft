@@ -67,6 +67,8 @@ class ChunkMap
 public:
     ChunkMap();
     ~ChunkMap();
+
+    DisplayChunk *getDisplayChunk();
 private:
     QVector2D chuckPosition;                                                    //区块坐标，世界中的区块是二维分布的.
     QMap<int,DisplayChunk*> displayChunk;                                       //16个对等的显示区块，每一个显示区块可能为空
