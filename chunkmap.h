@@ -8,6 +8,7 @@
 #include <QMap>
 #include <QSet>
 #include <QVector>
+#include <QVector2D>
 #include <QVector3D>
 #include <QtOpenGL>
 
@@ -68,7 +69,10 @@ public:
     ChunkMap();
     ~ChunkMap();
 
+    bool addBlock(Block *block,bool update);                                //增加方块
     DisplayChunk *getDisplayChunk();
+
+    static QVector2D v3d2v2d(const QVector3D & v3d);                            //将QVector3D转换为QVector2D,舍弃y
 private:
     QVector2D chuckPosition;                                                    //区块坐标，世界中的区块是二维分布的.
     QMap<int,DisplayChunk*> displayChunk;                                       //16个对等的显示区块，每一个显示区块可能为空

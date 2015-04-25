@@ -36,6 +36,13 @@ DisplayChunk *ChunkMap::getDisplayChunk()
 
 }
 
+QVector2D ChunkMap::v3d2v2d(const QVector3D &v3d)
+{
+    float x=v3d.x();
+    float z=v3d.z();
+    return QVector2D(x,z);
+}
+
 //=============================================//
 
 DisplayChunk::DisplayChunk()
