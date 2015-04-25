@@ -52,7 +52,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     view.translate(-8,-8,0);
     renderBlocks(view);
     defaultStates();
-//    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
+    //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
 }
 
@@ -86,9 +86,10 @@ void GameScene::setStates()
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
-    //    glClearDepth(1.0);
-    //    glDepthFunc(GL_LEQUAL);
-    //    glDepthRange(0.0f,1.0f);
+//    glClearDepth(1.0);
+//    glDepthFunc(GL_LEQUAL);
+//    glDepthRange(0.0f,1.0f);
+
     //png透明
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER,0.0);
@@ -157,13 +158,12 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
     rot+=lastTime.msecsTo(QTime::currentTime())*0.01;
     lastTime=QTime::currentTime();
 
-    glRotatef(rot,1.0,1.0,0.5);
+    glRotatef(rot,1.0,1.0,0.0);
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
     blockProgram->setUniformValue("view",view);
 
-    glCallList(disChunk->getDisplayListID());
-    glCallList(disChunk2->getDisplayListID());
+    disChunk->draw();
 
     blockProgram->release();
 
@@ -196,29 +196,14 @@ void GameScene::initGame()
                                            "请联系开发者寻求解决方案"),QMessageBox::Ok);
         exit(1);
     }
-
-    block=new Block(QVector3D(0.0,1.0,0.0),mBlockList[2]);
-    block2=new Block(QVector3D(0.0,2.0,0.0),mBlockList[16]);
-
-    disChunk=new DisplayChunk(QVector3D(0,0,0));
-//    disChunk->setDisplayListID(buildList);
-    disChunk->addBlock(block,true);
-    disChunk->addBlock(block2,true);
     qsrand(time(0));
-
+    disChunk=new DisplayChunk(0,0,0);
     for(int i=0;i<16;i++)
-        for(int j=0;j<16;j++){
+        for(int j=0;j<16;j++)
             for(int k=0;k<16;k++){
-                disChunk->addBlock(new Block(QVector3D(i,k,j),mBlockList[qrand()%34]),false);
+                disChunk->addBlock(new Block(QVector3D(i,j,k),mBlockList[qrand()%33+1]),false);
             }
-        }
     disChunk->update();
-
-    disChunk2=new DisplayChunk(QVector3D(-1,0,0));
-    for(int i=0;i>=-20;i--){
-        disChunk2->addBlock(new Block(QVector3D(i,0,0),mBlockList[qrand()%34]),false);
-    }
-    disChunk2->update();
 }
 
 void GameScene::loadmBlockList()

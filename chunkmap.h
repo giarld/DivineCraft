@@ -19,13 +19,14 @@ class DisplayChunk
 {
 public:
     DisplayChunk();
+    DisplayChunk(int cx,int cy,int cz);
     DisplayChunk(QVector3D dcPos);
     ~DisplayChunk();
 
     void resetDisplayChunk();
     void resetDisplayChunk(QVector3D dcPos);                                       //清空重置区块
     bool addBlock(Block *block,bool update);                                //增加方块
-    bool removeBlock(QVector3D pos);                     //移除方块,只是单纯的从显示区块移除，Block的其他相关关系再主场景处理
+    bool removeBlock(QVector3D pos,bool update);                     //移除方块,只是单纯的从显示区块移除，Block的其他相关关系再主场景处理
 
     void update();
 
@@ -33,11 +34,16 @@ public:
 
     Block *getBlock(QVector3D bPos);                    //返还指定坐标的方块。
 
+    void draw();                                                            //绘制区块
+
     GLuint getDisplayListID() const;
     void setDisplayListID(const GLuint &value);
 
+    bool isShow();
+    void setShow(bool s);
+
     static QVector3D blockPos2dcPos(QVector3D bPos);                //计算块内坐标,全局
-    static QVector3D calcChunckPos(QVector3D bPos);                     //计算方块所属区块坐标
+    static QVector3D calcChunckPos(QVector3D bPos);                     //计算方块所属显示区块坐标
 
 private:
     int calcKey(QVector3D bPos);                                    //通过方块坐标计算其存储的key
@@ -48,6 +54,7 @@ private:
     QVector3D dcPosition;                     //显示区块坐标（x16=首区块坐标）
     QMap<int,Block*> blocks;               //方块列表16*16*16，key=0 to 4095 ( key=(16*16)*y+16*z+x. (0<=x,y,z<16) ; x,y,z=Block.(x,y,z)/16)
     int blockCount;                                 //方块计数器
+    bool show;                                           //是否显示
 //    bool hasBlock;                                                   //含非空气方块？
     GLuint displayListID;                                       //分配的显示列表编号
 };
@@ -61,7 +68,7 @@ public:
     ChunkMap();
     ~ChunkMap();
 private:
-    QVector2D chuckPosition;                                                    //区块坐标，世界中的区块是二维分布的。方块坐标/16可以找到对应区块
+    QVector2D chuckPosition;                                                    //区块坐标，世界中的区块是二维分布的.
     QMap<int,DisplayChunk*> displayChunk;                                       //16个对等的显示区块，每一个显示区块可能为空
 };
 
