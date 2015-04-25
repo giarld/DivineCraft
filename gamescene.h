@@ -47,6 +47,7 @@ private:
     QGLShaderProgram *blockProgram;                     //方块着色器程序
     QTime lastTime;
     DisplayChunk *disChunk;
+    ChunkMap *chunk1;
 
 
     QVector<BlockListNode *> mBlockList;                                                            //存储所有类型方块的物理属性

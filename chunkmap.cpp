@@ -21,9 +21,18 @@ int g2Int(float x)                      //浮点数转整数的自定义规则
 ///========================================//
 ///
 /// ========================================//
-ChunkMap::ChunkMap()
+ChunkMap::ChunkMap(QVector2D cPos)
+    :chunkPosition(cPos)
+    ,lastOPDC(NULL)
 {
+    displayChunk.clear();
+}
 
+ChunkMap::ChunkMap(int cx, int cz)
+    :chunkPosition(QVector2D(cx,cz))
+    ,lastOPDC(NULL)
+{
+    displayChunk.clear();
 }
 
 ChunkMap::~ChunkMap()
@@ -31,9 +40,95 @@ ChunkMap::~ChunkMap()
 
 }
 
-DisplayChunk *ChunkMap::getDisplayChunk()
+bool ChunkMap::addBlock(Block *block, bool update)
 {
+    QVector3D dcPos=DisplayChunk::calcChunckPos(block->getPosition());
+    int dkey=dcPos.y();
+    QVector2D cPos=v3d2v2d(dcPos);
+    if(cPos!=chunkPosition)                                         //方块不属于当前区块，pass
+        return false;
+    if(displayChunk.value(dkey)==NULL){
+        if(!createDisplayChunk(dcPos)) return false;
+    }
+    //获得DisplayChunk完成之后
+    DisplayChunk *dc=displayChunk.value(dkey);
+    dc->addBlock(block,update);
+    lastOPDC=dc;                                                            //设置上一个操作区块为当前
+    return true;
+}
 
+bool ChunkMap::removeBlock(QVector3D pos, bool update)
+{
+    QVector3D dcPos=DisplayChunk::calcChunckPos(pos);
+    int dkey=dcPos.y();
+    QVector2D cPos=v3d2v2d(dcPos);
+    if(cPos!=chunkPosition)                                         //方块不属于当前区块，pass
+        return false;
+    DisplayChunk *dc=displayChunk.value(dkey);
+    if(dc==NULL)
+        return false;
+    return dc->removeBlock(pos,update);
+}
+
+Block *ChunkMap::getBlock(QVector3D bPos)
+{
+    QVector3D dcPos=DisplayChunk::calcChunckPos(bPos);
+    int dkey=dcPos.y();
+    QVector2D cPos=v3d2v2d(dcPos);
+    if(cPos!=chunkPosition)                                                 //坐标不是当前区块,pass
+        return NULL;
+    DisplayChunk *dc=displayChunk.value(dkey);
+    if(dc==NULL)                              //实现区块未生成，pass
+        return NULL;
+    return dc->getBlock(bPos);
+}
+
+bool ChunkMap::haveBlock(QVector3D bPos)
+{
+    Block *b=getBlock(bPos);
+    if(b==NULL || b->isAir()==true)                 //空气或没有则没有
+        return false;
+    return true;
+}
+
+DisplayChunk *ChunkMap::getDisplayChunk(QVector3D dcPos)
+{
+    int key=dcPos.y();
+    QVector2D cPos=v3d2v2d(dcPos);
+    if(cPos!=chunkPosition)
+        return NULL;
+    return displayChunk.value(key);
+}
+
+void ChunkMap::draw()
+{
+    foreach (DisplayChunk *dc, displayChunk) {
+        if(dc)
+            dc->draw();
+    }
+}
+
+void ChunkMap::update(int y)
+{
+    if(y<MINLOW || y>MAXHIGHT)
+        return ;
+    if(displayChunk.value(y)==NULL)
+        return ;
+    displayChunk.value(y)->update();
+}
+
+void ChunkMap::updateLast()
+{
+    if(lastOPDC!=NULL)
+        lastOPDC->update();
+}
+
+void ChunkMap::updateAll()
+{
+    foreach (DisplayChunk *dc, displayChunk) {
+        if(dc)
+            dc->update();
+    }
 }
 
 QVector2D ChunkMap::v3d2v2d(const QVector3D &v3d)
@@ -41,6 +136,20 @@ QVector2D ChunkMap::v3d2v2d(const QVector3D &v3d)
     float x=v3d.x();
     float z=v3d.z();
     return QVector2D(x,z);
+}
+
+bool ChunkMap::createDisplayChunk(QVector3D dcPos)
+{
+    QVector2D cPos=v3d2v2d(dcPos);
+    if(cPos!=chunkPosition)                                                 //显示区块不属于当前区块，pass
+        return false;
+    int key=dcPos.y();
+    if(key<MINLOW || key>MAXHIGHT)                              //显示区块越界,pass
+        return false;
+    if(displayChunk.value(key)!=NULL)                                   //存在了，返还完成
+        return true;
+    displayChunk.insert(key,new DisplayChunk(dcPos));
+    return true;
 }
 
 //=============================================//
@@ -233,7 +342,7 @@ void DisplayChunk::updateDisplayList()
         if(!temp || temp->isAir()) continue;             //空气方块跳过
         for(int i=0;i<temp->faceSum();i++){
             Block *vis=getBlock(temp->vicinityPosition(i));
-            if(vis==NULL){
+            if(vis==NULL || vis->isAir()){
                 faces<<temp->getFace(i);
                 continue;
             }

@@ -48,11 +48,11 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     //    float angle = 00.0;
     //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
     //    view.rotate(q );
-    view(2, 3) -= 30.0;
+    view(2, 3) -= 40.0;
     view.translate(-8,-8,0);
     renderBlocks(view);
     defaultStates();
-    //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
+//    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
 }
 
@@ -86,9 +86,19 @@ void GameScene::setStates()
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
-//    glClearDepth(1.0);
-//    glDepthFunc(GL_LEQUAL);
-//    glDepthRange(0.0f,1.0f);
+//        glDepthRange(0.0f,1.0f);
+//        glClearDepth(1.0f);
+//        glDepthFunc(GL_LEQUAL);
+//        glDepthMask(GL_TRUE);
+    //反锯齿
+//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glEnable(GL_BLEND);
+//    glEnable(GL_POINT_SMOOTH);
+//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_LINE_SMOOTH);
+//    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_POLYGON_SMOOTH);
+//    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
     //png透明
     glEnable(GL_ALPHA_TEST);
@@ -134,6 +144,13 @@ void GameScene::defaultStates()
     glDisable(GL_NORMALIZE);
     glDisable(GL_ALPHA_TEST);
 
+    //
+//    glDisable(GL_BLEND);
+//    glDisable(GL_LINE_SMOOTH);
+//    glDisable(GL_POINT_SMOOTH);
+//    glDisable(GL_POLYGON_SMOOTH);
+    //
+
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
 
@@ -158,12 +175,13 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
     rot+=lastTime.msecsTo(QTime::currentTime())*0.01;
     lastTime=QTime::currentTime();
 
-    glRotatef(rot,1.0,1.0,0.0);
+    glRotatef(rot,1.0,1.0,1.0);
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
     blockProgram->setUniformValue("view",view);
 
     disChunk->draw();
+    chunk1->draw();
 
     blockProgram->release();
 
@@ -204,6 +222,16 @@ void GameScene::initGame()
                 disChunk->addBlock(new Block(QVector3D(i,j,k),mBlockList[qrand()%33+1]),false);
             }
     disChunk->update();
+
+    chunk1=new ChunkMap(0,1);
+
+    for(int i=0;i<16;i++)
+        for(int j=0;j<255;j++)
+            for(int k=16;k<32;k++){
+                chunk1->addBlock(new Block(QVector3D(i,j,k),mBlockList[10]),false);
+            }
+    chunk1->updateAll();
+    chunk1->removeBlock(QVector3D(4,18,18),true);
 }
 
 void GameScene::loadmBlockList()

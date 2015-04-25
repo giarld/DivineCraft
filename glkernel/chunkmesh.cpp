@@ -36,7 +36,7 @@ ChunkMesh::ChunkMesh(int nFace)
     //    unsigned short *ip=m_ib.lock();
 
     //    if(!vp || !ip){
-    //        qWarning("BoxMesh::BoxMesh: Failed to lock vertex buffer and/or index buffer.");
+    //        qWarning("ChunkMesh::ChunkMesh: Failed to lock vertex buffer and/or index buffer.");
     //        m_ib.unlock();
     //        m_vb.unlock();
     //        return;
@@ -51,7 +51,7 @@ void ChunkMesh::addFace(Face *face)
     P3T2N3Vertex *vp=m_vb.lock();
     unsigned short *ip=m_ib.lock();
     if(!vp || !ip){
-        qWarning("BoxMesh::BoxMesh: Failed to lock vertex buffer and/or index buffer.");
+        qWarning("ChunkMesh::ChunkMesh: Failed to lock vertex buffer and/or index buffer.");
         m_ib.unlock();
         m_vb.unlock();
         return;

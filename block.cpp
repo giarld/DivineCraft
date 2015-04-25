@@ -2,33 +2,33 @@
 
 QVector3D posAOffsets[][4]={        //0类方块顶点偏移
     {//FRONT
-     QVector3D(0.0,1.0,0.0),QVector3D(0.0,0.0,0.0),
-     QVector3D(1.0,0.0,0.0),QVector3D(1.0,1.0,0.0)
+     QVector3D(0.0f,1.0f,0.0f),QVector3D(0.0f,0.0f,0.0f),
+     QVector3D(1.0f,0.0f,0.0f),QVector3D(1.0f,1.0f,0.0f)
     },
     {
         //BACK
-        QVector3D(1.0,1.0,-1.0),QVector3D(1.0,0.0,-1.0),
-        QVector3D(0.0,0.0,-1.0),QVector3D(0.0,1.0,-1.0)
+        QVector3D(1.0f,1.0f,-1.0f),QVector3D(1.0f,0.0f,-1.0f),
+        QVector3D(0.0f,0.0f,-1.0f),QVector3D(0.0f,1.0f,-1.0f)
     },
     {
         //LEFT
-        QVector3D(0.0,1.0,-1.0),QVector3D(0.0,0.0,-1.0),
-        QVector3D(0.0,0.0,0.0),QVector3D(0.0,1.0,0.0)
+        QVector3D(0.0f,1.0f,-1.0f),QVector3D(0.0f,0.0f,-1.0f),
+        QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,1.0f,0.0f)
     },
     {
         //RIGHT
-        QVector3D(1.0,1.0,0.0),QVector3D(1.0,0.0,0.0),
-        QVector3D(1.0,0.0,-1.0),QVector3D(1.0,1.0,-1.0)
+        QVector3D(1.0f,1.0f,0.0f),QVector3D(1.0f,0.0f,0.0f),
+        QVector3D(1.0f,0.0f,-1.0f),QVector3D(1.0f,1.0f,-1.0f)
     },
     {
         //TOP
-        QVector3D(0.0,1.0,-1.0),QVector3D(0.0,1.0,0.0),
-        QVector3D(1.0,1.0,0.0),QVector3D(1.0,1.0,-1.0)
+        QVector3D(0.0f,1.0f,-1.0f),QVector3D(0.0f,1.0f,0.0f),
+        QVector3D(1.0f,1.0f,0.0f),QVector3D(1.0f,1.0f,-1.0f)
     },
     {
         //DOWN
-        QVector3D(0.0,0.0,0.0),QVector3D(0.0,0.0,-1.0),
-        QVector3D(1.0,0.0,-1.0),QVector3D(1.0,0.0,0.0)
+        QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,0.0f,-1.0f),
+        QVector3D(1.0f,0.0f,-1.0f),QVector3D(1.0f,0.0f,0.0f)
     }
 };
 

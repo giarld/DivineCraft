@@ -27,7 +27,7 @@ public:
     void resetDisplayChunk();
     void resetDisplayChunk(QVector3D dcPos);                                       //清空重置区块
     bool addBlock(Block *block,bool update);                                //增加方块
-    bool removeBlock(QVector3D pos,bool update);                     //移除方块,只是单纯的从显示区块移除，Block的其他相关关系再主场景处理
+    bool removeBlock(QVector3D pos,bool update);                     //移除方块
 
     void update();
 
@@ -66,16 +66,34 @@ private:
 class ChunkMap
 {
 public:
-    ChunkMap();
+    enum{
+        MINLOW=0,MAXHIGHT=255
+    };
+    ChunkMap(QVector2D cPos);
+    ChunkMap(int cx,int cz);
     ~ChunkMap();
 
-    bool addBlock(Block *block,bool update);                                //增加方块
-    DisplayChunk *getDisplayChunk();
+    bool addBlock(Block *block, bool update);                                //增加方块
+    bool removeBlock(QVector3D pos,bool update);                     //移除方块
+    Block *getBlock(QVector3D bPos);                                                //返还指定坐标方块
+    bool haveBlock(QVector3D bPos);                                             //判定是否有指定坐标方块
+
+    DisplayChunk *getDisplayChunk(QVector3D dcPos);                     //返还指定 显示区块 坐标的显示区块
+
+    virtual void draw();
+
+    void update(int y);                                         //刷新第y个区块
+    void updateLast();                                          //刷新上一个被操作的区块
+    void updateAll();                                                   //强制刷新所有
 
     static QVector2D v3d2v2d(const QVector3D & v3d);                            //将QVector3D转换为QVector2D,舍弃y
 private:
-    QVector2D chuckPosition;                                                    //区块坐标，世界中的区块是二维分布的.
+    bool createDisplayChunk(QVector3D dcPos);                                                     //创建一个显示区块
+
+private:
+    QVector2D chunkPosition;                                                    //区块坐标，世界中的区块是二维分布的.
     QMap<int,DisplayChunk*> displayChunk;                                       //16个对等的显示区块，每一个显示区块可能为空
+    DisplayChunk *lastOPDC;                                                                   //上一个被操作显示区块
 };
 
 #endif // CHUNKMAP_H
