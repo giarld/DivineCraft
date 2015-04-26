@@ -13,11 +13,13 @@ public:
     DCView();
     ~DCView();
 protected:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
 
 private:
-     GameScene *s;
+     GameScene *gameScene;
 };
 
 #endif // DCVIEW_H

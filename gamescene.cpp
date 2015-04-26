@@ -8,6 +8,7 @@
 float rot=0;
 GameScene::GameScene(int width, int height)
     :maxRenderLen(20)
+    ,inSence(false)
 {
     setSceneRect(0,0,width,height);
     initGame();
@@ -16,6 +17,7 @@ GameScene::GameScene(int width, int height)
     timer->setInterval(20);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
     timer->start();
+
 }
 
 GameScene::~GameScene()
@@ -57,13 +59,24 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 
     renderBlocks(view);
     defaultStates();
-//    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
+    //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
 }
+
+bool GameScene::isInScene()
+{
+    return inSence;
+}
+
 
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsScene::mousePressEvent(event);
+    if(event->button()==Qt::LeftButton){
+        if(!inSence){
+            inSence=true;
+        }
+    }
 }
 
 void GameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -74,12 +87,15 @@ void GameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsScene::mouseMoveEvent(event);
-    //        qDebug()<<event->scenePos();
+    //            qDebug()<<event->scenePos();
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
 {
     QGraphicsScene::keyPressEvent(event);
+    if(event->key()==Qt::Key_Escape && inSence){
+        inSence=false;
+    }
 }
 
 void GameScene::setStates()
@@ -91,19 +107,19 @@ void GameScene::setStates()
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
-//        glDepthRange(0.0f,1.0f);
-//        glClearDepth(1.0f);
-//        glDepthFunc(GL_LEQUAL);
-//        glDepthMask(GL_TRUE);
+    //        glDepthRange(0.0f,1.0f);
+    //        glClearDepth(1.0f);
+    //        glDepthFunc(GL_LEQUAL);
+    //        glDepthMask(GL_TRUE);
     //反锯齿
-//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//    glEnable(GL_BLEND);
-//    glEnable(GL_POINT_SMOOTH);
-//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-//    glEnable(GL_LINE_SMOOTH);
-//    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-//    glEnable(GL_POLYGON_SMOOTH);
-//    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //    glEnable(GL_BLEND);
+    //    glEnable(GL_POINT_SMOOTH);
+    //    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    //    glEnable(GL_LINE_SMOOTH);
+    //    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    //    glEnable(GL_POLYGON_SMOOTH);
+    //    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
     //png透明
     glEnable(GL_ALPHA_TEST);
@@ -150,10 +166,10 @@ void GameScene::defaultStates()
     glDisable(GL_ALPHA_TEST);
 
     //
-//    glDisable(GL_BLEND);
-//    glDisable(GL_LINE_SMOOTH);
-//    glDisable(GL_POINT_SMOOTH);
-//    glDisable(GL_POLYGON_SMOOTH);
+    //    glDisable(GL_BLEND);
+    //    glDisable(GL_LINE_SMOOTH);
+    //    glDisable(GL_POINT_SMOOTH);
+    //    glDisable(GL_POLYGON_SMOOTH);
     //
 
     glMatrixMode(GL_MODELVIEW);
@@ -180,7 +196,7 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
 
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
-//    blockProgram->setUniformValue("view",view);
+    //    blockProgram->setUniformValue("view",view);
 
     disChunk->draw();
     chunk1->draw(QVector3D(0,0,0),maxRenderLen);
@@ -193,8 +209,15 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
     }
 }
 
+void GameScene::mouseMove(const QPointF &dp)
+{
+    camera->sightMove(dp);
+}
+
 void GameScene::initGame()
 {
+    camera=new Camera();
+
     loadmBlockList();
     blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
 

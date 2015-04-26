@@ -9,6 +9,7 @@
 #include "glkernel/glbuffers.h"
 #include "block.h"
 #include "chunkmap.h"
+#include "camera.h"
 
 #define PI 3.14159265358979
 
@@ -23,6 +24,7 @@ public:
     ~GameScene();
     virtual void drawBackground(QPainter *painter, const QRectF &);
 
+    bool isInScene();                   //返还是否进入场景控制模式
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
@@ -35,6 +37,9 @@ protected:
     void renderBlocks(const QMatrix4x4 &view);                                          //绘制
 
 signals:
+
+public slots:
+    void mouseMove(const QPointF &dp);                                  //鼠标发生移动的槽，用于主窗口给予鼠标偏移量
 
 private:
     void initGame();                                                                    //初始化游戏场景
@@ -50,6 +55,8 @@ private:
     DisplayChunk *disChunk;
     ChunkMap *chunk1;
 
+    Camera *camera;
+    bool inSence;                                                    //鼠标场景中？
 
     QVector<BlockListNode *> mBlockList;                                                            //存储所有类型方块的物理属性
 };
