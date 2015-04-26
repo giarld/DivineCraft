@@ -49,8 +49,12 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     //    float angle = 00.0;
     //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
     //    view.rotate(q );
-    view(2, 3) -=50.0;
+    rot+=lastTime.msecsTo(QTime::currentTime())*0.01;
+    lastTime=QTime::currentTime();
+
+    view(2, 3) -=40.0;
     view.translate(-8,-8,0);
+
     renderBlocks(view);
     defaultStates();
 //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
@@ -172,11 +176,8 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
     }
     glLoadMatrixf(view.constData());
 
-
-    rot+=lastTime.msecsTo(QTime::currentTime())*0.01;
-    lastTime=QTime::currentTime();
-
     glRotatef(rot,1.0,1.0,1.0);
+
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
 //    blockProgram->setUniformValue("view",view);
