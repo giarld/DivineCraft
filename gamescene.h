@@ -41,6 +41,7 @@ private:
     void loadmBlockList();                                                          //加载方块列表和纹理描述文件
 
 private:
+    int maxRenderLen;                                                   //最大渲染距离
     GLTexture2D *blockTexture;                                  //方块材质
     QGLShader *blockVertexShader;                           //方块顶点着色器
     QGLShader *blockFragmentShader;                     //方块片段着色器

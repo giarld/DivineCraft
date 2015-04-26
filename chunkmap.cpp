@@ -100,10 +100,12 @@ DisplayChunk *ChunkMap::getDisplayChunk(QVector3D dcPos)
     return displayChunk.value(key);
 }
 
-void ChunkMap::draw()
+void ChunkMap::draw(const QVector3D &pos, int maxLen)
 {
+    QVector3D oPos=DisplayChunk::calcChunckPos(pos);
+
     foreach (DisplayChunk *dc, displayChunk) {
-        if(dc)
+        if(dc && gAbs(int(dc->getDcPosition().distanceToPoint(oPos)))<=maxLen)
             dc->draw();
     }
 }
@@ -401,4 +403,8 @@ void DisplayChunk::deleteDisplayList()
         glDeleteLists(displayListID,1);
         displayListID=GLuint(0);
     }
+}
+QVector3D DisplayChunk::getDcPosition() const
+{
+    return dcPosition;
 }

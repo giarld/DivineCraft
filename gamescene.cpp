@@ -7,6 +7,7 @@
 //================================================//
 float rot=0;
 GameScene::GameScene(int width, int height)
+    :maxRenderLen(20)
 {
     setSceneRect(0,0,width,height);
     initGame();
@@ -41,19 +42,19 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
-    qgluPerspective(60.0,width/height,0.01,300.0);
+    qgluPerspective(60.0,width/height,0.01,200.0);
 
     glMatrixMode(GL_MODELVIEW);
     QMatrix4x4 view;
     //    float angle = 00.0;
     //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
     //    view.rotate(q );
-    view(2, 3) -= 40.0;
+    view(2, 3) -=50.0;
     view.translate(-8,-8,0);
     renderBlocks(view);
     defaultStates();
 //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
-    painter->endNativePainting();
+    painter->endNativePainting();`
 }
 
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -178,10 +179,10 @@ void GameScene::renderBlocks(const QMatrix4x4 &view)
     glRotatef(rot,1.0,1.0,1.0);
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
-    blockProgram->setUniformValue("view",view);
+//    blockProgram->setUniformValue("view",view);
 
     disChunk->draw();
-    chunk1->draw();
+    chunk1->draw(QVector3D(0,0,0),maxRenderLen);
 
     blockProgram->release();
 
@@ -228,7 +229,7 @@ void GameScene::initGame()
     for(int i=0;i<16;i++)
         for(int j=0;j<256;j++)
             for(int k=16;k<32;k++){
-                chunk1->addBlock(new Block(QVector3D(i,j,k),mBlockList[10]),false);
+                chunk1->addBlock(new Block(QVector3D(i,j,k),mBlockList[7]),false);
             }
     chunk1->updateAll();
     chunk1->removeBlock(QVector3D(4,18,18),true);

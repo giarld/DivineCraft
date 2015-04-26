@@ -15,7 +15,7 @@
 class Block;                                                //block的提前声明
 
 
-//显示与处理区块
+//显示与处理区块,管理Block
 class DisplayChunk
 {
 public:
@@ -23,6 +23,7 @@ public:
     DisplayChunk(int cx,int cy,int cz);
     DisplayChunk(QVector3D dcPos);
     ~DisplayChunk();
+
 
     void resetDisplayChunk();
     void resetDisplayChunk(QVector3D dcPos);                                       //清空重置区块
@@ -46,6 +47,8 @@ public:
     static QVector3D blockPos2dcPos(QVector3D bPos);                //计算块内坐标,全局
     static QVector3D calcChunckPos(QVector3D bPos);                     //计算方块所属显示区块坐标
 
+    QVector3D getDcPosition() const;
+
 private:
     int calcKey(QVector3D bPos);                                    //通过方块坐标计算其存储的key
     void updateDisplayList();                                       //更新显示列表
@@ -63,6 +66,7 @@ private:
 
 
 ///16×16×256的方块网络，由16个显示区块组成，寻找一个显示区块需要一个方块的三维坐标
+//管理DisplayChunk
 class ChunkMap
 {
 public:
@@ -80,7 +84,7 @@ public:
 
     DisplayChunk *getDisplayChunk(QVector3D dcPos);                     //返还指定 显示区块 坐标的显示区块
 
-    virtual void draw();
+    void draw(const QVector3D &pos,int maxLen);                         //绘制区块中的显示区块，当区块到camera原点的距离小于等于maxLen时，绘制
 
     void update(int y);                                         //刷新第y个区块
     void updateLast();                                          //刷新上一个被操作的区块
