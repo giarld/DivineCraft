@@ -67,6 +67,7 @@ bool ChunkMap::removeBlock(QVector3D pos, bool update)
     DisplayChunk *dc=displayChunk.value(dkey);
     if(dc==NULL)
         return false;
+    lastOPDC=dc;                                            //设置上一个操作区块为当前
     return dc->removeBlock(pos,update);
 }
 
