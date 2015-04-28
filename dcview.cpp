@@ -28,6 +28,8 @@ void DCView::mousePressEvent(QMouseEvent *event)
     if(event->button()==Qt::LeftButton){
         if(gameScene->isInScene()){
             this->cursor().setPos(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2);
+            gameScene->setCenterPoint(QPointF(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2));
+            this->setCursor(Qt::BlankCursor);
         }
     }
 }
@@ -35,7 +37,10 @@ void DCView::mousePressEvent(QMouseEvent *event)
 void DCView::mouseMoveEvent(QMouseEvent *event)
 {
     QGraphicsView::mouseMoveEvent(event);
-
+    if(gameScene->isInScene()){
+        this->cursor().setPos(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2);
+        gameScene->setCenterPoint(QPointF(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2));
+    }
 }
 
 void DCView::resizeEvent(QResizeEvent *event)
@@ -53,6 +58,11 @@ void DCView::keyPressEvent(QKeyEvent *event)
             this->showNormal();
         else
             this->showFullScreen();
+    }
+    else if(event->key()==Qt::Key_Escape){
+        if(gameScene->isInScene()){
+            this->setCursor(Qt::ArrowCursor);
+        }
     }
     QGraphicsView::keyPressEvent(event);
 }

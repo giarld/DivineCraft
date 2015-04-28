@@ -25,16 +25,18 @@ public:
     virtual void drawBackground(QPainter *painter, const QRectF &);
 
     bool isInScene();                   //返还是否进入场景控制模式
+    void setCenterPoint(const QPointF &cp);
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
     void setStates();               //设置状态，初始化GL绘图
     void setLights();               //光照
     void defaultStates();           //还原GL设置
-    void renderBlocks(const QMatrix4x4 &view);                                          //绘制
+    void renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview);                                          //绘制
 
 signals:
 
@@ -57,6 +59,7 @@ private:
 
     Camera *camera;
     bool inSence;                                                    //鼠标场景中？
+    QPointF centerPoint;
 
     QVector<BlockListNode *> mBlockList;                                                            //存储所有类型方块的物理属性
 };

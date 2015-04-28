@@ -34,14 +34,14 @@ struct Face
     Vertex vert[4];             //四个顶点，以逆时针排序，正对着观察从左上角开始。
 };
 
-/*方块，由面组成。标准方块有6个面：FRONT,BACK,TOP,DOWN,LEFT,RIGHT。
+/*方块，由面组成。标准方块有6个面：FRONT,BACK,LEFT,RIGHT,TOP,DOWN。
  * 花卉一类的方块有4个面：FRONT,BACK,TOP,DOWN，且成对角绘制
 */
 
 class Block
 {
 public:
-    enum{//face Enum
+    enum FaceEnum{
         FRONT=0,BACK=1,LEFT=2,RIGHT=3,TOP=4,DOWN=5,MAX_FACE_SUM=6
     };
     enum{

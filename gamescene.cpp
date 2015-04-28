@@ -5,7 +5,6 @@
 //================================================//
 //
 //================================================//
-float rot=0;
 GameScene::GameScene(int width, int height)
     :maxRenderLen(20)
     ,inSence(false)
@@ -16,6 +15,7 @@ GameScene::GameScene(int width, int height)
     QTimer *timer=new QTimer;
     timer->setInterval(20);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
+    connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
     timer->start();
 
 }
@@ -29,6 +29,7 @@ GameScene::~GameScene()
     delete blockVertexShader;
     delete blockFragmentShader;
     delete blockProgram;
+    delete camera;
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -36,28 +37,27 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     float width=float(painter->device()->width());
     float height=float(painter->device()->height());
 
-    QTime lT=QTime::currentTime();
+//    QTime lT=QTime::currentTime();
 
     painter->beginNativePainting();
+
     setStates();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
-    qgluPerspective(60.0,width/height,0.01,200.0);
+    qgluPerspective(60.0,width/height,0.01,300.0);
 
     glMatrixMode(GL_MODELVIEW);
     QMatrix4x4 view;
-    //    float angle = 00.0;
-    //    QQuaternion q=QQuaternion::fromAxisAndAngle(QVector3D(1.0,0.0,0.0), angle) * QQuaternion();
-    //    view.rotate(q );
-    rot+=lastTime.msecsTo(QTime::currentTime())*0.01;
-    lastTime=QTime::currentTime();
+    view.translate(-camera->getEyePosition());
 
-    view(2, 3) -=40.0;
-    view.translate(-8,-8,0);
+    QMatrix4x4 rview;
+    QPointF rot=camera->rotation();
+    rview.rotate(rot.x(),0,1,0);
+    rview.rotate(rot.y(),cos(Camera::radians(rot.x())),0,sin(Camera::radians(rot.x())));
 
-    renderBlocks(view);
+    renderBlocks(view,rview);
     defaultStates();
     //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
@@ -68,6 +68,11 @@ bool GameScene::isInScene()
     return inSence;
 }
 
+void GameScene::setCenterPoint(const QPointF &cp)
+{
+    this->centerPoint=cp;
+}
+
 
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
@@ -75,6 +80,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if(event->button()==Qt::LeftButton){
         if(!inSence){
             inSence=true;
+            camera->bind();
         }
     }
 }
@@ -88,6 +94,9 @@ void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsScene::mouseMoveEvent(event);
     //            qDebug()<<event->scenePos();
+    if(inSence){
+        camera->sightMove(event->screenPos()-centerPoint);
+    }
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
@@ -95,7 +104,19 @@ void GameScene::keyPressEvent(QKeyEvent *event)
     QGraphicsScene::keyPressEvent(event);
     if(event->key()==Qt::Key_Escape && inSence){
         inSence=false;
+        camera->unBind();
     }
+    else{
+        camera->keyPress(event->key());
+    }
+//    qDebug()<<QTime::currentTime()<<"press:"<<event->key();
+}
+
+void GameScene::keyReleaseEvent(QKeyEvent *event)
+{
+    QGraphicsScene::keyReleaseEvent(event);
+    camera->keyRelease(event->key());
+//    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
 }
 
 void GameScene::setStates()
@@ -184,15 +205,16 @@ void GameScene::defaultStates()
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
 }
 
-void GameScene::renderBlocks(const QMatrix4x4 &view)
+void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 {
     if(glActiveTexture){
         glActiveTexture(GL_TEXTURE0);
         blockTexture->bind();
     }
-    glLoadMatrixf(view.constData());
 
-    glRotatef(rot,1.0,1.0,1.0);
+    glLoadMatrixf(rview.constData());
+    glMultMatrixf(view.constData());
+//    glRotatef(rot,1.0,1.0,1.0);
 
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
@@ -216,7 +238,9 @@ void GameScene::mouseMove(const QPointF &dp)
 
 void GameScene::initGame()
 {
-    camera=new Camera();
+    camera=new Camera(QVector3D(8,0,40),QPointF(0.0,0.0));
+    camera->setMouseLevel(0.5);
+    camera->setGameMode(Camera::GOD);
 
     loadmBlockList();
     blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
