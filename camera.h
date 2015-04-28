@@ -39,7 +39,7 @@ public:
     QVector3D position() const;                                                     //位置坐标的设置与返还
     void setPosition(const QVector3D &position);
 
-    QVector3D getEyePosition() const;
+    QVector3D getEyePosition() const;                                       //返还眼睛的坐标
 
     QPointF rotation() const;                                                         //视角向量的设置与返还
     void setRotation(const QPointF &rotation);

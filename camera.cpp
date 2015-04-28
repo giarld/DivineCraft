@@ -158,7 +158,7 @@ void Camera::setPosition(const QVector3D &position)
 QVector3D Camera::getEyePosition() const
 {
     QVector3D eyeP=position();
-    eyeP.setY(eyeP.y()+1.5);
+    eyeP.setY(eyeP.y()+1.650);
     return eyeP;
 }
 QPointF Camera::rotation() const
