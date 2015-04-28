@@ -37,7 +37,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     float width=float(painter->device()->width());
     float height=float(painter->device()->height());
 
-//    QTime lT=QTime::currentTime();
+//        QTime lT=QTime::currentTime();
 
     painter->beginNativePainting();
 
@@ -59,7 +59,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 
     renderBlocks(view,rview);
     defaultStates();
-    //    qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
+//        qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
 }
 
@@ -109,14 +109,14 @@ void GameScene::keyPressEvent(QKeyEvent *event)
     else{
         camera->keyPress(event->key());
     }
-//    qDebug()<<QTime::currentTime()<<"press:"<<event->key();
+    //    qDebug()<<QTime::currentTime()<<"press:"<<event->key();
 }
 
 void GameScene::keyReleaseEvent(QKeyEvent *event)
 {
     QGraphicsScene::keyReleaseEvent(event);
     camera->keyRelease(event->key());
-//    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
+    //    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
 }
 
 void GameScene::setStates()
@@ -212,13 +212,14 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
         blockTexture->bind();
     }
 
+    line->draw();
     glLoadMatrixf(rview.constData());
     glMultMatrixf(view.constData());
-//    glRotatef(rot,1.0,1.0,1.0);
+    //    glRotatef(rot,1.0,1.0,1.0);
 
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
-    //    blockProgram->setUniformValue("view",view);
+//    blockProgram->setUniformValue("view",view);
 
     disChunk->draw();
     chunk1->draw(QVector3D(0,0,0),maxRenderLen);
@@ -231,16 +232,11 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
     }
 }
 
-void GameScene::mouseMove(const QPointF &dp)
-{
-    camera->sightMove(dp);
-}
-
 void GameScene::initGame()
 {
-    camera=new Camera(QVector3D(8,0,40),QPointF(0.0,0.0));
-    camera->setMouseLevel(0.5);
-    camera->setGameMode(Camera::GOD);
+    camera=new Camera(QVector3D(8,0,-8),QPointF(180.0,0.0));
+    //    camera->setMouseLevel(0.5);
+    camera->setGameMode(Camera::SURVIVAL);
 
     loadmBlockList();
     blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
@@ -281,6 +277,11 @@ void GameScene::initGame()
             }
     chunk1->updateAll();
     chunk1->removeBlock(QVector3D(4,18,18),true);
+
+    line=new LineMesh(2);
+    float lineLen=0.0005;
+    line->addPoint(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
+    line->addPoint(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
 }
 
 void GameScene::loadmBlockList()
@@ -346,27 +347,4 @@ void GameScene::loadmBlockList()
     //    foreach (BlockListNode *a, mBlockList) {
     //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
     //    }
-}
-
-//==========================================================================//
-
-WorldThread::WorldThread(QObject *parent)
-    :QThread(parent)
-    ,isRun(false)
-{
-}
-
-void WorldThread::run()
-{
-    isRun=true;
-    count=0;
-    while(isRun){
-        qWarning()<<count++;
-    }
-}
-
-void WorldThread::stop()
-{
-    isRun=false;
-    this->wait();
 }

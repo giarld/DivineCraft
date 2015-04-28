@@ -62,8 +62,9 @@ private:
     QPointF mRotation;                  //camera眼方向(单位向量)
     bool mBind;                                   //鼠标是否处于绑定状态
     bool kBind;                                     //键盘是否处于绑定状态
-    float mouseLevel;                           //鼠标灵敏度(0-1)
+    float mouseLevel;                           //鼠标灵敏度(0.01-1)
     float moveSpeed;                                //每毫秒的移动速度
+    float ySpeed;                                      //垂直方向上的速度分量
     float dlAngle;                                      //每一个鼠标偏移方位带来的角度修正
     QVector3D udMotion;                     //前后位移分量
     QVector3D lfMotion;                         //左右位移分量

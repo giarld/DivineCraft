@@ -24,8 +24,8 @@ Camera::Camera(Camera::CameraMode mode, QObject *parent)
     ,kBind(false)
     ,mouseLevel(0.5)
     ,moveSpeed(0.005)
-    ,G(4.0)
-    ,MaxSpeed(0.05)
+    ,G(0.05)
+    ,MaxSpeed(0.5)
 {
     setMouseLevel(mouseLevel);
     reMotionVector();
@@ -42,8 +42,8 @@ Camera::Camera(const QVector3D &position, const QPointF &rotation, Camera::Camer
     ,kBind(false)
     ,mouseLevel(0.5)
     ,moveSpeed(0.005)
-    ,G(4.0)
-    ,MaxSpeed(0.05)
+    ,G(0.05)
+    ,MaxSpeed(0.5)
 {
     setMouseLevel(mouseLevel);
     reMotionVector();
@@ -116,6 +116,7 @@ void Camera::bind()
 {
     mBind=kBind=true;
     lastTime=QTime::currentTime();
+    ySpeed=0.0;
 }
 
 void Camera::unBind()
@@ -142,8 +143,12 @@ float Camera::getMouseLevel() const
 
 void Camera::setMouseLevel(float value)
 {
+    if(value<0.01)
+        value=0.01;
+    if(value>1.0)
+        value=1.0;
     mouseLevel = gMax(0.0,gMin(value,1.0));
-    dlAngle=value*0.1f;
+    dlAngle=mouseLevel*0.1f;
 }
 QVector3D Camera::position() const
 {
@@ -190,34 +195,46 @@ void Camera::cMove()
 
     QVector3D strafe;
     if(keyMap[0]){
-        strafe+=(udMotion*timeC*moveSpeed);
+        strafe+=udMotion;
     }
     if(keyMap[1]){
-        strafe-=(udMotion*timeC*moveSpeed);
+        strafe-=udMotion;
     }
     if(keyMap[2]){
-        strafe+=(lfMotion*timeC*moveSpeed);
+        strafe+=lfMotion;
     }
     if(keyMap[3]){
-        strafe-=(lfMotion*timeC*moveSpeed);
+        strafe-=lfMotion;
     }
     if(keyMap[4]){
         if(gameMode==GOD){
-            strafe.setY(strafe.y()+1.0*timeC*moveSpeed);
+            strafe.setY(strafe.y()+1.0);
         }
         else if(gameMode==SURVIVAL){
-
+            if(ySpeed==0){
+                ySpeed=MaxSpeed;
+            }
         }
     }
     if(keyMap[5]){
         if(gameMode==GOD){
-            strafe.setY(strafe.y()-1.0*timeC*moveSpeed);
+            strafe.setY(strafe.y()-1.0);
         }
         else if(gameMode==SURVIVAL){
 
         }
     }
-    mPosition+=strafe;
+
+    if(gameMode==SURVIVAL){
+        if(mPosition.y()>0){
+            ySpeed-=(G*timeC);
+        }
+    }
+    if(mPosition.y()<=0)
+        ySpeed=0;
+    strafe.setY(strafe.y()+ySpeed*timeC);
+    strafe.normalize();                                             //方向矢量单位化
+    mPosition+=(strafe*timeC*moveSpeed);
 
     lastTime=nowTime;
 }

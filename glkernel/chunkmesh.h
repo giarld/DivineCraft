@@ -34,5 +34,14 @@ private:
     int vidx,iidx;
 };
 
+class LineMesh:public GLLineMesh<P3T2N3Vertex, unsigned short>
+{
+public:
+    explicit LineMesh(int nPoint);
+    void addPoint(const QVector3D &aPoint,const QVector3D &bPoint);
+
+private:
+    int vidx,iidx;
+};
 
 #endif // BOXMESH_H

@@ -87,5 +87,43 @@ protected:
     GLIndexBuffer<TIndex> m_ib;
 };
 
+//线段绘图网络
+template<class TVertex, class TIndex>
+class GLLineMesh
+{
+public:
+    GLLineMesh(int vertexCount, int indexCount) : m_vb(vertexCount), m_ib(indexCount)
+    {
+    }
+
+    virtual ~GLLineMesh()
+    {
+    }
+
+    virtual void draw()
+    {
+        if (failed())
+            return;
+
+        int type = GL_UNSIGNED_INT;
+        if (sizeof(TIndex) == sizeof(char)) type = GL_UNSIGNED_BYTE;
+        if (sizeof(TIndex) == sizeof(short)) type = GL_UNSIGNED_SHORT;
+
+        m_vb.bind();
+        m_ib.bind();
+        glDrawElements(GL_LINES, m_ib.length(), type, BUFFER_OFFSET(0));          //绘制三角形网络
+        m_vb.unbind();
+        m_ib.unbind();
+    }
+
+    bool failed()
+    {
+        return m_vb.failed() || m_ib.failed();
+    }
+protected:
+    GLVertexBuffer<TVertex> m_vb;
+    GLIndexBuffer<TIndex> m_ib;
+};
+
 
 #endif

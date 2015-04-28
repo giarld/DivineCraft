@@ -40,8 +40,6 @@ protected:
 
 signals:
 
-public slots:
-    void mouseMove(const QPointF &dp);                                  //鼠标发生移动的槽，用于主窗口给予鼠标偏移量
 
 private:
     void initGame();                                                                    //初始化游戏场景
@@ -61,26 +59,10 @@ private:
     bool inSence;                                                    //鼠标场景中？
     QPointF centerPoint;
 
+    LineMesh *line;
+
     QVector<BlockListNode *> mBlockList;                                                            //存储所有类型方块的物理属性
 };
 
-//--负责加载、保存、重建地图和区块的线程--//
-class WorldThread : public QThread
-{
-    Q_OBJECT
-
-public:
-    WorldThread(QObject *parent=0);
-
-protected:
-    virtual void run();
-
-public slots:
-    void stop();
-
-private:
-    bool isRun;
-    int count;
-};
 
 #endif // GAMESCENE_H

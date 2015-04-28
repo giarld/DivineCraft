@@ -66,3 +66,33 @@ void ChunkMesh::addFace(Face *face)
     m_ib.unlock();
     m_vb.unlock();
 }
+
+
+LineMesh::LineMesh(int nPoint)
+    :GLLineMesh<P3T2N3Vertex,unsigned short>(2*nPoint,2*nPoint)
+{
+    vidx=iidx=0;
+}
+
+void LineMesh::addPoint(const QVector3D &aPoint, const QVector3D &bPoint)
+{
+    P3T2N3Vertex *vp=m_vb.lock();
+    unsigned short *ip=m_ib.lock();
+    if(!vp || !ip){
+        qWarning("ChunkMesh::ChunkMesh: Failed to lock vertex buffer and/or index buffer.");
+        m_ib.unlock();
+        m_vb.unlock();
+        return;
+    }
+    vp[vidx].position=aPoint;
+    ip[iidx++]=vidx;
+    vidx++;
+
+    vp[vidx].position=bPoint;
+    ip[iidx++]=vidx;
+    vidx++;
+
+    m_ib.unlock();
+    m_vb.unlock();
+}
+
