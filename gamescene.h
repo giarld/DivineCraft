@@ -37,7 +37,7 @@ protected:
     void renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview);                                          //绘制
 
 signals:
-
+    void upTest();
 private:
     void initGame();                                                                    //初始化游戏场景
 

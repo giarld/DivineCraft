@@ -69,16 +69,30 @@ void World::draw()
 void World::updateWorld()
 {
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
-    QString key=getKey(GMath::v3d2v2d(cdPos));
-    //test
-    ChunkMap*newCm=loadChunk(GMath::v3d2v2d(cdPos));
-    newCm->updateAll();
-    chunksMap.insert(key,newCm);
+    QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为其实区块。
+
+    bfs2World(startCPos);
+
+    foreach (ChunkMap *cm, chunksMap) {
+        if(cm){
+            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+1){
+                QString key=getKey(cm->getChunkPosition());
+                if(cm->haveChange()){                                                               //未保存先保存
+                    saveChunk(key);
+                }
+                delete cm;
+                chunksMap.remove(key);
+            }
+        }
+    }
+
+    qWarning("up end");
 }
 
-void World::saveChunk()
+void World::forcedUpdateWorld()
 {
-
+    chunksMap.clear();
+    updateWorld();
 }
 
 void World::loadBlockIndex()
@@ -147,9 +161,28 @@ void World::loadBlockIndex()
     //    }
 }
 
+void World::autoSave()
+{
+    foreach (ChunkMap *cm, chunksMap) {
+        if(cm && cm->haveChange()){
+            saveChunk(getKey(cm->getChunkPosition()));
+        }
+    }
+}
+
+void World::updateDraw()
+{
+    QTime fTime=QTime::currentTime();
+    while(!updateQueue.isEmpty() && fTime.msecsTo(QTime::currentTime())<=5){                      //没次刷新最多只进行5ms
+        QString key=updateQueue.front();
+        updateQueue.pop_front();
+        chunksMap.value(key)->updateAll();
+    }
+}
+
 QString World::getKey(QVector2D chunkPos)
 {
-    QString sKey=tr("%1-%2").arg((int)chunkPos.x()).arg((int)chunkPos.y());
+    QString sKey=tr("%1x%2").arg((int)chunkPos.x()).arg((int)chunkPos.y());
     return sKey;
 }
 
@@ -162,6 +195,8 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
 {
     ChunkMap *newChunk;
     QString key=getKey(chunkPos);
+
+    qDebug()<<"Load:"<<key;
 
     if(filePath==NULL || filePath=="")
         setfilePath();
@@ -196,7 +231,11 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
     if(!ok){           //文件无法打开或读取错误,新建区块
         newChunk=createChunk(chunkPos);
     }
-//        newChunk->updateAll();
+    else{
+        newChunk->saveAll();                            //因为是从文件读取的，将区块标为已保存，防止重复写入
+        qDebug()<<"load on file";
+    }
+    //        newChunk->updateAll();
     file.close();
     return newChunk;
 }
@@ -217,6 +256,88 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
         }
     }
     return newChunk;
+}
+
+void World::bfs2World(const QVector2D &start)
+{
+    QMap<QString,bool> flag;                                            //路径标记
+    int rr[4][2]={
+        {-1,0},{1,0},{0,-1},{0,1}
+    };                                                              //四个遍历方向
+    QQueue<QVector2D> Q;
+    Q.push_back(start);
+    flag.insert(getKey(start),true);
+    while(!Q.isEmpty()){
+        QVector2D nPos=Q.front();
+        Q.pop_front();
+        QString key=getKey(nPos);
+        if(chunksMap.value(key)==NULL){
+            chunksMap.insert(key,loadChunk(nPos));                  //所到之处是空的，加载之
+            saveChunk(key);                                                                 //保存一个
+            updateQueue.push_back(key);                             //增加到刷新等待队列
+        }
+
+        for(int i=0;i<4;i++){                                                       //遍历是个方向
+            int xx=nPos.x()+rr[i][0];
+            int yy=nPos.y()+rr[i][1];
+            QVector2D temp(xx,yy);
+
+            if(flag.value(getKey(temp))==false
+                    && GMath::gAbs(temp.distanceToPoint(start))<=maxRenderLen+1){                            //未涉及且在可视渲染距离内的区块，入队
+                Q.push_back(temp);
+                flag.insert(getKey(temp),true);
+            }
+        }
+    }
+
+    //以下两句其实多余
+    flag.clear();
+    Q.clear();
+}
+
+bool World::saveChunk(QString key)
+{
+    ChunkMap *sc=chunksMap.value(key);
+    if(!sc)                 //未创建的区块，pass
+        return false;
+    if(sc->haveChange()==false){            //无修改，直接返还完成
+        return true;
+    }
+    if(filePath==NULL || filePath=="")
+        setfilePath();
+    QDir sdir(filePath);
+    if(sdir.absolutePath()!=filePath){
+        QMessageBox::warning(0,tr("错误"),tr("游戏无法正确的创建文件和目录，即将被关闭\n此错误可能与文件读写权限有关"));
+        exit(0);
+    }
+    if(!sdir.cd("chunks/")){
+        sdir.mkdir("chunks/");
+        sdir.cd("chunks/");
+    }
+    QString chunkFile=tr("%1/%2.gck").arg(sdir.absolutePath()).arg(key);
+    QFile file(chunkFile);
+    if(file.open(QIODevice::WriteOnly)){
+        QDataStream out(&file);
+        out<<0x9394ef<<0x7b2f5c;                                                                        //插入标识符
+        for(int i=0;i<16;i++){                                                                                          //遍历并将所有方块信息写入到文件
+            DisplayChunk *sdc=sc->getDisplayChunk(i);
+            if(sdc && sdc->isOk()){
+                foreach (Block *b, sdc->getBlocks()) {
+                    if(b && b->isAir()==false){                                                             //只保存非空气方块
+                        out<<0x01<<b->getPosition()<<b->getId()<<0xfe;
+                    }
+                }
+            }
+        }
+    }
+    else{
+        return false;
+    }
+    file.close();
+
+    sc->saveAll();                                                                              //标识为已保存
+    qDebug()<<"save ok";
+    return true;
 }
 
 void World::setfilePath()

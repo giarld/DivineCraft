@@ -92,13 +92,9 @@ bool ChunkMap::haveBlock(QVector3D bPos)
     return true;
 }
 
-DisplayChunk *ChunkMap::getDisplayChunk(QVector3D dcPos)
+DisplayChunk *ChunkMap::getDisplayChunk(int y)
 {
-    int key=dcPos.y();
-    QVector2D cPos=GMath::v3d2v2d(dcPos);
-    if(cPos!=chunkPosition)
-        return NULL;
-    return displayChunk.value(key);
+    return displayChunk.value(y);
 }
 
 void ChunkMap::draw(const QVector3D &pos, int maxLen)
@@ -167,6 +163,16 @@ bool ChunkMap::createDisplayChunk(QVector3D dcPos)
     displayChunk.insert(key,new DisplayChunk(dcPos));
     return true;
 }
+QVector2D ChunkMap::getChunkPosition() const
+{
+    return chunkPosition;
+}
+
+//void ChunkMap::setChunkPosition(const QVector2D &value)
+//{
+//    chunkPosition = value;
+//}
+
 
 //=============================================//
 
@@ -389,7 +395,7 @@ void DisplayChunk::updateDisplayList()
         }
     }
     faceSum=faces.length();
-    qDebug()<<"Face Sum = "<<faceSum;
+//    qDebug()<<"Face Sum = "<<faceSum;
     glNewList(displayListID,GL_COMPILE);
 
     if(faceSum>=16200){                                                 //每个mesh最多容纳16200个面，如果面数多余16200，再创建一个mesh
@@ -415,7 +421,6 @@ void DisplayChunk::updateDisplayList()
         delete mesh2;
     }
     glEndList();
-
     faces.clear();
 }
 

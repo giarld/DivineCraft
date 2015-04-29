@@ -19,8 +19,8 @@ GameScene::GameScene(int width, int height)
     timer->setInterval(20);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
     connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
+    connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
     timer->start();
-
 }
 
 GameScene::~GameScene()
@@ -49,7 +49,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
-    qgluPerspective(60.0,width/height,0.01,300.0);
+    qgluPerspective(60.0,width/height,0.01,500.0);
 
     glMatrixMode(GL_MODELVIEW);
     QMatrix4x4 view;
@@ -114,6 +114,9 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->setGameMode(Camera::GOD);
         else
             camera->setGameMode(Camera::SURVIVAL);
+    }
+    else if(event->key()==Qt::Key_U){
+        emit upTest();
     }
     else{
         camera->keyPress(event->key());
@@ -242,7 +245,7 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
 void GameScene::initGame()
 {
-    camera=new Camera(QVector3D(8,3,8),QPointF(180.0,0.0));
+    camera=new Camera(QVector3D(8,4,8),QPointF(180.0,0.0));
     //    camera->setMouseLevel(0.5);
     camera->setGameMode(Camera::GOD);
 
@@ -271,6 +274,7 @@ void GameScene::initGame()
     wThread=new QThread;
     world->moveToThread(wThread);
     connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
+    connect(this,SIGNAL(upTest()),world,SLOT(updateWorld()));
     wThread->start();
     world->loadBlockIndex();
     world->setMaxRenderLen(maxRenderLen);
@@ -278,8 +282,7 @@ void GameScene::initGame()
     ///////////////////////////
 
     world->setCameraPosition(camera->position());
-    world->updateWorld();
-    world->addBlock(new Block(QVector3D(8,3,8),world->getBlockIndex(33)),true);
+//    world->updateWorld();
 
     line=new LineMesh(2);
     float lineLen=0.0004;

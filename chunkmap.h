@@ -88,7 +88,7 @@ public:
     Block *getBlock(QVector3D bPos);                                                //返还指定坐标方块
     bool haveBlock(QVector3D bPos);                                             //判定是否有指定坐标方块
 
-    DisplayChunk *getDisplayChunk(QVector3D dcPos);                     //返还指定 显示区块 坐标的显示区块
+    DisplayChunk *getDisplayChunk(int y);                     //返还指定 显示区块垂直高度的显示区块
 
     void draw(const QVector3D &pos,int maxLen);                         //绘制区块中的显示区块，pos是camera坐标,当区块到camera原点的距离小于等于maxLen时，绘制
 
@@ -97,6 +97,9 @@ public:
     void updateAll();                                                   //强制刷新所有
     bool haveChange();                                          //是否对区块进行过修改
     void saveAll();                                                         //已经保存了全部，也就是设置每一个显示区块的haveChange为false
+    QVector2D getChunkPosition() const;
+//    void setChunkPosition(const QVector2D &value);
+
 private:
     bool createDisplayChunk(QVector3D dcPos);                                                     //创建一个显示区块
 
