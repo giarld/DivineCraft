@@ -24,7 +24,6 @@ public:
     DisplayChunk(QVector3D dcPos);
     ~DisplayChunk();
 
-
     void resetDisplayChunk();
     void resetDisplayChunk(QVector3D dcPos);                                       //清空重置区块
     bool addBlock(Block *block,bool update);                                //增加方块
@@ -44,10 +43,13 @@ public:
     bool isShow();
     void setShow(bool s);
 
-    static QVector3D blockPos2dcPos(QVector3D bPos);                //计算块内坐标,全局
+    static QVector3D blockPos2dcPos(QVector3D bPos);                //计算块内坐标(0-15)
     static QVector3D calcChunckPos(QVector3D bPos);                     //计算方块所属显示区块坐标
 
     QVector3D getDcPosition() const;
+
+    bool getHaveChange() const;
+    void setHaveChange(bool value);
 
 private:
     int calcKey(QVector3D bPos);                                    //通过方块坐标计算其存储的key
@@ -59,6 +61,7 @@ private:
     QMap<int,Block*> blocks;               //方块列表16*16*16，key=0 to 4095 ( key=(16*16)*y+16*z+x. (0<=x,y,z<16) ; x,y,z=Block.(x,y,z)/16)
     int blockCount;                                 //方块计数器
     bool show;                                           //是否显示
+    bool haveChange;                            //有修改
 //    bool hasBlock;                                                   //含非空气方块？
     GLuint displayListID;                                       //分配的显示列表编号
 };
@@ -84,13 +87,12 @@ public:
 
     DisplayChunk *getDisplayChunk(QVector3D dcPos);                     //返还指定 显示区块 坐标的显示区块
 
-    void draw(const QVector3D &pos,int maxLen);                         //绘制区块中的显示区块，当区块到camera原点的距离小于等于maxLen时，绘制
+    void draw(const QVector3D &pos,int maxLen);                         //绘制区块中的显示区块，pos是camera坐标,当区块到camera原点的距离小于等于maxLen时，绘制
 
     void update(int y);                                         //刷新第y个区块
     void updateLast();                                          //刷新上一个被操作的区块
     void updateAll();                                                   //强制刷新所有
 
-    static QVector2D v3d2v2d(const QVector3D & v3d);                            //将QVector3D转换为QVector2D,舍弃y
 private:
     bool createDisplayChunk(QVector3D dcPos);                                                     //创建一个显示区块
 

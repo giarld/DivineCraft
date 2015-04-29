@@ -5,6 +5,7 @@
 #include <QTime>
 #include <QVector3D>
 #include <QQuaternion>
+#include "world.h"
 
 class Camera : public QObject
 {
@@ -44,10 +45,14 @@ public:
     QPointF rotation() const;                                                         //视角向量的设置与返还
     void setRotation(const QPointF &rotation);
 
-    static float radians(float angle);              //角度转换为弧度
-
     int getGameMode() const;
     void setGameMode(const int &value);
+
+    float getG() const;
+    void setG(float value);
+
+signals:
+
 
 public slots:
     void cMove();                                               //对camera进行移动操作的槽，与timer的timeout信号连接
@@ -65,6 +70,7 @@ private:
     float mouseLevel;                           //鼠标灵敏度(0.01-1)
     float moveSpeed;                                //每毫秒的移动速度
     float ySpeed;                                      //垂直方向上的速度分量
+    float jumSpeed;                                 //起跳速度
     float dlAngle;                                      //每一个鼠标偏移方位带来的角度修正
     QVector3D udMotion;                     //前后位移分量
     QVector3D lfMotion;                         //左右位移分量

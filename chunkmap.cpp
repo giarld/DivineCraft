@@ -1,11 +1,7 @@
 #include "chunkmap.h"
 #include "block.h"
 #include "glkernel/chunkmesh.h"
-
-int gAbs(int x)
-{
-    return x>=0?x:-x;
-}
+#include "gmath.h"
 
 int g2Int(float x)                      //浮点数转整数的自定义规则
 {
@@ -37,14 +33,18 @@ ChunkMap::ChunkMap(int cx, int cz)
 
 ChunkMap::~ChunkMap()
 {
-
+    foreach (DisplayChunk *d, displayChunk) {
+        if(d)
+            delete d;
+    }
+    displayChunk.clear();
 }
 
 bool ChunkMap::addBlock(Block *block, bool update)
 {
     QVector3D dcPos=DisplayChunk::calcChunckPos(block->getPosition());
     int dkey=dcPos.y();
-    QVector2D cPos=v3d2v2d(dcPos);
+    QVector2D cPos=GMath::v3d2v2d(dcPos);
     if(cPos!=chunkPosition)                                         //方块不属于当前区块，pass
         return false;
     if(displayChunk.value(dkey)==NULL){
@@ -61,7 +61,7 @@ bool ChunkMap::removeBlock(QVector3D pos, bool update)
 {
     QVector3D dcPos=DisplayChunk::calcChunckPos(pos);
     int dkey=dcPos.y();
-    QVector2D cPos=v3d2v2d(dcPos);
+    QVector2D cPos=GMath::v3d2v2d(dcPos);
     if(cPos!=chunkPosition)                                         //方块不属于当前区块，pass
         return false;
     DisplayChunk *dc=displayChunk.value(dkey);
@@ -75,7 +75,7 @@ Block *ChunkMap::getBlock(QVector3D bPos)
 {
     QVector3D dcPos=DisplayChunk::calcChunckPos(bPos);
     int dkey=dcPos.y();
-    QVector2D cPos=v3d2v2d(dcPos);
+    QVector2D cPos=GMath::v3d2v2d(dcPos);
     if(cPos!=chunkPosition)                                                 //坐标不是当前区块,pass
         return NULL;
     DisplayChunk *dc=displayChunk.value(dkey);
@@ -95,7 +95,7 @@ bool ChunkMap::haveBlock(QVector3D bPos)
 DisplayChunk *ChunkMap::getDisplayChunk(QVector3D dcPos)
 {
     int key=dcPos.y();
-    QVector2D cPos=v3d2v2d(dcPos);
+    QVector2D cPos=GMath::v3d2v2d(dcPos);
     if(cPos!=chunkPosition)
         return NULL;
     return displayChunk.value(key);
@@ -106,7 +106,7 @@ void ChunkMap::draw(const QVector3D &pos, int maxLen)
     QVector3D oPos=DisplayChunk::calcChunckPos(pos);
 
     foreach (DisplayChunk *dc, displayChunk) {
-        if(dc && gAbs(int(dc->getDcPosition().distanceToPoint(oPos)))<=maxLen)
+        if(dc && GMath::gAbs(int(dc->getDcPosition().distanceToPoint(oPos)))<=maxLen)          //有效区块且离camera区块的距离小于等于maxLen
             dc->draw();
     }
 }
@@ -134,16 +134,9 @@ void ChunkMap::updateAll()
     }
 }
 
-QVector2D ChunkMap::v3d2v2d(const QVector3D &v3d)
-{
-    float x=v3d.x();
-    float z=v3d.z();
-    return QVector2D(x,z);
-}
-
 bool ChunkMap::createDisplayChunk(QVector3D dcPos)
 {
-    QVector2D cPos=v3d2v2d(dcPos);
+    QVector2D cPos=GMath::v3d2v2d(dcPos);
     if(cPos!=chunkPosition)                                                 //显示区块不属于当前区块，pass
         return false;
     int key=dcPos.y();
@@ -228,7 +221,7 @@ bool DisplayChunk::addBlock(Block *block, bool update)
 
     if(update)
         this->update();
-
+    this->setHaveChange(true);                              //标记区块有修改
     return true;
 }
 
@@ -245,6 +238,7 @@ bool DisplayChunk::removeBlock(QVector3D pos, bool update)
     blockCount-=1;
     if(update)
         this->update();
+    this->setHaveChange(true);                      //标记区块有修改
     return true;
 }
 
@@ -300,9 +294,9 @@ void DisplayChunk::setShow(bool s)
 
 QVector3D DisplayChunk::blockPos2dcPos(QVector3D bPos)
 {
-    int x=gAbs((int)bPos.x());
-    int y=gAbs((int)bPos.y());
-    int z=gAbs((int)bPos.z());
+    int x=GMath::gAbs((int)bPos.x());
+    int y=GMath::gAbs((int)bPos.y());
+    int z=GMath::gAbs((int)bPos.z());
     int xx=x%16;
     int yy=y%16;
     int zz=z%16;
@@ -405,6 +399,16 @@ void DisplayChunk::deleteDisplayList()
         displayListID=GLuint(0);
     }
 }
+bool DisplayChunk::getHaveChange() const
+{
+    return haveChange;
+}
+
+void DisplayChunk::setHaveChange(bool value)
+{
+    haveChange = value;
+}
+
 QVector3D DisplayChunk::getDcPosition() const
 {
     return dcPosition;

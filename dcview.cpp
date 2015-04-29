@@ -19,7 +19,8 @@ DCView::DCView()
 
 DCView::~DCView()
 {
-
+    if(gameScene)
+        delete gameScene;
 }
 
 void DCView::mousePressEvent(QMouseEvent *event)

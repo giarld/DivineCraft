@@ -1,18 +1,7 @@
 #include "camera.h"
 #include <math.h>
 #include <string.h>
-
-#define PI 3.14159265358979
-
-float gMin(float a,float b)
-{
-    return a<=b?a:b;
-}
-
-float gMax(float a,float b)
-{
-    return a>=b?a:b;
-}
+#include "gmath.h"
 
 
 Camera::Camera(Camera::CameraMode mode, QObject *parent)
@@ -24,8 +13,9 @@ Camera::Camera(Camera::CameraMode mode, QObject *parent)
     ,kBind(false)
     ,mouseLevel(0.5)
     ,moveSpeed(0.005)
-    ,G(0.05)
-    ,MaxSpeed(0.5)
+    ,jumSpeed(0.0125)
+    ,G(0.00005)
+    ,MaxSpeed(0.1)
 {
     setMouseLevel(mouseLevel);
     reMotionVector();
@@ -42,8 +32,9 @@ Camera::Camera(const QVector3D &position, const QPointF &rotation, Camera::Camer
     ,kBind(false)
     ,mouseLevel(0.5)
     ,moveSpeed(0.005)
-    ,G(0.05)
-    ,MaxSpeed(0.5)
+    ,jumSpeed(0.0125)
+    ,G(0.00005)
+    ,MaxSpeed(0.1)
 {
     setMouseLevel(mouseLevel);
     reMotionVector();
@@ -60,7 +51,7 @@ void Camera::sightMove(const QPointF &dp)
     float yr=dp.y()*dlAngle;
     float x=mRotation.x()+xr;
     float y=mRotation.y()+yr;
-    y=gMax(-89.9,gMin(89.9,y));                                         //俯仰度在-90到90度之间
+    y=GMath::gMax(-89.999,GMath::gMin(89.999,y));                                         //俯仰度在-89.999到89.999度之间(不限制在90度是为了让位移向量能识别到前进方向)
     mRotation=QPointF(x,y);
     reMotionVector();
 }
@@ -116,7 +107,6 @@ void Camera::bind()
 {
     mBind=kBind=true;
     lastTime=QTime::currentTime();
-    ySpeed=0.0;
 }
 
 void Camera::unBind()
@@ -129,10 +119,10 @@ QVector3D Camera::getSightVector() const
     float x=mRotation.x();
     float y=mRotation.y();
 
-    float m=cos(radians(y));
-    float dy=sin(radians(y));
-    float dx=cos(radians(x-90.0))*m;
-    float dz=sin(radians(x-90.0))*m;
+    float m=cos(GMath::radians(y));
+    float dy=sin(GMath::radians(y));
+    float dx=cos(GMath::radians(x-90.0))*m;
+    float dz=sin(GMath::radians(x-90.0))*m;
     QVector3D vec=QVector3D(dx,dy,dz);
     return vec.normalized();
 }
@@ -147,7 +137,7 @@ void Camera::setMouseLevel(float value)
         value=0.01;
     if(value>1.0)
         value=1.0;
-    mouseLevel = gMax(0.0,gMin(value,1.0));
+    mouseLevel = GMath::gMax(0.0,GMath::gMin(value,1.0));
     dlAngle=mouseLevel*0.1f;
 }
 QVector3D Camera::position() const
@@ -176,17 +166,12 @@ void Camera::setRotation(const QPointF &rotation)
     mRotation = rotation;
 }
 
-float Camera::radians(float angle)
-{
-    return angle*(PI/180.0);
-}
-
 void Camera::cMove()
 {
-    if(!kBind){
-        lastTime=QTime::currentTime();
-        return;
-    }
+//    if(!kBind){
+//        lastTime=QTime::currentTime();
+//        return;
+//    }
 
     QTime nowTime=QTime::currentTime();
     int timeC=lastTime.msecsTo(nowTime);
@@ -211,8 +196,9 @@ void Camera::cMove()
             strafe.setY(strafe.y()+1.0);
         }
         else if(gameMode==SURVIVAL){
-            if(ySpeed==0){
-                ySpeed=MaxSpeed;
+            if(ySpeed==0.0){
+                ySpeed=jumSpeed;
+                mPosition.setY(mPosition.y()+0.0001);
             }
         }
     }
@@ -225,16 +211,22 @@ void Camera::cMove()
         }
     }
 
-    if(gameMode==SURVIVAL){
-        if(mPosition.y()>0){
-            ySpeed-=(G*timeC);
-        }
-    }
-    if(mPosition.y()<=0)
-        ySpeed=0;
-    strafe.setY(strafe.y()+ySpeed*timeC);
+
     strafe.normalize();                                             //方向矢量单位化
     mPosition+=(strafe*timeC*moveSpeed);
+    if(mPosition.y()<=0.0){
+        ySpeed=0;
+        mPosition.setY(0.0);
+    }
+    if(gameMode==SURVIVAL && mPosition.y()>0){
+        if(ySpeed>-MaxSpeed){
+            ySpeed-=(G*timeC);
+        }
+        mPosition.setY(mPosition.y()+ySpeed*timeC);
+    }
+    else if(gameMode==GOD)
+        ySpeed=0.0;
+//    qDebug()<<mPosition.y();
 
     lastTime=nowTime;
 }
@@ -247,6 +239,16 @@ void Camera::reMotionVector()
     lfMotion=QVector3D(udMotion.z(),0,-udMotion.x());
     lfMotion.normalize();
 }
+float Camera::getG() const
+{
+    return G;
+}
+
+void Camera::setG(float value)
+{
+    G = value;
+}
+
 int Camera::getGameMode() const
 {
     return gameMode;
@@ -254,7 +256,7 @@ int Camera::getGameMode() const
 
 void Camera::setGameMode(const int &value)
 {
-    gameMode = value;
+        gameMode = value;
 }
 
 

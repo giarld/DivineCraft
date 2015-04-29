@@ -2,6 +2,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include "ctime"
+#include "gmath.h"
 //================================================//
 //
 //================================================//
@@ -12,6 +13,13 @@ GameScene::GameScene(int width, int height)
     setSceneRect(0,0,width,height);
     initGame();
     lastTime=QTime::currentTime();
+
+    world=new World;
+    wThread=new QThread;
+    world->moveToThread(wThread);
+    connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
+    wThread->start();
+
     QTimer *timer=new QTimer;
     timer->setInterval(20);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
@@ -30,6 +38,11 @@ GameScene::~GameScene()
     delete blockFragmentShader;
     delete blockProgram;
     delete camera;
+    delete chunk1;
+    delete disChunk;
+    wThread->quit();
+    wThread->wait();
+    delete wThread;
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -55,7 +68,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     QMatrix4x4 rview;
     QPointF rot=camera->rotation();
     rview.rotate(rot.x(),0,1,0);
-    rview.rotate(rot.y(),cos(Camera::radians(rot.x())),0,sin(Camera::radians(rot.x())));
+    rview.rotate(rot.y(),cos(GMath::radians(rot.x())),0,sin(GMath::radians(rot.x())));
 
     renderBlocks(view,rview);
     defaultStates();
@@ -105,6 +118,12 @@ void GameScene::keyPressEvent(QKeyEvent *event)
     if(event->key()==Qt::Key_Escape && inSence){
         inSence=false;
         camera->unBind();
+    }
+    else if(event->key()==Qt::Key_M){
+        if(camera->getGameMode()==Camera::SURVIVAL)
+            camera->setGameMode(Camera::GOD);
+        else
+            camera->setGameMode(Camera::SURVIVAL);
     }
     else{
         camera->keyPress(event->key());
@@ -222,7 +241,7 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 //    blockProgram->setUniformValue("view",view);
 
     disChunk->draw();
-    chunk1->draw(QVector3D(0,0,0),maxRenderLen);
+    chunk1->draw(camera->position(), maxRenderLen);
 
     blockProgram->release();
 
@@ -234,9 +253,9 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
 void GameScene::initGame()
 {
-    camera=new Camera(QVector3D(8,0,-8),QPointF(180.0,0.0));
+    camera=new Camera(QVector3D(8,100,-8),QPointF(180.0,0.0));
     //    camera->setMouseLevel(0.5);
-    camera->setGameMode(Camera::SURVIVAL);
+    camera->setGameMode(Camera::GOD);
 
     loadmBlockList();
     blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
@@ -279,7 +298,7 @@ void GameScene::initGame()
     chunk1->removeBlock(QVector3D(4,18,18),true);
 
     line=new LineMesh(2);
-    float lineLen=0.0005;
+    float lineLen=0.0004;
     line->addPoint(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
     line->addPoint(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
 }

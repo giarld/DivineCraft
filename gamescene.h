@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include <QtOpenGL>
+#include <QThread>
 #include "glkernel/chunkmesh.h"
 #include "glkernel/glextensions.h"
 #include "glkernel/glmeshs.h"
@@ -10,10 +11,7 @@
 #include "block.h"
 #include "chunkmap.h"
 #include "camera.h"
-
-#define PI 3.14159265358979
-
-class WorldThread;
+#include "world.h"
 
 class GameScene : public QGraphicsScene
 {
@@ -54,6 +52,9 @@ private:
     QTime lastTime;
     DisplayChunk *disChunk;
     ChunkMap *chunk1;
+
+    World *world;
+    QThread *wThread;
 
     Camera *camera;
     bool inSence;                                                    //鼠标场景中？

@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     block.cpp \
     glkernel/chunkmesh.cpp \
     chunkmap.cpp \
-    world.cpp
+    world.cpp \
+    gmath.cpp
 
 HEADERS  += dcview.h \
     glkernel/glextensions.h \
@@ -41,7 +42,8 @@ HEADERS  += dcview.h \
     glkernel/glmeshs.h \
     glkernel/chunkmesh.h \
     chunkmap.h \
-    world.h
+    world.h \
+    gmath.h
 
 
 wince*: {
