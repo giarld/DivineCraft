@@ -38,10 +38,8 @@ protected:
 
 signals:
 
-
 private:
     void initGame();                                                                    //初始化游戏场景
-    void loadmBlockList();                                                          //加载方块列表和纹理描述文件
 
 private:
     int maxRenderLen;                                                   //最大渲染距离
@@ -50,8 +48,6 @@ private:
     QGLShader *blockFragmentShader;                     //方块片段着色器
     QGLShaderProgram *blockProgram;                     //方块着色器程序
     QTime lastTime;
-    DisplayChunk *disChunk;
-    ChunkMap *chunk1;
 
     World *world;
     QThread *wThread;
@@ -61,8 +57,6 @@ private:
     QPointF centerPoint;
 
     LineMesh *line;
-
-    QVector<BlockListNode *> mBlockList;                                                            //存储所有类型方块的物理属性
 };
 
 

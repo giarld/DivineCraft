@@ -45,11 +45,14 @@ public:
 
     static QVector3D blockPos2dcPos(QVector3D bPos);                //计算块内坐标(0-15)
     static QVector3D calcChunckPos(QVector3D bPos);                     //计算方块所属显示区块坐标
+    static QVector3D calcChunkOriginPos(QVector3D cPos);            //计算区块的原点方块的坐标(cPos是显示区块坐标)
 
     QVector3D getDcPosition() const;
 
     bool getHaveChange() const;
     void setHaveChange(bool value);
+
+    QMap<int, Block *> getBlocks() const;                               //返还方块列表
 
 private:
     int calcKey(QVector3D bPos);                                    //通过方块坐标计算其存储的key
@@ -92,7 +95,8 @@ public:
     void update(int y);                                         //刷新第y个区块
     void updateLast();                                          //刷新上一个被操作的区块
     void updateAll();                                                   //强制刷新所有
-
+    bool haveChange();                                          //是否对区块进行过修改
+    void saveAll();                                                         //已经保存了全部，也就是设置每一个显示区块的haveChange为false
 private:
     bool createDisplayChunk(QVector3D dcPos);                                                     //创建一个显示区块
 

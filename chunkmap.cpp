@@ -134,6 +134,26 @@ void ChunkMap::updateAll()
     }
 }
 
+bool ChunkMap::haveChange()
+{
+    foreach (DisplayChunk *dc, displayChunk) {
+        if(dc){
+            if(dc->getHaveChange())
+                return true;
+        }
+    }
+    return false;
+}
+
+void ChunkMap::saveAll()
+{
+    foreach (DisplayChunk *dc, displayChunk) {
+        if(dc){
+            dc->setHaveChange(false);
+        }
+    }
+}
+
 bool ChunkMap::createDisplayChunk(QVector3D dcPos)
 {
     QVector2D cPos=GMath::v3d2v2d(dcPos);
@@ -157,6 +177,7 @@ DisplayChunk::DisplayChunk()
     ,displayListID(GLuint(0))
 {
     blocks.clear();
+    setHaveChange(false);
 }
 
 DisplayChunk::DisplayChunk(int cx, int cy, int cz)
@@ -166,6 +187,7 @@ DisplayChunk::DisplayChunk(int cx, int cy, int cz)
     ,displayListID(GLuint(0))
 {
     blocks.clear();
+    setHaveChange(false);
 }
 
 DisplayChunk::DisplayChunk(QVector3D dcPos)
@@ -316,6 +338,17 @@ QVector3D DisplayChunk::calcChunckPos(QVector3D bPos)
     return pos;
 }
 
+QVector3D DisplayChunk::calcChunkOriginPos(QVector3D cPos)
+{
+    int x=int(cPos.x())+1;
+    int y=int(cPos.y())+1;
+    int z=int(cPos.z())+1;
+    int xx=x*16-16;
+    int yy=y*16-16;
+    int zz=z*16-16;
+    return QVector3D(xx,yy,zz);
+}
+
 int DisplayChunk::calcKey(QVector3D bPos)
 {
     QVector3D dcPos=blockPos2dcPos(bPos);
@@ -399,6 +432,12 @@ void DisplayChunk::deleteDisplayList()
         displayListID=GLuint(0);
     }
 }
+
+QMap<int, Block *> DisplayChunk::getBlocks() const
+{
+    return blocks;
+}
+
 bool DisplayChunk::getHaveChange() const
 {
     return haveChange;

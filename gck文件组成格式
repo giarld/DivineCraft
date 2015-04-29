@@ -1,0 +1,10 @@
+.gck是divinecraft的区块存储文件
+文件名以区块坐标为准:x-y.gck，如:0-0.gck、10-20.gck
+格式如下：
+起始文件识别标识
+0x9394ef 0x7b2f5c
+接下来由诺干个块组成（最多也就65536个）
+每个块结构为:
+int:begin  QVector3D:blockPosition  int:blockIndex  int:end
+比如：
+0x01  QVector3D(0,0,0)  1  0xfe

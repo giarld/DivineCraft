@@ -14,11 +14,6 @@ GameScene::GameScene(int width, int height)
     initGame();
     lastTime=QTime::currentTime();
 
-    world=new World;
-    wThread=new QThread;
-    world->moveToThread(wThread);
-    connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
-    wThread->start();
 
     QTimer *timer=new QTimer;
     timer->setInterval(20);
@@ -30,16 +25,11 @@ GameScene::GameScene(int width, int height)
 
 GameScene::~GameScene()
 {
-    foreach (BlockListNode *t, mBlockList) {
-        delete t;
-    }
     delete blockTexture;
     delete blockVertexShader;
     delete blockFragmentShader;
     delete blockProgram;
     delete camera;
-    delete chunk1;
-    delete disChunk;
     wThread->quit();
     wThread->wait();
     delete wThread;
@@ -50,7 +40,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     float width=float(painter->device()->width());
     float height=float(painter->device()->height());
 
-//        QTime lT=QTime::currentTime();
+    //        QTime lT=QTime::currentTime();
 
     painter->beginNativePainting();
 
@@ -72,7 +62,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 
     renderBlocks(view,rview);
     defaultStates();
-//        qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
+    //        qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
 }
 
@@ -238,10 +228,9 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
-//    blockProgram->setUniformValue("view",view);
+    //    blockProgram->setUniformValue("view",view);
 
-    disChunk->draw();
-    chunk1->draw(camera->position(), maxRenderLen);
+    world->draw();
 
     blockProgram->release();
 
@@ -253,11 +242,10 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
 void GameScene::initGame()
 {
-    camera=new Camera(QVector3D(8,100,-8),QPointF(180.0,0.0));
+    camera=new Camera(QVector3D(8,3,8),QPointF(180.0,0.0));
     //    camera->setMouseLevel(0.5);
     camera->setGameMode(Camera::GOD);
 
-    loadmBlockList();
     blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
 
     blockVertexShader=new QGLShader(QGLShader::Vertex);
@@ -278,24 +266,20 @@ void GameScene::initGame()
                                            "请联系开发者寻求解决方案"),QMessageBox::Ok);
         exit(1);
     }
-    qsrand(time(0));
-    disChunk=new DisplayChunk(0,0,0);
-    for(int i=0;i<16;i++)
-        for(int j=0;j<16;j++)
-            for(int k=0;k<16;k++){
-                disChunk->addBlock(new Block(QVector3D(i,j,k),mBlockList[qrand()%33+1]),false);
-            }
-    disChunk->update();
+    ////////////////////////////
+    world=new World;
+    wThread=new QThread;
+    world->moveToThread(wThread);
+    connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
+    wThread->start();
+    world->loadBlockIndex();
+    world->setMaxRenderLen(maxRenderLen);
+    world->setWorldName("Test");
+    ///////////////////////////
 
-    chunk1=new ChunkMap(0,1);
-
-    for(int i=0;i<16;i++)
-        for(int j=0;j<256;j++)
-            for(int k=16;k<32;k++){
-                chunk1->addBlock(new Block(QVector3D(i,j,k),mBlockList[10]),false);
-            }
-    chunk1->updateAll();
-    chunk1->removeBlock(QVector3D(4,18,18),true);
+    world->setCameraPosition(camera->position());
+    world->updateWorld();
+    world->addBlock(new Block(QVector3D(8,3,8),world->getBlockIndex(33)),true);
 
     line=new LineMesh(2);
     float lineLen=0.0004;
@@ -303,67 +287,3 @@ void GameScene::initGame()
     line->addPoint(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
 }
 
-void GameScene::loadmBlockList()
-{
-    QFile file(":/res/divinecraft/block.list");
-    if(file.open(QIODevice::ReadOnly)){
-        QTextStream in(&file);
-        while(!in.atEnd()){
-            QString line=in.readLine();
-            if(line=="" || line==NULL) continue;
-            QStringList temp=line.split(" ",QString::SkipEmptyParts);
-            int id=temp[0].toInt();
-            int type=temp[1].toInt();
-            bool collide=temp[2].toInt();
-            bool trans=temp[3].toInt();
-            QString name=temp[4];
-            BlockListNode *node=new BlockListNode;
-            node->id=id;
-            node->type=type;
-            node->name=name;
-            node->collide=collide;
-            node->trans=trans;
-            mBlockList<<node;
-        }
-    }
-    file.close();
-
-    file.setFileName(":/res/divinecraft/textures/texture_index.list");
-    if(file.open(QIODevice::ReadOnly)){
-        QTextStream in(&file);
-        int index=0;
-        while(!in.atEnd()){
-            QString line=in.readLine();
-            if(line=="" || line==NULL) continue;
-            if(index==0){
-                QStringList temp=line.split(" ",QString::SkipEmptyParts);
-                float tWidth=temp[0].toFloat();
-                float tHeight=temp[1].toFloat();
-                foreach (BlockListNode *node, mBlockList) {
-                    node->texWidth=tWidth;
-                    node->texHeight=tHeight;
-                }
-            }
-            else{
-                QStringList temp=line.split(" ",QString::SkipEmptyParts);
-                int i=0;
-                int id=temp[i++].toInt();
-                int type=temp[i++].toInt();
-                if(id>=mBlockList.length()) continue;
-                BlockListNode *bl=mBlockList[id];
-                while(i<temp.length()){
-                    int u=temp[i++].toFloat();
-                    int v=temp[i++].toFloat();
-                    bl->tex<<QVector2D(u,v);
-                }
-                if(type==0 && i<=10){
-                    bl->tex<<QVector2D(temp[temp.length()-2].toFloat(),temp[temp.length()-1].toFloat());
-                }
-            }
-            index++;
-        }
-    }
-    //    foreach (BlockListNode *a, mBlockList) {
-    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
-    //    }
-}
