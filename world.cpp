@@ -8,6 +8,8 @@
 World::World(QObject *parent) : QObject(parent)
 {
     setMaxRenderLen(16);
+    this->lastCameraChunk=QVector2D(0,0);
+    upLock=false;
 }
 
 World::~World()
@@ -68,25 +70,29 @@ void World::draw()
 
 void World::updateWorld()
 {
+    if(upLock)
+        return;
+    upLock=true;
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为其实区块。
 
     bfs2World(startCPos);
 
     foreach (ChunkMap *cm, chunksMap) {
-        if(cm){
-            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+1){
+        if(cm && !cm->inDraw()){                                        //有效区块切区块不在绘图状态
+            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+2){
                 QString key=getKey(cm->getChunkPosition());
                 if(cm->haveChange()){                                                               //未保存先保存
                     saveChunk(key);
                 }
-                delete cm;
                 chunksMap.remove(key);
+                delete cm;
             }
         }
     }
 
     qWarning("up end");
+    upLock=false;
 }
 
 void World::forcedUpdateWorld()
@@ -203,7 +209,7 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
     QDir idir(filePath);
     if(idir.absolutePath()!=filePath){
         QMessageBox::warning(0,tr("错误"),tr("游戏无法正确的创建文件和目录，即将被关闭\n此错误可能与文件读写权限有关"));
-        exit(0);
+        exit(1);
     }
     if(!idir.cd("chunks/")){
         idir.mkdir("chunks/");
@@ -219,10 +225,14 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
         if(za==0x9394ef && zb==0x7b2f5c){                               //如果文件达标，创建并读取区块
             newChunk=new ChunkMap(chunkPos);
             while(!in.atEnd()){
-                int b,e;
+                int b;
                 QVector3D blockPos;
                 int blockIndex;
-                in>>b>>blockPos>>blockIndex>>e;
+                in>>b>>blockPos>>blockIndex;
+                if(b!=0x01){
+                    qWarning()<<tr("文件读取出错!");
+                    break;
+                }
                 newChunk->addBlock(new Block(blockPos,getBlockIndex(blockIndex)),false);
             }
             ok=true;
@@ -308,7 +318,7 @@ bool World::saveChunk(QString key)
     QDir sdir(filePath);
     if(sdir.absolutePath()!=filePath){
         QMessageBox::warning(0,tr("错误"),tr("游戏无法正确的创建文件和目录，即将被关闭\n此错误可能与文件读写权限有关"));
-        exit(0);
+        exit(1);
     }
     if(!sdir.cd("chunks/")){
         sdir.mkdir("chunks/");
@@ -324,7 +334,7 @@ bool World::saveChunk(QString key)
             if(sdc && sdc->isOk()){
                 foreach (Block *b, sdc->getBlocks()) {
                     if(b && b->isAir()==false){                                                             //只保存非空气方块
-                        out<<0x01<<b->getPosition()<<b->getId()<<0xfe;
+                        out<<0x01<<b->getPosition()<<b->getId();
                     }
                 }
             }
@@ -395,7 +405,12 @@ QVector3D World::getCameraPosition() const
     return cameraPosition;
 }
 
-void World::setCameraPosition(const QVector3D &value)
+void World::changeCameraPosition(const QVector3D &cPos)
 {
-    cameraPosition = value;
+    cameraPosition = cPos;
+    QVector2D nowC=GMath::v3d2v2d(DisplayChunk::calcChunckPos(cameraPosition));
+    if(nowC!=lastCameraChunk){
+        lastCameraChunk=nowC;
+        updateWorld();
+    }
 }

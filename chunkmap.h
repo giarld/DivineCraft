@@ -92,6 +92,8 @@ public:
 
     void draw(const QVector3D &pos,int maxLen);                         //绘制区块中的显示区块，pos是camera坐标,当区块到camera原点的距离小于等于maxLen时，绘制
 
+    bool inDraw();                                                                                          //在绘制
+
     void update(int y);                                         //刷新第y个区块
     void updateLast();                                          //刷新上一个被操作的区块
     void updateAll();                                                   //强制刷新所有
@@ -107,6 +109,8 @@ private:
     QVector2D chunkPosition;                                                    //区块坐标，世界中的区块是二维分布的.
     QMap<int,DisplayChunk*> displayChunk;                                       //16个对等的显示区块，每一个显示区块可能为空
     DisplayChunk *lastOPDC;                                                                   //上一个被操作显示区块
+
+    bool drawLock;                                                                              //绘制锁，识别是否在绘制的锁
 };
 
 #endif // CHUNKMAP_H

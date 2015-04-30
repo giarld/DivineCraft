@@ -24,7 +24,6 @@ public:
     void draw();                                                                                        //绘制
 
     QVector3D getCameraPosition() const;
-    void setCameraPosition(const QVector3D &value);
 
     int getMaxRenderLen() const;
     void setMaxRenderLen(int value);
@@ -43,6 +42,7 @@ public slots:
     void loadBlockIndex();                  //加载方块索引
     void autoSave();                                  //自动保存？每个一个特定时钟周期进行一次保存操作
     void updateDraw();                          //处理显示更新等待队列里的请求
+    void changeCameraPosition(const QVector3D &cPos);
 
 private:
     QString getKey(QVector2D chunkPos);                     //返还匹配chunksMap的键值，chunkPos是区块坐标
@@ -57,10 +57,12 @@ private:
     QMap<QString,ChunkMap*> chunksMap;               //区块列表。key="chunkX-chunkY"
     int maxRenderLen;                                            //额，最大的区块显示距离，以camera所在区块为起点(最大加载距离比最大可视距离要大1)
     QVector3D cameraPosition;                                       //camera的坐标，让区块能更新的前提
+    QVector2D lastCameraChunk;                                  //camera所在区块的坐标记录
     QString worldName;
     QString filePath;                                                               //地图文件所在目录地址
     QVector<BlockListNode *> mBlockIndex;                                                            //存储所有类型方块的物理属性
     QQueue<QString> updateQueue;                                    //显示更新等待队列，保存等待刷新显示的区块
+    bool upLock;                                                                //update单操作锁
 };
 
 #endif // WORLD_H

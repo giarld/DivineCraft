@@ -24,6 +24,9 @@ public:
 
     bool isInScene();                   //返还是否进入场景控制模式
     void setCenterPoint(const QPointF &cp);
+
+    void startGame();
+    void pauseGame();
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
@@ -34,10 +37,13 @@ protected:
     void setStates();               //设置状态，初始化GL绘图
     void setLights();               //光照
     void defaultStates();           //还原GL设置
-    void renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview);                                          //绘制
+    void renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview);                                          //变换与绘制，view是位移矩阵，rview是旋转矩阵
+
+    void firstLoad();                                                                                                                                   //第一次加载世界
 
 signals:
-    void upTest();
+    void updateWorld();                                     //从场景要求更新世界的信号
+
 private:
     void initGame();                                                                    //初始化游戏场景
 

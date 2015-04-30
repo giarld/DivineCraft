@@ -51,8 +51,13 @@ public:
     float getG() const;
     void setG(float value);
 
-signals:
+    void setWorld(World *value);
 
+    bool getPause() const;
+    void setPause(bool value);
+
+signals:
+    void cameraMove(const QVector3D &cPos);
 
 public slots:
     void cMove();                                               //对camera进行移动操作的槽，与timer的timeout信号连接
@@ -67,6 +72,7 @@ private:
     QPointF mRotation;                  //camera眼方向(单位向量)
     bool mBind;                                   //鼠标是否处于绑定状态
     bool kBind;                                     //键盘是否处于绑定状态
+    bool pause;                                             //是否暂停
     float mouseLevel;                           //鼠标灵敏度(0.01-1)
     float moveSpeed;                                //每毫秒的移动速度
     float ySpeed;                                      //垂直方向上的速度分量
@@ -78,6 +84,8 @@ private:
     QTime lastTime;
     float G;                                                    //重力系数G
     float MaxSpeed;                                     //速度上限
+
+    World *myWorld;
 };
 
 #endif // CAMERA_H

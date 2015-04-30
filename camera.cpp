@@ -7,39 +7,41 @@
 Camera::Camera(Camera::CameraMode mode, QObject *parent)
     :QObject(parent)
     ,mode(mode)
-    ,mPosition(QVector3D(0,0,0))
     ,mRotation(QPointF(0.0,0.0))
     ,mBind(false)
     ,kBind(false)
     ,mouseLevel(0.5)
-    ,moveSpeed(0.05)
+    ,moveSpeed(0.005)
     ,jumSpeed(0.0125)
     ,G(0.00005)
     ,MaxSpeed(0.1)
 {
     setMouseLevel(mouseLevel);
+    setPosition(QVector3D(0,0,0));
     reMotionVector();
     setGameMode(Camera::SURVIVAL);
     memset(keyMap,0,sizeof(keyMap));
+    setPause(true);
 }
 
 Camera::Camera(const QVector3D &position, const QPointF &rotation, Camera::CameraMode mode, QObject *parent)
     :QObject(parent)
     ,mode(mode)
-    ,mPosition(position)
     ,mRotation(rotation)
     ,mBind(false)
     ,kBind(false)
     ,mouseLevel(0.5)
-    ,moveSpeed(0.05)
+    ,moveSpeed(0.005)
     ,jumSpeed(0.0125)
     ,G(0.00005)
     ,MaxSpeed(0.1)
 {
     setMouseLevel(mouseLevel);
+    setPosition(position);
     reMotionVector();
     setGameMode(Camera::SURVIVAL);
     memset(keyMap,0,sizeof(keyMap));
+    setPause(true);
 }
 
 void Camera::sightMove(const QPointF &dp)
@@ -168,10 +170,10 @@ void Camera::setRotation(const QPointF &rotation)
 
 void Camera::cMove()
 {
-//    if(!kBind){
-//        lastTime=QTime::currentTime();
-//        return;
-//    }
+    if(pause){                                                  //暂停时的处理
+        lastTime=QTime::currentTime();
+        return;
+    }
 
     QTime nowTime=QTime::currentTime();
     int timeC=lastTime.msecsTo(nowTime);
@@ -228,6 +230,8 @@ void Camera::cMove()
         ySpeed=0.0;
 //    qDebug()<<mPosition.y();
 
+    emit cameraMove(mPosition);                                                     //发出移动了的信号
+
     lastTime=nowTime;
 }
 
@@ -239,6 +243,22 @@ void Camera::reMotionVector()
     lfMotion=QVector3D(udMotion.z(),0,-udMotion.x());
     lfMotion.normalize();
 }
+bool Camera::getPause() const
+{
+    return pause;
+}
+
+void Camera::setPause(bool value)
+{
+    pause = value;
+}
+
+
+void Camera::setWorld(World *value)
+{
+    myWorld = value;
+}
+
 float Camera::getG() const
 {
     return G;

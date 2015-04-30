@@ -7,13 +7,12 @@
 //
 //================================================//
 GameScene::GameScene(int width, int height)
-    :maxRenderLen(20)
+    :maxRenderLen(5)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
     initGame();
     lastTime=QTime::currentTime();
-
 
     QTimer *timer=new QTimer;
     timer->setInterval(20);
@@ -52,6 +51,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     qgluPerspective(60.0,width/height,0.01,500.0);
 
     glMatrixMode(GL_MODELVIEW);
+
     QMatrix4x4 view;
     view.translate(-camera->getEyePosition());
 
@@ -60,7 +60,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     rview.rotate(rot.x(),0,1,0);
     rview.rotate(rot.y(),cos(GMath::radians(rot.x())),0,sin(GMath::radians(rot.x())));
 
-    renderBlocks(view,rview);
+    renderWorld(view,rview);
     defaultStates();
     //        qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
@@ -76,6 +76,16 @@ void GameScene::setCenterPoint(const QPointF &cp)
     this->centerPoint=cp;
 }
 
+void GameScene::startGame()
+{
+    camera->setPause(false);
+}
+
+void GameScene::pauseGame()
+{
+    camera->setPause(true);
+}
+
 
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
@@ -84,6 +94,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         if(!inSence){
             inSence=true;
             camera->bind();
+            startGame();
         }
     }
 }
@@ -108,15 +119,13 @@ void GameScene::keyPressEvent(QKeyEvent *event)
     if(event->key()==Qt::Key_Escape && inSence){
         inSence=false;
         camera->unBind();
+        pauseGame();
     }
     else if(event->key()==Qt::Key_M){
         if(camera->getGameMode()==Camera::SURVIVAL)
             camera->setGameMode(Camera::GOD);
         else
             camera->setGameMode(Camera::SURVIVAL);
-    }
-    else if(event->key()==Qt::Key_U){
-        emit upTest();
     }
     else{
         camera->keyPress(event->key());
@@ -134,25 +143,28 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
 void GameScene::setStates()
 {
     glClearColor(0.0,0.65,1.0,0.5);
+
     glEnable(GL_DEPTH_TEST);                //启用深度测试
     glEnable(GL_CULL_FACE);                     //正面消隐
     glEnable(GL_LIGHTING);                          //光照
+    //    glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
     //        glDepthRange(0.0f,1.0f);
     //        glClearDepth(1.0f);
-    //        glDepthFunc(GL_LEQUAL);
-    //        glDepthMask(GL_TRUE);
+    //            glDepthFunc(GL_LEQUAL);
+    //            glDepthMask(GL_FALSE);
     //反锯齿
-    //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //    glEnable(GL_BLEND);
-    //    glEnable(GL_POINT_SMOOTH);
-    //    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    //    glEnable(GL_LINE_SMOOTH);
-    //    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    //    glEnable(GL_POLYGON_SMOOTH);
-    //    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_BLEND);
+//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glEnable(GL_POINT_SMOOTH);
+//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_LINE_SMOOTH);
+//    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_POLYGON_SMOOTH);
+//    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
     //png透明
     glEnable(GL_ALPHA_TEST);
@@ -199,10 +211,10 @@ void GameScene::defaultStates()
     glDisable(GL_ALPHA_TEST);
 
     //
-    //    glDisable(GL_BLEND);
-    //    glDisable(GL_LINE_SMOOTH);
-    //    glDisable(GL_POINT_SMOOTH);
-    //    glDisable(GL_POLYGON_SMOOTH);
+//    glDisable(GL_BLEND);
+//    glDisable(GL_POINT_SMOOTH);
+//    glDisable(GL_LINE_SMOOTH);
+//    glDisable(GL_POLYGON_SMOOTH);
     //
 
     glMatrixMode(GL_MODELVIEW);
@@ -217,7 +229,7 @@ void GameScene::defaultStates()
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
 }
 
-void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
+void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 {
     if(glActiveTexture){
         glActiveTexture(GL_TEXTURE0);
@@ -232,7 +244,6 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
     //    blockProgram->setUniformValue("view",view);
-
     world->draw();
 
     blockProgram->release();
@@ -241,6 +252,11 @@ void GameScene::renderBlocks(const QMatrix4x4 &view,const QMatrix4x4 &rview)
         glActiveTexture(GL_TEXTURE0);
         blockTexture->unbind();
     }
+}
+
+void GameScene::firstLoad()
+{
+    emit updateWorld();
 }
 
 void GameScene::initGame()
@@ -274,15 +290,18 @@ void GameScene::initGame()
     wThread=new QThread;
     world->moveToThread(wThread);
     connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
-    connect(this,SIGNAL(upTest()),world,SLOT(updateWorld()));
+    connect(this,SIGNAL(updateWorld()),world,SLOT(forcedUpdateWorld()));
+    connect(camera,SIGNAL(cameraMove(QVector3D)),world,SLOT(changeCameraPosition(QVector3D)));          //连接camera移动与世界相机位移的槽
     wThread->start();
     world->loadBlockIndex();
     world->setMaxRenderLen(maxRenderLen);
     world->setWorldName("Test");
+    camera->setWorld(world);                                //传递世界指针
     ///////////////////////////
 
-    world->setCameraPosition(camera->position());
-//    world->updateWorld();
+    //    world->setCameraPosition(camera->position());
+    //    world->updateWorld();
+    firstLoad();            //强制首次加载
 
     line=new LineMesh(2);
     float lineLen=0.0004;

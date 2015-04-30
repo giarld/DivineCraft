@@ -22,6 +22,7 @@ ChunkMap::ChunkMap(QVector2D cPos)
     ,lastOPDC(NULL)
 {
     displayChunk.clear();
+    drawLock=false;
 }
 
 ChunkMap::ChunkMap(int cx, int cz)
@@ -29,6 +30,7 @@ ChunkMap::ChunkMap(int cx, int cz)
     ,lastOPDC(NULL)
 {
     displayChunk.clear();
+    drawLock=false;
 }
 
 ChunkMap::~ChunkMap()
@@ -99,12 +101,21 @@ DisplayChunk *ChunkMap::getDisplayChunk(int y)
 
 void ChunkMap::draw(const QVector3D &pos, int maxLen)
 {
+    if(drawLock)
+        return ;
+    drawLock=true;
     QVector3D oPos=DisplayChunk::calcChunckPos(pos);
 
     foreach (DisplayChunk *dc, displayChunk) {
         if(dc && GMath::gAbs(int(dc->getDcPosition().distanceToPoint(oPos)))<=maxLen)          //有效区块且离camera区块的距离小于等于maxLen
             dc->draw();
     }
+    drawLock=false;
+}
+
+bool ChunkMap::inDraw()
+{
+    return drawLock;
 }
 
 void ChunkMap::update(int y)
