@@ -253,7 +253,7 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
 ChunkMap *World::createChunk(QVector2D chunkPos)
 {
     QVector3D nPos=QVector3D(chunkPos.x(),0,chunkPos.y());
-    QVector3D oPos=DisplayChunk::calcChunkOriginPos(nPos);
+    QVector3D oPos=DisplayChunk::calcChunkOriginPos(nPos);                  //计算出区块的偏移坐标
     ChunkMap *newChunk=new ChunkMap(chunkPos);
     int i,j,k;
     int cb[]={4,1,2};
@@ -265,6 +265,9 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
             }
         }
     }
+    newChunk->addBlock(new Block(oPos+QVector3D(8,3,8),getBlockIndex(10)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(5,3,5),getBlockIndex(33)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(11,3,11),getBlockIndex(17)),false);
     return newChunk;
 }
 

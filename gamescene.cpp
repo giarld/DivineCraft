@@ -48,7 +48,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
-    qgluPerspective(60.0,width/height,0.01,500.0);
+    qgluPerspective(60.0,width/height,0.01f,1000.0f);
 
     glMatrixMode(GL_MODELVIEW);
 
@@ -164,7 +164,8 @@ void GameScene::setStates()
 //    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 //    glEnable(GL_POLYGON_SMOOTH);
 //    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+//    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_DONT_CARE);
+//    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_FASTEST);
 
     //png透明
     glEnable(GL_ALPHA_TEST);
@@ -180,9 +181,9 @@ void GameScene::setStates()
 
     setLights();
 
-    float materialSpecular[]={0.5f,0.5f,0.5f,1.0f};
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,materialSpecular);           //设置有质感的光照效果
-    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
+//    float materialSpecular[]={0.5f,0.5f,0.5f,1.0f};
+//    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,materialSpecular);           //设置有质感的光照效果
+//    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
 }
 
 void GameScene::setLights()

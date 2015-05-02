@@ -117,6 +117,7 @@ GLTexture2D::GLTexture2D(const QString& fileName, int width, int height)
     glTexImage2D(GL_TEXTURE_2D, 0, 4, image.width(), image.height(), 0,
         GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
 
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
