@@ -75,16 +75,18 @@ GLTexture2D::GLTexture2D(int width, int height)
     //创建一个材质
     glBindTexture(GL_TEXTURE_2D, m_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
-        GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                 GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);       //不会低像素模糊而是直接显示马赛克
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);       //不会低像素模糊而是直接显示马赛克
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -102,7 +104,7 @@ GLTexture2D::GLTexture2D(const QString& fileName, int width, int height)
 
     image = image.convertToFormat(QImage::Format_ARGB32);
 
-//    qDebug() << "Image size:" << image.width() << "x" << image.height();
+    //    qDebug() << "Image size:" << image.width() << "x" << image.height();
     if (width <= 0)
         width = image.width();
     if (height <= 0)
@@ -115,17 +117,19 @@ GLTexture2D::GLTexture2D(const QString& fileName, int width, int height)
     // Works on x86, so probably works on all little-endian systems.
     // Does it work on big-endian systems?
     glTexImage2D(GL_TEXTURE_2D, 0, 4, image.width(), image.height(), 0,
-        GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
+                 GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
 
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);       //不会低像素模糊而是直接显示马赛克
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -133,7 +137,7 @@ void GLTexture2D::load(int width, int height, QRgb *data)
 {
     glBindTexture(GL_TEXTURE_2D, m_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
-        GL_BGRA, GL_UNSIGNED_BYTE, data);
+                 GL_BGRA, GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -149,6 +153,61 @@ void GLTexture2D::unbind()
     glDisable(GL_TEXTURE_2D);
 }
 
+//============================================================================//
+//                                 GLTextureArray            2D纹理数组                     //
+//============================================================================//
+
+GLTextureArray::GLTextureArray(int width, int height,int num)
+{
+    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, m_texture);
+
+    glTexImage3D(GL_TEXTURE_2D_ARRAY_EXT, 0, 4,
+                 width, height, num, 0, GL_BGRA,  GL_UNSIGNED_BYTE, 0);
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri( GL_TEXTURE_2D_ARRAY_EXT, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+}
+
+void GLTextureArray::loadNext(const QString &fileName, int texNub, int width , int height)
+{
+    QImage image(fileName);
+
+    if (image.isNull()) {
+        m_failed = true;
+        return;
+    }
+
+    image = image.convertToFormat(QImage::Format_ARGB32);
+
+    if (width <= 0)
+        width = image.width();
+    if (height <= 0)
+        height = image.height();
+    if (width != image.width() || height != image.height())
+        image = image.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, m_texture);
+
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY_EXT, 0, 0,0,texNub,
+                    image.width(), image.height(),1,GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0);
+}
+
+void GLTextureArray::bind()
+{
+    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, m_texture);
+    glEnable(GL_TEXTURE_2D_ARRAY_EXT);
+}
+
+void GLTextureArray::unbind()
+{
+    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0);
+    glDisable(GL_TEXTURE_2D_ARRAY_EXT);
+}
 
 //============================================================================//
 //                                 GLTexture3D            3D材质类                     //
@@ -158,9 +217,9 @@ GLTexture3D::GLTexture3D(int width, int height, int depth)
 {
     GLBUFFERS_ASSERT_OPENGL("GLTexture3D::GLTexture3D", glTexImage3D, return)
 
-    glBindTexture(GL_TEXTURE_3D, m_texture);
+            glBindTexture(GL_TEXTURE_3D, m_texture);
     glTexImage3D(GL_TEXTURE_3D, 0, 4, width, height, depth, 0,
-        GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                 GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -176,9 +235,9 @@ void GLTexture3D::load(int width, int height, int depth, QRgb *data)
 {
     GLBUFFERS_ASSERT_OPENGL("GLTexture3D::load", glTexImage3D, return)
 
-    glBindTexture(GL_TEXTURE_3D, m_texture);
+            glBindTexture(GL_TEXTURE_3D, m_texture);
     glTexImage3D(GL_TEXTURE_3D, 0, 4, width, height, depth, 0,
-        GL_BGRA, GL_UNSIGNED_BYTE, data);
+                 GL_BGRA, GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
@@ -204,7 +263,7 @@ GLTextureCube::GLTextureCube(int size)
 
     for (int i = 0; i < 6; ++i)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 4, size, size, 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                     GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -242,7 +301,7 @@ GLTextureCube::GLTextureCube(const QStringList& fileNames, int size)
         // Works on x86, so probably works on all little-endian systems.
         // Does it work on big-endian systems?
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index, 0, 4, image.width(), image.height(), 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
+                     GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
 
         if (++index == 6)
             break;
@@ -251,15 +310,15 @@ GLTextureCube::GLTextureCube(const QStringList& fileNames, int size)
     // Clear remaining faces. 清除剩余的没有贴图的纹理面
     while (index < 6) {
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index, 0, 4, size, size, 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                     GL_BGRA, GL_UNSIGNED_BYTE, 0);
         ++index;
     }
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);       //不会低像素模糊而是直接显示马赛克
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);       //不会低像素模糊而是直接显示马赛克
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE);
@@ -269,8 +328,8 @@ GLTextureCube::GLTextureCube(const QStringList& fileNames, int size)
 void GLTextureCube::load(int size, int face, QRgb *data)
 {
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, 4, size, size, 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, 4, size, size, 0,
+                 GL_BGRA, GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
@@ -298,10 +357,10 @@ GLFrameBufferObject::GLFrameBufferObject(int width, int height)
     , m_failed(false)
 {
     GLBUFFERS_ASSERT_OPENGL("GLFrameBufferObject::GLFrameBufferObject",
-        glGenFramebuffersEXT && glGenRenderbuffersEXT && glBindRenderbufferEXT && glRenderbufferStorageEXT, return)
+                            glGenFramebuffersEXT && glGenRenderbuffersEXT && glBindRenderbufferEXT && glRenderbufferStorageEXT, return)
 
-    // TODO: share depth buffers of same size       相同大小的份额深度缓冲
-    glGenFramebuffersEXT(1, &m_fbo);
+            // TODO: share depth buffers of same size       相同大小的份额深度缓冲
+            glGenFramebuffersEXT(1, &m_fbo);
     //glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
     glGenRenderbuffersEXT(1, &m_depthBuffer);
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_depthBuffer);
@@ -313,9 +372,9 @@ GLFrameBufferObject::GLFrameBufferObject(int width, int height)
 GLFrameBufferObject::~GLFrameBufferObject()
 {
     GLBUFFERS_ASSERT_OPENGL("GLFrameBufferObject::~GLFrameBufferObject",
-        glDeleteFramebuffersEXT && glDeleteRenderbuffersEXT, return)
+                            glDeleteFramebuffersEXT && glDeleteRenderbuffersEXT, return)
 
-    glDeleteFramebuffersEXT(1, &m_fbo);
+            glDeleteFramebuffersEXT(1, &m_fbo);
     glDeleteRenderbuffersEXT(1, &m_depthBuffer);
 }
 
@@ -325,7 +384,7 @@ void GLFrameBufferObject::setAsRenderTarget(bool state)
 {
     GLBUFFERS_ASSERT_OPENGL("GLFrameBufferObject::setAsRenderTarget", glBindFramebufferEXT, return)
 
-    if (state) {
+            if (state) {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
         glViewport(0, 0, m_width, m_height);
@@ -341,7 +400,7 @@ bool GLFrameBufferObject::isComplete()
 {
     GLBUFFERS_ASSERT_OPENGL("GLFrameBufferObject::isComplete", glCheckFramebufferStatusEXT, return false)
 
-    return GL_FRAMEBUFFER_COMPLETE_EXT == glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+            return GL_FRAMEBUFFER_COMPLETE_EXT == glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 }
 
 //============================================================================//
@@ -357,11 +416,11 @@ GLRenderTargetCube::GLRenderTargetCube(int size)
 void GLRenderTargetCube::begin(int face)
 {
     GLBUFFERS_ASSERT_OPENGL("GLRenderTargetCube::begin",
-        glFramebufferTexture2DEXT && glFramebufferRenderbufferEXT, return)
+                            glFramebufferTexture2DEXT && glFramebufferRenderbufferEXT, return)
 
-    m_fbo.setAsRenderTarget(true);
+            m_fbo.setAsRenderTarget(true);
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-        GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, m_texture, 0);
+                              GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, m_texture, 0);
     glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_fbo.m_depthBuffer);
 }
 
@@ -404,12 +463,14 @@ void GLRenderTargetCube::getViewMatrix(QMatrix4x4& mat, int face)
 void GLRenderTargetCube::getProjectionMatrix(QMatrix4x4& mat, float nearZ, float farZ)
 {
     static const QMatrix4x4 reference(
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, -1.0f, 0.0f);
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, -1.0f, 0.0f);
 
     mat = reference;
     mat(2, 2) = (nearZ+farZ)/(nearZ-farZ);
     mat(2, 3) = 2.0f*nearZ*farZ/(nearZ-farZ);
 }
+
+

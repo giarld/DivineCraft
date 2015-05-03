@@ -7,7 +7,7 @@
 //
 //================================================//
 GameScene::GameScene(int width, int height)
-    :maxRenderLen(5)
+    :maxRenderLen(10)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
@@ -142,15 +142,20 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
 
 void GameScene::setStates()
 {
+//    glShadeModel(GL_SMOOTH);
     glClearColor(0.0,0.65,1.0,0.5);
-
+    glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);                //启用深度测试
+    glDepthFunc(GL_LEQUAL);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
     glEnable(GL_CULL_FACE);                     //正面消隐
     glEnable(GL_LIGHTING);                          //光照
     //    glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
+//    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     //        glDepthRange(0.0f,1.0f);
     //        glClearDepth(1.0f);
     //            glDepthFunc(GL_LEQUAL);
@@ -181,9 +186,9 @@ void GameScene::setStates()
 
     setLights();
 
-//    float materialSpecular[]={0.5f,0.5f,0.5f,1.0f};
-//    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,materialSpecular);           //设置有质感的光照效果
-//    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
+    float materialSpecular[]={0.5f,0.5f,0.5f,1.0f};
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,materialSpecular);           //设置有质感的光照效果
+    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
 }
 
 void GameScene::setLights()

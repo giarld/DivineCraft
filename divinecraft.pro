@@ -20,6 +20,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = divinecraft
 TEMPLATE = app
 
+# LIBS += -lglut -lGLU
 
 SOURCES += main.cpp\
         dcview.cpp \

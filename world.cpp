@@ -266,8 +266,13 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
         }
     }
     newChunk->addBlock(new Block(oPos+QVector3D(8,3,8),getBlockIndex(10)),false);
-    newChunk->addBlock(new Block(oPos+QVector3D(5,3,5),getBlockIndex(33)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(5,3,5),getBlockIndex(34)),false);
     newChunk->addBlock(new Block(oPos+QVector3D(11,3,11),getBlockIndex(17)),false);
+
+    for(i=18;i<34;i++){
+        newChunk->addBlock(new Block(oPos+QVector3D(2,3+i-18,8),getBlockIndex(i)),false);
+    }
+
     return newChunk;
 }
 

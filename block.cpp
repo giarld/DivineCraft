@@ -70,6 +70,7 @@ float texSwing[4][2]={
     {0.0f,0.0f},{0.0f,1.0f},{1.0f,1.0f},{1.0f,0.0f}
 };      //材质的延伸
 
+
 float texRevise[4][2]={
     {0.005f,0.005f},{0.005f,-0.005f},{-0.005f,-0.005f},{-0.005f,0.005f}
 };              //材质的修正
@@ -133,8 +134,8 @@ void Block::createBlock()
                 nf->vert[j].normal=Anormals[i];                                              //法线
                 float uw=mBlock->texWidth;
                 float vh=mBlock->texHeight;
-                nf->vert[j].texCoord=QVector2D(mBlock->tex[i].x()/uw+texSwing[j][0]/uw+texRevise[j][0]/uw,
-                        mBlock->tex[i].y()/vh+texSwing[j][1]/vh+texRevise[j][1]/vh);                     //纹理
+                nf->vert[j].texCoord=QVector2D(mBlock->tex[i].x()/uw+1.0/uw*texSwing[j][0]+texRevise[j][0]/uw,
+                        mBlock->tex[i].y()/vh+1.0/vh*texSwing[j][1]+texRevise[j][1]/vh);                     //纹理
             }
             face<<nf;
         }

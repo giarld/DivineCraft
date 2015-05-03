@@ -11,11 +11,11 @@
 #define SIZE_OF_MEMBER(cls, member) sizeof(static_cast<cls *>(0)->member)
 
 #define GLBUFFERS_ASSERT_OPENGL(prefix, assertion, returnStatement)                         \
-if (m_failed || !(assertion)) {                                                             \
+    if (m_failed || !(assertion)) {                                                             \
     if (!m_failed) qCritical(prefix ": The necessary OpenGL functions are not available."); \
     m_failed = true;                                                                        \
     returnStatement;                                                                        \
-}
+    }
 
 void qgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
@@ -61,6 +61,15 @@ public:
     GLTexture2D(int width, int height);
     explicit GLTexture2D(const QString& fileName, int width = 0, int height = 0);
     void load(int width, int height, QRgb *data);
+    virtual void bind();
+    virtual void unbind();
+};
+
+class GLTextureArray : public GLTexture
+{
+public:
+    GLTextureArray(int width, int height, int num);
+    void loadNext(const QString& fileName, int width = 0, int height = 0, int texNub=0);
     virtual void bind();
     virtual void unbind();
 };
@@ -161,8 +170,8 @@ public:
         , m_failed(false)
     {
         GLBUFFERS_ASSERT_OPENGL("GLVertexBuffer::GLVertexBuffer", glGenBuffers && glBindBuffer && glBufferData, return)
-         //创建缓存
-        glGenBuffers(1, &m_buffer);
+                //创建缓存
+                glGenBuffers(1, &m_buffer);
         glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
         glBufferData(GL_ARRAY_BUFFER, (m_length = length) * sizeof(T), data, mode);
     }
@@ -170,15 +179,15 @@ public:
     ~GLVertexBuffer()
     {
         GLBUFFERS_ASSERT_OPENGL("GLVertexBuffer::~GLVertexBuffer", glDeleteBuffers, return)
-        //释放缓存
-        glDeleteBuffers(1, &m_buffer);
+                //释放缓存
+                glDeleteBuffers(1, &m_buffer);
     }
 
     void bind()
     {
         GLBUFFERS_ASSERT_OPENGL("GLVertexBuffer::bind", glBindBuffer, return)
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
+                glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
         for (VertexDescription *desc = T::description; desc->field != VertexDescription::Null; ++desc) {
             switch (desc->field) {
             case VertexDescription::Position:
@@ -207,7 +216,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLVertexBuffer::unbind", glBindBuffer, return)
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
         for (VertexDescription *desc = T::description; desc->field != VertexDescription::Null; ++desc) {
             switch (desc->field) {
             case VertexDescription::Position:
@@ -234,7 +243,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLVertexBuffer::lock", glBindBuffer && glMapBuffer, return 0)
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
+                glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
         //glBufferData(GL_ARRAY_BUFFER, m_length, NULL, m_mode);
         GLvoid* buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
         m_failed = (buffer == 0);
@@ -246,7 +255,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLVertexBuffer::unlock", glBindBuffer && glUnmapBuffer, return)
 
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
+                glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
@@ -274,7 +283,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLIndexBuffer::GLIndexBuffer", glGenBuffers && glBindBuffer && glBufferData, return)
 
-        glGenBuffers(1, &m_buffer);
+                glGenBuffers(1, &m_buffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_length = length) * sizeof(T), data, mode);
     }
@@ -283,14 +292,14 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLIndexBuffer::~GLIndexBuffer", glDeleteBuffers, return)
 
-        glDeleteBuffers(1, &m_buffer);
+                glDeleteBuffers(1, &m_buffer);
     }
 
     void bind()
     {
         GLBUFFERS_ASSERT_OPENGL("GLIndexBuffer::bind", glBindBuffer, return)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
         //qDebug()<<"Ibind";
     }
 
@@ -298,7 +307,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLIndexBuffer::unbind", glBindBuffer, return)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         //qDebug()<<"Iunbind";
     }
 
@@ -308,7 +317,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLIndexBuffer::lock", glBindBuffer && glMapBuffer, return 0)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
         GLvoid* buffer = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_READ_WRITE);
         m_failed = (buffer == 0);
         return reinterpret_cast<T *>(buffer);
@@ -318,7 +327,7 @@ public:
     {
         GLBUFFERS_ASSERT_OPENGL("GLIndexBuffer::unlock", glBindBuffer && glUnmapBuffer, return)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer);
         glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
     }
 
