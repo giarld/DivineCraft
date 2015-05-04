@@ -2,33 +2,33 @@
 
 QVector3D posAOffsets[][4]={        //0类方块顶点偏移
     {//FRONT
-     QVector3D(0.0f,1.0f,0.0f),QVector3D(0.0f,0.0f,0.0f),
-     QVector3D(1.0f,0.0f,0.0f),QVector3D(1.0f,1.0f,0.0f)
+     QVector3D(0.0f,1.0f,1.0f),QVector3D(0.0f,0.0f,1.0f),
+     QVector3D(1.0f,0.0f,1.0f),QVector3D(1.0f,1.0f,1.0f)
     },
     {
         //BACK
-        QVector3D(1.0f,1.0f,-1.0f),QVector3D(1.0f,0.0f,-1.0f),
-        QVector3D(0.0f,0.0f,-1.0f),QVector3D(0.0f,1.0f,-1.0f)
-    },
-    {
-        //LEFT
-        QVector3D(0.0f,1.0f,-1.0f),QVector3D(0.0f,0.0f,-1.0f),
+        QVector3D(1.0f,1.0f,0.0f),QVector3D(1.0f,0.0f,0.0f),
         QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,1.0f,0.0f)
     },
     {
+        //LEFT
+        QVector3D(0.0f,1.0f,0.0f),QVector3D(0.0f,0.0f,0.0f),
+        QVector3D(0.0f,0.0f,1.0f),QVector3D(0.0f,1.0f,1.0f)
+    },
+    {
         //RIGHT
-        QVector3D(1.0f,1.0f,0.0f),QVector3D(1.0f,0.0f,0.0f),
-        QVector3D(1.0f,0.0f,-1.0f),QVector3D(1.0f,1.0f,-1.0f)
+        QVector3D(1.0f,1.0f,1.0f),QVector3D(1.0f,0.0f,1.0f),
+        QVector3D(1.0f,0.0f,0.0f),QVector3D(1.0f,1.0f,0.0f)
     },
     {
         //TOP
-        QVector3D(0.0f,1.0f,-1.0f),QVector3D(0.0f,1.0f,0.0f),
-        QVector3D(1.0f,1.0f,0.0f),QVector3D(1.0f,1.0f,-1.0f)
+        QVector3D(1.0f,1.0f,1.0f),QVector3D(1.0f,1.0f,0.0f),
+        QVector3D(0.0f,1.0f,0.0f),QVector3D(0.0f,1.0f,1.0f)
     },
     {
         //DOWN
-        QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,0.0f,-1.0f),
-        QVector3D(1.0f,0.0f,-1.0f),QVector3D(1.0f,0.0f,0.0f)
+        QVector3D(0.0f,0.0f,0.0f),QVector3D(1.0f,0.0f,0.0f),
+        QVector3D(1.0f,0.0f,1.0f),QVector3D(0.0f,0.0f,1.0f)
     }
 };
 
@@ -168,7 +168,7 @@ void Block::setPosition(const QVector3D &value)
 
 QVector3D Block::vicinityPosition(int site) const
 {
-    if(site<Block::FRONT || site>=face.length()){
+    if(site<Block::FRONT || site>=Block::MAX_FACE_SUM){
         return this->getPosition();
     }
     return this->getPosition()+vicinityOffset[site];

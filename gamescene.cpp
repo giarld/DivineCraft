@@ -48,7 +48,8 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
-    qgluPerspective(60.0,width/height,0.01f,1000.0f);
+
+    qgluPerspective(60.0,width/height,0.01f,3000.0f);
 
     glMatrixMode(GL_MODELVIEW);
 

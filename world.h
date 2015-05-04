@@ -20,6 +20,8 @@ public:
 
     bool addBlock(Block *block, bool update);                                //增加方块
     bool removeBlock(QVector3D pos,bool update);                     //移除方块
+    Block *getBlock(QVector3D bPos);                                                //返回制定坐标处的方块
+    bool collision(QVector3D bPos);                                                 //实体碰撞检测
 
     void draw();                                                                                        //绘制
 
@@ -42,6 +44,7 @@ public slots:
     void loadBlockIndex();                  //加载方块索引
     void autoSave();                                  //自动保存？每个一个特定时钟周期进行一次保存操作
     void updateDraw();                          //处理显示更新等待队列里的请求
+    void fulfilRemoveQueue();
     void changeCameraPosition(const QVector3D &cPos);
 
 private:

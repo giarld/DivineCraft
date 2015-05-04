@@ -29,3 +29,11 @@ int GMath::gAbs(int x)
     return x>=0?x:-x;
 }
 
+int GMath::f2int(float a)
+{
+    int b=int(a);
+    if(a<0.0)
+        return b-1;
+    return b;
+}
+

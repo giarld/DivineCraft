@@ -59,6 +59,26 @@ bool World::removeBlock(QVector3D pos, bool update)
     return tempc->removeBlock(pos,update);
 }
 
+Block *World::getBlock(QVector3D bPos)
+{
+    QVector3D dp=DisplayChunk::calcChunckPos(bPos);
+
+    ChunkMap *chunk=chunksMap.value(getKey(GMath::v3d2v2d(dp)));
+    if(chunk==NULL)                                                 //空区块返还空方块
+        return NULL;
+    return chunk->getBlock(bPos);                       //向下查找方块
+}
+
+bool World::collision(QVector3D bPos)
+{
+    Block *tb=getBlock(bPos);
+    if(tb==NULL)
+        return false;
+    if(tb->isAir())
+        return false;                   //空气没有碰撞箱
+    return tb->isCollide();
+}
+
 void World::draw()
 {
     foreach (ChunkMap *cm, chunksMap) {
@@ -73,14 +93,17 @@ void World::updateWorld()
     if(upLock)
         return;
     upLock=true;
+
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为其实区块。
 
     bfs2World(startCPos);
+    qWarning()<<"load ok";
 
     foreach (ChunkMap *cm, chunksMap) {
-        if(cm && !cm->inDraw()){                                        //有效区块切区块不在绘图状态
+        if(cm && !cm->inDraw()){                                        //有效区块且区块不在绘图状态
             if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+2){
+                cm->setShow(false);
                 QString key=getKey(cm->getChunkPosition());
                 if(cm->haveChange()){                                                               //未保存先保存
                     saveChunk(key);
@@ -182,8 +205,15 @@ void World::updateDraw()
     while(!updateQueue.isEmpty() && fTime.msecsTo(QTime::currentTime())<=5){                      //没次刷新最多只进行5ms
         QString key=updateQueue.front();
         updateQueue.pop_front();
-        chunksMap.value(key)->updateAll();
+        ChunkMap *ch=chunksMap.value(key);
+        if(ch)
+            ch->updateAll();
     }
+}
+
+void World::fulfilRemoveQueue()
+{
+
 }
 
 QString World::getKey(QVector2D chunkPos)
@@ -202,7 +232,7 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
     ChunkMap *newChunk;
     QString key=getKey(chunkPos);
 
-    qDebug()<<"Load:"<<key;
+    //    qDebug()<<"Load:"<<key;
 
     if(filePath==NULL || filePath=="")
         setfilePath();
@@ -243,7 +273,7 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
     }
     else{
         newChunk->saveAll();                            //因为是从文件读取的，将区块标为已保存，防止重复写入
-        qDebug()<<"load on file";
+        //        qDebug()<<"load on file";
     }
     //        newChunk->updateAll();
     file.close();
@@ -265,9 +295,10 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
             }
         }
     }
-    newChunk->addBlock(new Block(oPos+QVector3D(8,3,8),getBlockIndex(10)),false);
-    newChunk->addBlock(new Block(oPos+QVector3D(5,3,5),getBlockIndex(34)),false);
-    newChunk->addBlock(new Block(oPos+QVector3D(11,3,11),getBlockIndex(17)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(0,3,0),getBlockIndex(10)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(0,3,15),getBlockIndex(34)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(15,3,0),getBlockIndex(12)),false);
+    newChunk->addBlock(new Block(oPos+QVector3D(15,3,15),getBlockIndex(13)),false);
 
     for(i=18;i<34;i++){
         newChunk->addBlock(new Block(oPos+QVector3D(2,3+i-18,8),getBlockIndex(i)),false);
@@ -354,7 +385,7 @@ bool World::saveChunk(QString key)
     file.close();
 
     sc->saveAll();                                                                              //标识为已保存
-    qDebug()<<"save ok";
+    //    qDebug()<<"save ok";
     return true;
 }
 

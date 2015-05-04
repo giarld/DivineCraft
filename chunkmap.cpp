@@ -20,6 +20,7 @@ int g2Int(float x)                      //浮点数转整数的自定义规则
 ChunkMap::ChunkMap(QVector2D cPos)
     :chunkPosition(cPos)
     ,lastOPDC(NULL)
+    ,show(true)
 {
     displayChunk.clear();
     drawLock=false;
@@ -28,6 +29,7 @@ ChunkMap::ChunkMap(QVector2D cPos)
 ChunkMap::ChunkMap(int cx, int cz)
     :chunkPosition(QVector2D(cx,cz))
     ,lastOPDC(NULL)
+    ,show(true)
 {
     displayChunk.clear();
     drawLock=false;
@@ -86,13 +88,6 @@ Block *ChunkMap::getBlock(QVector3D bPos)
     return dc->getBlock(bPos);
 }
 
-bool ChunkMap::haveBlock(QVector3D bPos)
-{
-    Block *b=getBlock(bPos);
-    if(b==NULL || b->isAir()==true)                 //空气或没有则没有
-        return false;
-    return true;
-}
 
 DisplayChunk *ChunkMap::getDisplayChunk(int y)
 {
@@ -101,6 +96,8 @@ DisplayChunk *ChunkMap::getDisplayChunk(int y)
 
 void ChunkMap::draw(const QVector3D &pos, int maxLen)
 {
+    if(!isShow())
+        return ;
     if(drawLock)
         return ;
     drawLock=true;
@@ -179,6 +176,16 @@ QVector2D ChunkMap::getChunkPosition() const
     return chunkPosition;
 }
 
+void ChunkMap::setShow(bool s)
+{
+    this->show=s;
+}
+
+bool ChunkMap::isShow()
+{
+    return show;
+}
+
 //void ChunkMap::setChunkPosition(const QVector2D &value)
 //{
 //    chunkPosition = value;
@@ -190,7 +197,6 @@ QVector2D ChunkMap::getChunkPosition() const
 DisplayChunk::DisplayChunk()
     :dcPosition(QVector3D(0.0,-1.0,0.0))
     ,blockCount(0)
-    ,show(true)
     ,displayListID(GLuint(0))
 {
     blocks.clear();
@@ -200,7 +206,6 @@ DisplayChunk::DisplayChunk()
 DisplayChunk::DisplayChunk(int cx, int cy, int cz)
     :dcPosition(QVector3D(cx,cy,cz))
     ,blockCount(0)
-    ,show(true)
     ,displayListID(GLuint(0))
 {
     blocks.clear();
@@ -210,7 +215,6 @@ DisplayChunk::DisplayChunk(int cx, int cy, int cz)
 DisplayChunk::DisplayChunk(QVector3D dcPos)
     :dcPosition(dcPos)
     ,blockCount(0)
-    ,show(true)
     ,displayListID(GLuint(0))
 {
     blocks.clear();
@@ -240,7 +244,6 @@ void DisplayChunk::resetDisplayChunk(QVector3D dcPos)
     }
     blocks.clear();
     blockCount=0;
-    setShow(true);
     deleteDisplayList();
 }
 
@@ -308,7 +311,7 @@ Block *DisplayChunk::getBlock(QVector3D bPos)
 
 void DisplayChunk::draw()
 {
-    if(displayListID!=0 && isOk() && isShow())
+    if(displayListID!=0 && isOk())
         glCallList(displayListID);
 }
 GLuint DisplayChunk::getDisplayListID() const
@@ -319,16 +322,6 @@ GLuint DisplayChunk::getDisplayListID() const
 void DisplayChunk::setDisplayListID(const GLuint &value)
 {
     displayListID = value;
-}
-
-bool DisplayChunk::isShow()
-{
-    return show;
-}
-
-void DisplayChunk::setShow(bool s)
-{
-    this->show=s;
 }
 
 QVector3D DisplayChunk::blockPos2dcPos(QVector3D bPos)

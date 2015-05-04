@@ -40,9 +40,6 @@ public:
     GLuint getDisplayListID() const;
     void setDisplayListID(const GLuint &value);
 
-    bool isShow();
-    void setShow(bool s);
-
     static QVector3D blockPos2dcPos(QVector3D bPos);                //计算块内坐标(0-15)
     static QVector3D calcChunckPos(QVector3D bPos);                     //计算方块所属显示区块坐标
     static QVector3D calcChunkOriginPos(QVector3D cPos);            //计算区块的原点方块的坐标(cPos是显示区块坐标)
@@ -63,7 +60,6 @@ private:
     QVector3D dcPosition;                     //显示区块坐标（x16=首区块坐标）
     QMap<int,Block*> blocks;               //方块列表16*16*16，key=0 to 4095 ( key=(16*16)*y+16*z+x. (0<=x,y,z<16) ; x,y,z=Block.(x,y,z)/16)
     int blockCount;                                 //方块计数器
-    bool show;                                           //是否显示
     bool haveChange;                            //有修改
 //    bool hasBlock;                                                   //含非空气方块？
     GLuint displayListID;                                       //分配的显示列表编号
@@ -86,7 +82,6 @@ public:
     bool addBlock(Block *block, bool update);                                //增加方块
     bool removeBlock(QVector3D pos,bool update);                     //移除方块
     Block *getBlock(QVector3D bPos);                                                //返还指定坐标方块
-    bool haveBlock(QVector3D bPos);                                             //判定是否有指定坐标方块
 
     DisplayChunk *getDisplayChunk(int y);                     //返还指定 显示区块垂直高度的显示区块
 
@@ -102,6 +97,9 @@ public:
     QVector2D getChunkPosition() const;
 //    void setChunkPosition(const QVector2D &value);
 
+    void setShow(bool s);
+    bool isShow();
+
 private:
     bool createDisplayChunk(QVector3D dcPos);                                                     //创建一个显示区块
 
@@ -109,7 +107,7 @@ private:
     QVector2D chunkPosition;                                                    //区块坐标，世界中的区块是二维分布的.
     QMap<int,DisplayChunk*> displayChunk;                                       //16个对等的显示区块，每一个显示区块可能为空
     DisplayChunk *lastOPDC;                                                                   //上一个被操作显示区块
-
+    bool show;
     bool drawLock;                                                                              //绘制锁，识别是否在绘制的锁
 };
 

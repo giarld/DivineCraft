@@ -3,7 +3,6 @@
 #include <string.h>
 #include "gmath.h"
 
-
 Camera::Camera(Camera::CameraMode mode, QObject *parent)
     :QObject(parent)
     ,mode(mode)
@@ -213,7 +212,13 @@ void Camera::cMove()
         }
     }
 
+    //!!碰撞检测
 
+    float x=mPosition.x();
+    float y=mPosition.y();
+    float z=mPosition.z();
+
+//===================================================
     strafe.normalize();                                             //方向矢量单位化
     mPosition+=(strafe*timeC*moveSpeed);
     if(mPosition.y()<=0.0){
