@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #ifndef DCVIEW_H
 #define DCVIEW_H
 #include <QtWidgets>

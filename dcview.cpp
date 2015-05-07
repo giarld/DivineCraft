@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #include "dcview.h"
 #include <QApplication>
 

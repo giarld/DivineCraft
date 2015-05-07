@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #ifndef GMATH_H
 #define GMATH_H
 

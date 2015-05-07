@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #include "world.h"
 #include <QDataStream>
 #include <QTextStream>

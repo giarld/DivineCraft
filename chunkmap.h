@@ -1,6 +1,7 @@
 /*
  * 区块网络
  * 区块和显示区块在主程序中的分配是有限的。
+ * Author:Gxin
  */
 #ifndef CHUNKMAP_H
 #define CHUNKMAP_H

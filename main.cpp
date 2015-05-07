@@ -1,3 +1,7 @@
+/*
+ * Author:Gxin
+ * main
+ */
 #include "dcview.h"
 #include "glkernel/glextensions.h"
 #include <QApplication>

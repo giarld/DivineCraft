@@ -1,5 +1,6 @@
 /*
  * 绘图网络，自建的VBO网络
+ * Author:Gxin
  */
 #ifndef GLTRIANGLEMESH_H
 #define GLTRIANGLEMESH_H

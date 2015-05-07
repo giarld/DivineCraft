@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #include "camera.h"
 #include <math.h>
 #include <string.h>

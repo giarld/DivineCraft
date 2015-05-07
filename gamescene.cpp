@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #include "gamescene.h"
 #include <QTextStream>
 #include <QMessageBox>

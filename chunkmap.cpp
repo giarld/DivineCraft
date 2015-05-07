@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #include "chunkmap.h"
 #include "block.h"
 #include "glkernel/chunkmesh.h"

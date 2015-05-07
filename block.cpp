@@ -1,3 +1,6 @@
+/*
+ * Author:Gxin
+ */
 #include "block.h"
 
 QVector3D posAOffsets[][4]={        //0类方块顶点偏移
