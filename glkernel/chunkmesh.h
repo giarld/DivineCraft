@@ -37,8 +37,8 @@ private:
 class LineMesh:public GLLineMesh<P3T2N3Vertex, unsigned short>
 {
 public:
-    explicit LineMesh(int nPoint);
-    void addPoint(const QVector3D &aPoint,const QVector3D &bPoint);
+    explicit LineMesh(int nLine);
+    void addLine(const QVector3D &aPoint,const QVector3D &bPoint);
 
 private:
     int vidx,iidx;

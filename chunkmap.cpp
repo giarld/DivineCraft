@@ -3,16 +3,6 @@
 #include "glkernel/chunkmesh.h"
 #include "gmath.h"
 
-int g2Int(float x)                      //浮点数转整数的自定义规则
-{
-    if(float(int(x))==x)
-        return x;
-    if(x>=0.0)
-        return int(x);
-    else{
-        return int(x)-1;
-    }
-}
 
 ///========================================//
 ///
@@ -341,9 +331,9 @@ QVector3D DisplayChunk::calcChunckPos(QVector3D bPos)
     int x=(int)bPos.x();
     int y=(int)bPos.y();
     int z=(int)bPos.z();
-    int xx=g2Int(x/16.0);
-    int yy=g2Int(y/16.0);
-    int zz=g2Int(z/16.0);
+    int xx=GMath::g2Int(x/16.0);
+    int yy=GMath::g2Int(y/16.0);
+    int zz=GMath::g2Int(z/16.0);
     QVector3D pos=QVector3D(xx,yy,zz);
     return pos;
 }

@@ -42,6 +42,8 @@ public:
 
     QVector3D getEyePosition() const;                                       //返还眼睛的坐标
 
+    QVector3D getKeyPosition() const;
+
     QPointF rotation() const;                                                         //视角向量的设置与返还
     void setRotation(const QPointF &rotation);
 
@@ -61,6 +63,8 @@ signals:
 
 public slots:
     void cMove();                                               //对camera进行移动操作的槽，与timer的timeout信号连接
+    void addBlock();
+    void removeBlock();
 
 private:
     void reMotionVector();                                  //计算位移分量
@@ -84,6 +88,9 @@ private:
     QTime lastTime;
     float G;                                                    //重力系数G
     float MaxSpeed;                                     //速度上限
+
+    QVector3D preBlock;                         //即将放置方块的位置
+    QVector3D keyBlock;                         //被选定的实体方块
 
     World *myWorld;
 };

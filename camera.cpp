@@ -3,6 +3,7 @@
 #include <string.h>
 #include "gmath.h"
 
+
 Camera::Camera(Camera::CameraMode mode, QObject *parent)
     :QObject(parent)
     ,mode(mode)
@@ -124,7 +125,7 @@ QVector3D Camera::getSightVector() const
     float dy=sin(GMath::radians(y));
     float dx=cos(GMath::radians(x-90.0))*m;
     float dz=sin(GMath::radians(x-90.0))*m;
-    QVector3D vec=QVector3D(dx,dy,dz);
+    QVector3D vec=QVector3D(dx,-dy,dz);
     return vec.normalized();
 }
 float Camera::getMouseLevel() const
@@ -157,6 +158,11 @@ QVector3D Camera::getEyePosition() const
     eyeP.setY(eyeP.y()+1.650);
     return eyeP;
 }
+
+QVector3D Camera::getKeyPosition() const
+{
+    return keyBlock;
+}
 QPointF Camera::rotation() const
 {
     return mRotation;
@@ -179,7 +185,7 @@ void Camera::cMove()
     if(timeC<20)
         timeC=20;
 
-    QVector3D strafe;
+    QVector3D strafe(0,0,0);
     if(keyMap[0]){
         strafe+=udMotion;
     }
@@ -199,7 +205,7 @@ void Camera::cMove()
         else if(gameMode==SURVIVAL){
             if(ySpeed==0.0){
                 ySpeed=jumSpeed;
-                mPosition.setY(mPosition.y()+0.0001);
+                mPosition.setY(mPosition.y()+0.1);
             }
         }
     }
@@ -214,30 +220,130 @@ void Camera::cMove()
 
     //!!碰撞检测
 
+    strafe.normalize();                                             //方向矢量单位化
+
+    float m=0.25;                                       //体胖
+    float h=1.8;                                        //身高
+
     float x=mPosition.x();
     float y=mPosition.y();
     float z=mPosition.z();
 
-//===================================================
-    strafe.normalize();                                             //方向矢量单位化
-    mPosition+=(strafe*timeC*moveSpeed);
-    if(mPosition.y()<=0.0){
-        ySpeed=0;
-        mPosition.setY(0.0);
-    }
-    if(gameMode==SURVIVAL && mPosition.y()>0){
+    QVector3D mBPos=GMath::v3toInt(mPosition);         //当前所在的方块坐标
+    QVector3D newPosition=mPosition+(strafe*timeC*moveSpeed);               //新的坐标
+
+    if(gameMode==GOD)
+        ySpeed=0.0;
+    else if(gameMode==SURVIVAL){         //跳跃动作
         if(ySpeed>-MaxSpeed){
             ySpeed-=(G*timeC);
         }
-        mPosition.setY(mPosition.y()+ySpeed*timeC);
+        newPosition.setY(y+ySpeed*timeC);
     }
-    else if(gameMode==GOD)
-        ySpeed=0.0;
-//    qDebug()<<mPosition.y();
 
-    emit cameraMove(mPosition);                                                     //发出移动了的信号
+
+
+    //x方向碰撞检测
+    for(float i=0;i<h;i+=0.2){
+        if(myWorld->collision(QVector3D(newPosition.x()+(strafe.x()>=0?m:-m),y+i,newPosition.z()))){
+            if(strafe.x()<0){
+                newPosition.setX(mBPos.x()+m);
+            }
+            else{
+                newPosition.setX(mBPos.x()+1-m);
+            }
+            break;
+        }
+    }
+
+    //z方向碰撞检测
+    for(float i=0;i<h;i+=0.2){
+        if(myWorld->collision(QVector3D(newPosition.x(),y+i,newPosition.z()+(strafe.z()>=0?m:-m)))){
+            if(strafe.z()<0){
+                newPosition.setZ(mBPos.z()+m);
+            }
+            else{
+                newPosition.setZ(mBPos.z()+1-m);
+            }
+            break;
+        }
+    }
+
+    //y方向的检测
+    if(myWorld->collision(QVector3D(x,newPosition.y(),z))){             //脚踩在方块上
+        newPosition.setY(mBPos.y());
+        ySpeed=0.0;
+    }
+
+    if(myWorld->collision(QVector3D(x,newPosition.y()+h,z))){                   //头顶住方块，回弹
+        newPosition.setY(float(GMath::g2Int(newPosition.y()+h))-h);
+        ySpeed=-G;
+    }
+
+    mPosition=newPosition;
+
+    //可放置实体检测
+
+    int handLen=8;      //手长
+    int mm=8;               //分片精度
+    QVector3D keyB;
+    QVector3D preB=QVector3D(0,-1,0);
+    QVector3D temp=getEyePosition();
+    float tx=temp.x();
+    float ty=temp.y();
+    float tz=temp.z();
+    QVector3D sightVector=getSightVector();
+
+    preBlock=keyBlock=preB;                         //初始化放置位置和选定实体
+
+    for(int i=0;i<handLen*mm;i++){
+        keyB=GMath::v3toInt(QVector3D(tx,ty,tz));
+        Block *tb=myWorld->getBlock(keyB);
+        if(keyB!=preB && tb!=NULL && !tb->isAir()){      //找到一个实体方块
+            keyBlock=keyB;
+            preBlock=preB;
+            break;
+        }
+        preB=keyB;
+        tx=tx+sightVector.x()/mm*1.0;
+        ty=ty+sightVector.y()/mm*1.0;
+        tz=tz+sightVector.z()/mm*1.0;
+    }
+
+//    qDebug()<<getEyePosition()<<keyBlock<<preBlock;
+//        qDebug()<<mPosition.y();
+
+    emit cameraMove(mPosition);                     //发出移动了的信号
 
     lastTime=nowTime;
+}
+
+void Camera::addBlock()
+{
+    if(pause){
+        return ;
+    }
+    if(preBlock.y()<0)              //preBlock没有指定位置或人站在该位置上，则忽略
+        return ;
+
+    float h=1.8;                                        //身高
+    for(float i=0;i<h;i+=0.2){
+        QVector3D temp=GMath::v3toInt(QVector3D(mPosition.x(),mPosition.y()+i,mPosition.z()));
+        if(preBlock==temp)
+            return ;
+    }
+
+    myWorld->addBlock(new Block(preBlock,myWorld->getBlockIndex(3)),true);
+}
+
+void Camera::removeBlock()
+{
+    if(pause){
+        return ;
+    }
+    if(keyBlock.y()<0)              //keyBlock没有指定位置或人站在该位置上，则忽略
+        return ;
+    myWorld->removeBlock(keyBlock,true);
 }
 
 void Camera::reMotionVector()
@@ -281,7 +387,7 @@ int Camera::getGameMode() const
 
 void Camera::setGameMode(const int &value)
 {
-        gameMode = value;
+    gameMode = value;
 }
 
 

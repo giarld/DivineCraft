@@ -68,13 +68,13 @@ void ChunkMesh::addFace(Face *face)
 }
 
 
-LineMesh::LineMesh(int nPoint)
-    :GLLineMesh<P3T2N3Vertex,unsigned short>(2*nPoint,2*nPoint)
+LineMesh::LineMesh(int nLine)
+    :GLLineMesh<P3T2N3Vertex,unsigned short>(2*nLine,2*nLine)
 {
     vidx=iidx=0;
 }
 
-void LineMesh::addPoint(const QVector3D &aPoint, const QVector3D &bPoint)
+void LineMesh::addLine(const QVector3D &aPoint, const QVector3D &bPoint)
 {
     P3T2N3Vertex *vp=m_vb.lock();
     unsigned short *ip=m_ib.lock();

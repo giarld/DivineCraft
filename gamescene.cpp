@@ -3,6 +3,23 @@
 #include <QMessageBox>
 #include "ctime"
 #include "gmath.h"
+
+QVector3D linePoints[][2]={
+    {QVector3D(-0.01,1.01,-0.01),QVector3D(-0.01,1.01,1.01)},
+    {QVector3D(1.01,1.01,-0.01),QVector3D(1.01,1.01,1.01)},
+    {QVector3D(-0.01,1.01,-0.01),QVector3D(1.01,1.01,-0.01)},
+    {QVector3D(-0.01,1.01,1.01),QVector3D(1.01,1.01,1.01)},
+
+    {QVector3D(-0.01,-0.01,-0.01),QVector3D(-0.01,-0.01,1.01)},
+    {QVector3D(1.01,-0.01,-0.01),QVector3D(1.01,-0.01,1.01)},
+    {QVector3D(-0.01,-0.01,-0.01),QVector3D(1.01,-0.01,-0.01)},
+    {QVector3D(-0.01,-0.01,1.01),QVector3D(1.01,-0.01,1.01)},
+
+    {QVector3D(-0.01,1.01,-0.01),QVector3D(-0.01,-0.01,-0.01)},
+    {QVector3D(-0.01,1.01,1.01),QVector3D(-0.01,-0.01,1.01)},
+    {QVector3D(1.01,1.01,-0.01),QVector3D(1.01,-0.01,-0.01)},
+    {QVector3D(1.01,1.01,1.01),QVector3D(1.01,-0.01,1.01)}
+};
 //================================================//
 //
 //================================================//
@@ -24,6 +41,7 @@ GameScene::GameScene(int width, int height)
 
 GameScene::~GameScene()
 {
+    world->autoSave();
     delete blockTexture;
     delete blockVertexShader;
     delete blockFragmentShader;
@@ -97,6 +115,14 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             camera->bind();
             startGame();
         }
+        else{
+            emit removeBlock();
+        }
+    }
+    else if(event->button()==Qt::RightButton){
+        if(inSence){
+            emit addBlock();
+        }
     }
 }
 
@@ -143,7 +169,7 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
 
 void GameScene::setStates()
 {
-//    glShadeModel(GL_SMOOTH);
+    //    glShadeModel(GL_SMOOTH);
     glClearColor(0.0,0.65,1.0,0.5);
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);                //启用深度测试
@@ -156,22 +182,22 @@ void GameScene::setStates()
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
-//    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    //    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     //        glDepthRange(0.0f,1.0f);
     //        glClearDepth(1.0f);
     //            glDepthFunc(GL_LEQUAL);
     //            glDepthMask(GL_FALSE);
     //反锯齿
-//    glEnable(GL_BLEND);
-//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//    glEnable(GL_POINT_SMOOTH);
-//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-//    glEnable(GL_LINE_SMOOTH);
-//    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-//    glEnable(GL_POLYGON_SMOOTH);
-//    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-//    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_DONT_CARE);
-//    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_FASTEST);
+    //    glEnable(GL_BLEND);
+    //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //    glEnable(GL_POINT_SMOOTH);
+    //    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    //    glEnable(GL_LINE_SMOOTH);
+    //    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    //    glEnable(GL_POLYGON_SMOOTH);
+    //    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    //    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_DONT_CARE);
+    //    glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_FASTEST);
 
     //png透明
     glEnable(GL_ALPHA_TEST);
@@ -218,10 +244,10 @@ void GameScene::defaultStates()
     glDisable(GL_ALPHA_TEST);
 
     //
-//    glDisable(GL_BLEND);
-//    glDisable(GL_POINT_SMOOTH);
-//    glDisable(GL_LINE_SMOOTH);
-//    glDisable(GL_POLYGON_SMOOTH);
+    //    glDisable(GL_BLEND);
+    //    glDisable(GL_POINT_SMOOTH);
+    //    glDisable(GL_LINE_SMOOTH);
+    //    glDisable(GL_POLYGON_SMOOTH);
     //
 
     glMatrixMode(GL_MODELVIEW);
@@ -243,7 +269,10 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
         blockTexture->bind();
     }
 
-    line->draw();
+    glLineWidth(2.0f);
+
+    line->draw();                           //画十字准心
+
     glLoadMatrixf(rview.constData());
     glMultMatrixf(view.constData());
     //    glRotatef(rot,1.0,1.0,1.0);
@@ -255,6 +284,16 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
     blockProgram->release();
 
+    LineMesh *lineRect=new LineMesh(12);
+
+    QVector3D keyPosition=camera->getKeyPosition();
+    if(keyPosition.y()>=0){
+
+        for(int i=0;i<12;i++){
+            lineRect->addLine(linePoints[i][0]+keyPosition,linePoints[i][1]+keyPosition);
+        }
+        lineRect->draw();
+    }
     if(glActiveTexture){
         glActiveTexture(GL_TEXTURE0);
         blockTexture->unbind();
@@ -299,6 +338,8 @@ void GameScene::initGame()
     connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
     connect(this,SIGNAL(updateWorld()),world,SLOT(forcedUpdateWorld()));
     connect(camera,SIGNAL(cameraMove(QVector3D)),world,SLOT(changeCameraPosition(QVector3D)));          //连接camera移动与世界相机位移的槽
+    connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()));
+    connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()));
     wThread->start();
     world->loadBlockIndex();
     world->setMaxRenderLen(maxRenderLen);
@@ -312,7 +353,7 @@ void GameScene::initGame()
 
     line=new LineMesh(2);
     float lineLen=0.0004;
-    line->addPoint(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
-    line->addPoint(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
+    line->addLine(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
+    line->addLine(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
 }
 

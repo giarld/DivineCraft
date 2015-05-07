@@ -43,6 +43,8 @@ protected:
 
 signals:
     void updateWorld();                                     //从场景要求更新世界的信号
+    void addBlock();
+    void removeBlock();
 
 private:
     void initGame();                                                                    //初始化游戏场景

@@ -44,7 +44,6 @@ public slots:
     void loadBlockIndex();                  //加载方块索引
     void autoSave();                                  //自动保存？每个一个特定时钟周期进行一次保存操作
     void updateDraw();                          //处理显示更新等待队列里的请求
-    void fulfilRemoveQueue();
     void changeCameraPosition(const QVector3D &cPos);
 
 private:

@@ -35,22 +35,22 @@ QVector3D posAOffsets[][4]={        //0类方块顶点偏移
 QVector3D posBOffsets[][4]={                //1类方块顶点偏移
     {//FRONT
      QVector3D(0.0f,1.0f,0.0f),QVector3D(0.0f,0.0f,0.0f),
-     QVector3D(1.0f,0.0f,-1.0f),QVector3D(1.0f,1.0f,-1.0f)
+     QVector3D(1.0f,0.0f,1.0f),QVector3D(1.0f,1.0f,1.0f)
     },
     {
         //BACK
-        QVector3D(1.0f,1.0f,-1.0f),QVector3D(1.0f,0.0f,-1.0f),
+        QVector3D(1.0f,1.0f,1.0f),QVector3D(1.0f,0.0f,1.0f),
         QVector3D(0.0f,0.0f,0.0f),QVector3D(0.0f,1.0f,0.0f)
     },
     {
         //LEFT
-        QVector3D(0.0f,1.0f,-1.0f),QVector3D(0.0f,0.0f,-1.0f),
+        QVector3D(0.0f,1.0f,1.0f),QVector3D(0.0f,0.0f,1.0f),
         QVector3D(1.0f,0.0f,0.0f),QVector3D(1.0f,1.0f,0.0f)
     },
     {
         //RIGHT
         QVector3D(1.0f,1.0f,0.0f),QVector3D(1.0f,0.0f,0.0f),
-        QVector3D(0.0f,0.0f,-1.0f),QVector3D(0.0f,1.0f,-1.0f)
+        QVector3D(0.0f,0.0f,1.0f),QVector3D(0.0f,1.0f,1.0f)
     },
 };
 
@@ -72,7 +72,7 @@ float texSwing[4][2]={
 
 
 float texRevise[4][2]={
-    {0.005f,0.005f},{0.005f,-0.005f},{-0.005f,-0.005f},{-0.005f,0.005f}
+    {0.008f,0.008f},{0.008f,-0.008f},{-0.008f,-0.008f},{-0.008f,0.008f}
 };              //材质的修正
 
 //向四周一个单位的偏移

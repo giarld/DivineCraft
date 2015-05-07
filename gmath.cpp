@@ -29,11 +29,18 @@ int GMath::gAbs(int x)
     return x>=0?x:-x;
 }
 
-int GMath::f2int(float a)
+int GMath::g2Int(float x)
 {
-    int b=int(a);
-    if(a<0.0)
-        return b-1;
-    return b;
+    if(float(int(x))==x)
+        return x;
+    if(x>=0.0)
+        return int(x);
+    else{
+        return int(x)-1;
+    }
 }
 
+QVector3D GMath::v3toInt(const QVector3D &vpos)
+{
+    return QVector3D(g2Int(vpos.x()),g2Int(vpos.y()),g2Int(vpos.z()));
+}
