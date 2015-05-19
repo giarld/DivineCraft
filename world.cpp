@@ -176,9 +176,16 @@ void World::loadBlockIndex()
                 int type=temp[i++].toInt();
                 if(id>=mBlockIndex.length()) continue;
                 BlockListNode *bl=mBlockIndex[id];
-                while(i<temp.length()){
+                int j=0;
+                int nc;
+                if(type==0)
+                    nc=6;
+                else if(type==1)
+                    nc=4;
+                while(i<temp.length() && j<nc){
                     int u=temp[i++].toInt();
                     bl->tex<<u;
+                    j++;
                 }
             }
             index++;

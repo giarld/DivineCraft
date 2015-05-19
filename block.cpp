@@ -73,11 +73,6 @@ float texSwing[4][2]={
     {0.0f,0.0f},{0.0f,1.0f},{1.0f,1.0f},{1.0f,0.0f}
 };      //材质的延伸
 
-
-float texRevise[4][2]={
-    {0.008f,0.008f},{0.008f,-0.008f},{-0.008f,-0.008f},{-0.008f,0.008f}
-};              //材质的修正
-
 //向四周一个单位的偏移
 QVector3D vicinityOffset[]={
     QVector3D(0,0,1),QVector3D(0,0,-1),
@@ -135,10 +130,6 @@ void Block::createBlock()
             for(int j=0;j<4;j++){
                 nf->vert[j].position=posAOffsets[i][j]+position;                 //实际坐标
                 nf->vert[j].normal=Anormals[i];                                              //法线
-//                float uw=mBlock->texWidth;
-//                float vh=mBlock->texHeight;
-//                nf->vert[j].texCoord=QVector2D(mBlock->tex[i].x()/uw+1.0/uw*texSwing[j][0]+texRevise[j][0]/uw,
-//                        mBlock->tex[i].y()/vh+1.0/vh*texSwing[j][1]+texRevise[j][1]/vh);
                 nf->vert[j].texCoord=QVector3D(texSwing[j][0],texSwing[j][1],1.0f*mBlock->tex[i]/mBlock->texLength);   //纹理
             }
             face<<nf;
@@ -151,10 +142,6 @@ void Block::createBlock()
             for(int j=0;j<4;j++){
                 nf->vert[j].position=posBOffsets[i][j]+position;                 //实际坐标
                 nf->vert[j].normal=Bnormals[i];                                              //法线
-//                float uw=mBlock->texWidth;
-//                float vh=mBlock->texHeight;
-//                nf->vert[j].texCoord=QVector2D(mBlock->tex[i].x()/uw+(1.0/uw)*texSwing[j][0]+texRevise[j][0],
-//                        mBlock->tex[i].y()/vh+(1.0/vh)*texSwing[j][1]+texRevise[j][1]);                     //纹理
                 nf->vert[j].texCoord=QVector3D(texSwing[j][0],texSwing[j][1],1.0f*mBlock->tex[i]/mBlock->texLength);   //纹理
             }
             face<<nf;

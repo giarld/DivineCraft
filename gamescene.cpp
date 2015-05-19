@@ -415,7 +415,7 @@ void GameScene::initGame()
     camera->loadPosRot();                                   //加载位置视角信息
     ///////////////////////////
 
-    loadTexture();
+    loadTexture();                      //加载纹理
 
     firstLoad();            //强制首次加载
 
@@ -440,7 +440,7 @@ void GameScene::loadTexture()
         files = QDir(":/res/divinecraft/textures/blocks/").entryInfoList(filter, QDir::Files | QDir::Readable);
 
         int tc=files.length();
-        qWarning()<<tc;
+//        qWarning()<<tc;
         world->setBlockListLength(tc);
         blockTexture=new GLTexture3D(tw,th,tc+1);               //为了使材质列表的最后一张材质能够使用，需要再增加一张多余的材质来垫底
         QRgb *data=new QRgb[tw*th*tc];
