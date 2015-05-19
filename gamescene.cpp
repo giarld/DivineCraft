@@ -27,7 +27,7 @@ QVector3D linePoints[][2]={
 //
 //================================================//
 GameScene::GameScene(int width, int height)
-    :maxRenderLen(5)
+    :maxRenderLen(20)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
@@ -354,13 +354,6 @@ void GameScene::saveOption()
 
 void GameScene::initGame()
 {
-    camera=new Camera(QVector3D(8,4,8),QPointF(180.0,0.0));
-    //    camera->setMouseLevel(0.5);
-//    camera->setGameMode(Camera::GOD);
-
-//    blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
-
-
     blockVertexShader=new QGLShader(QGLShader::Vertex);
     blockVertexShader->compileSourceFile(QLatin1String(":/res/divinecraft/shader/block.vsh"));
     blockFragmentShader=new QGLShader(QGLShader::Fragment);
@@ -399,6 +392,10 @@ void GameScene::initGame()
         exit(1);
     }
     ////////////////////////////
+    camera=new Camera(QVector3D(0,4,0),QPointF(180.0,0.0));
+    //    camera->setMouseLevel(0.5);
+    //    camera->setGameMode(Camera::GOD);
+
     world=new World;
     wThread=new QThread;
     world->moveToThread(wThread);
@@ -408,17 +405,20 @@ void GameScene::initGame()
     connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()));
     connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()));
     wThread->start();
-    world->loadBlockIndex();
+
     world->setMaxRenderLen(maxRenderLen);
     world->setWorldName("Test");
     camera->setWorld(world);                                //传递世界指针
-    camera->loadPosRot();                                   //加载位置视角信息
     ///////////////////////////
+    //这里是一个规定的加载顺序，后步骤会依赖于前步骤
+    world->loadBlockIndex();            //加载方块属性列表
 
     loadTexture();                      //加载纹理
 
+    camera->loadPosRot();                                   //加载位置视角信息
     firstLoad();            //强制首次加载
 
+    //---------------------------
     line=new LineMesh(2);           //十字准心
     float lineLen=0.0004;
     line->addLine(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
@@ -427,35 +427,41 @@ void GameScene::initGame()
     lineQua=new LineMesh(12);           //被选方块的包围线框
 }
 
-void GameScene::loadTexture()
+void GameScene:: loadTexture()
 {
-        BlockListNode *bn=world->getBlockIndex(0);
-        int tw=bn->texWidth;
-        int th=bn->texHeight;
+    BlockListNode *bn=world->getBlockIndex(0);
+    int tw=bn->texWidth;
+    int th=bn->texHeight;
 
-        QStringList filter;
-        QList<QFileInfo> files;
+    QStringList filter;
+    QList<QFileInfo> files;
+    QMap<QString,int>texMap;
 
-        filter = QStringList("*.png");                  //索引材质的数量
-        files = QDir(":/res/divinecraft/textures/blocks/").entryInfoList(filter, QDir::Files | QDir::Readable);
+    filter = QStringList("*.png");                  //索引材质的数量
+    files = QDir(":/res/divinecraft/textures/blocks/").entryInfoList(filter, QDir::Files | QDir::Readable);
 
-        int tc=files.length();
-//        qWarning()<<tc;
-        world->setBlockListLength(tc);
-        blockTexture=new GLTexture3D(tw,th,tc+1);               //为了使材质列表的最后一张材质能够使用，需要再增加一张多余的材质来垫底
-        QRgb *data=new QRgb[tw*th*tc];
+    int tc=files.length();
+    //        qWarning()<<tc;
+    world->setBlockListLength(tc);                                  //更新方块列表的材质数量记录
+    blockTexture=new GLTexture3D(tw,th,tc+1);               //为了使材质列表的最后一张材质能够使用，需要再增加一张多余的材质来垫底
+    QRgb *data=new QRgb[tw*th*tc];
     //    memset(data,0,tw*th*tc*sizeof(QRgb));
-        QRgb *p=data;
-        for(int k=0;k<=tc;k++){
-            QImage img(tr(":/res/divinecraft/textures/blocks/b%1.png").arg(k==tc?0:k));
-            for(int i=0;i<tw;i++){
-                for(int j=0;j<th;j++){
-                    *p=img.pixel(j,i);
-                    p++;
-                }
+    QRgb *p=data;
+    for(int k=0;k<=tc;k++){
+        QImage img(files[k==tc?0:k].absoluteFilePath());
+        if(k<tc){
+            texMap.insert(files[k].baseName(),k);
+        }
+        for(int i=0;i<tw;i++){
+            for(int j=0;j<th;j++){
+                *p=img.pixel(j,i);
+                p++;
             }
         }
-        blockTexture->load(tw,th,tc+1,data);
-        delete [] data;
+    }
+    blockTexture->load(tw,th,tc+1,data);
+    delete [] data;
+
+    world->calcBlockListNodeTexId(texMap);
 }
 

@@ -183,8 +183,8 @@ void World::loadBlockIndex()
                 else if(type==1)
                     nc=4;
                 while(i<temp.length() && j<nc){
-                    int u=temp[i++].toInt();
-                    bl->tex<<u;
+                    QString u=temp[i++];
+                    bl->texName<<u;
                     j++;
                 }
             }
@@ -199,8 +199,27 @@ void World::loadBlockIndex()
 void World::setBlockListLength(int len)
 {
     foreach (BlockListNode *node, mBlockIndex) {
-        node->texLength=len;
+        if(node)
+            node->texLength=len;
     }
+}
+
+void World::calcBlockListNodeTexId(const QMap<QString, int> &texMap)
+{
+    foreach (BlockListNode *node, mBlockIndex) {
+        if(node){
+            node->tex.clear();
+            foreach (QString name, node->texName) {
+                node->tex.append(texMap.value(name));
+            }
+        }
+    }
+}
+
+void World::setFirstCameraPosition(const QVector3D &cPos)
+{
+    cameraPosition = cPos;
+    lastCameraChunk=GMath::v3d2v2d(DisplayChunk::calcChunckPos(cameraPosition));
 }
 
 void World::autoSave()

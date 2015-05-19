@@ -18,6 +18,7 @@ struct BlockListNode{
     bool trans;                                         //是否透明
     QString name;                                //方块名称
     QVector<int> tex;             //材质id
+    QVector<QString> texName;           //材质名称单元
     float texWidth,texHeight;      //纹理的逻辑宽和高(texture_index.list第一行)
     int texLength;                         //纹理的数量
 };

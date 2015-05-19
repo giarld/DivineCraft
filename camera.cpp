@@ -170,7 +170,8 @@ void Camera::loadPosRot()
         }
         setPosition(pos);
         setRotation(rot);
-        myWorld->changeCameraPosition(position());
+        if(myWorld)                                 //进行初始位置设定
+            myWorld->setFirstCameraPosition(mPosition);
     }
     else{
         savePosRot();
