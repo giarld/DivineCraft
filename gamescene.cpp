@@ -27,7 +27,7 @@ QVector3D linePoints[][2]={
 //
 //================================================//
 GameScene::GameScene(int width, int height)
-    :maxRenderLen(20)
+    :maxRenderLen(10)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
@@ -462,6 +462,6 @@ void GameScene:: loadTexture()
     blockTexture->load(tw,th,tc+1,data);
     delete [] data;
 
-    world->calcBlockListNodeTexId(texMap);
+    world->calcBlockListNodeTexId(texMap);          //进行名称->ID映射
 }
 

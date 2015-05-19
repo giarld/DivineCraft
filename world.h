@@ -61,7 +61,7 @@ private:
     QString getKey(int x,int y);
     ChunkMap *loadChunk(QVector2D chunkPos);                                         //读取并加载区块
     ChunkMap *createChunk(QVector2D chunkPos);                                                     //当区块不存在于文件中时创建区块(当前只是简单的超平坦世界)
-    void bfs2World(const QVector2D &start);                                                                                            //对当前的world可视化区域进行广搜以完成区块的加载
+    void bfs2World(const QVector2D &start);                                                                    //对当前的world可视化区域进行广搜以完成区块的加载
     bool saveChunk(QString key);                                                              //保存区块修改
     void setfilePath();                                                                                                        //设置文件路径
 

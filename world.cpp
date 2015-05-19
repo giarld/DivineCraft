@@ -8,12 +8,14 @@
 #include <QDir>
 #include <QFile>
 #include "gmath.h"
+#include <ctime>
 
 World::World(QObject *parent) : QObject(parent)
 {
     setMaxRenderLen(16);
     this->lastCameraChunk=QVector2D(0,0);
     upLock=false;
+    qsrand(time(0));            //初始化随机种子
 }
 
 World::~World()
@@ -191,8 +193,8 @@ void World::loadBlockIndex()
             index++;
         }
     }
-//    foreach (BlockListNode *a, mBlockIndex) {
-//        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
+    //    foreach (BlockListNode *a, mBlockIndex) {
+    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
     //    }
 }
 
@@ -321,17 +323,21 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
             }
         }
     }
-    newChunk->addBlock(new Block(oPos+QVector3D(0,3,0),getBlockIndex(10)),false);
-    newChunk->addBlock(new Block(oPos+QVector3D(15,3,0),getBlockIndex(12)),false);
-    newChunk->addBlock(new Block(oPos+QVector3D(15,3,15),getBlockIndex(13)),false);
-    newChunk->addBlock(new Block(oPos+QVector3D(5,3,8),getBlockIndex(16)),false);
+    //    newChunk->addBlock(new Block(oPos+QVector3D(0,3,0),getBlockIndex(10)),false);
+    //    newChunk->addBlock(new Block(oPos+QVector3D(15,3,0),getBlockIndex(12)),false);
+    //    newChunk->addBlock(new Block(oPos+QVector3D(15,3,15),getBlockIndex(13)),false);
+    //    newChunk->addBlock(new Block(oPos+QVector3D(5,3,8),getBlockIndex(16)),false);
 
-    for(i=18;i<34;i++){
-        newChunk->addBlock(new Block(oPos+QVector3D(2,5+i-18,8),getBlockIndex(i)),false);
-    }
+    //    for(i=18;i<34;i++){
+    //        newChunk->addBlock(new Block(oPos+QVector3D(2,5+i-18,8),getBlockIndex(i)),false);
+    //    }
+    int x=qrand()%16;
+    int z=qrand()%16;
+    int b=qrand()%getBlockIndex(0)->texLength;
+    newChunk->addBlock(new Block(oPos+QVector3D(x,3,z),getBlockIndex(b)),false);
 
-    newChunk->removeBlock(QVector3D(4,2,2),false);
-    newChunk->removeBlock(QVector3D(4,1,2),false);
+    //    newChunk->removeBlock(QVector3D(4,2,2),false);
+    //    newChunk->removeBlock(QVector3D(4,1,2),false);
     return newChunk;
 }
 
