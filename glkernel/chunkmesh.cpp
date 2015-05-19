@@ -99,3 +99,8 @@ void LineMesh::addLine(const QVector3D &aPoint, const QVector3D &bPoint)
     m_vb.unlock();
 }
 
+void LineMesh::clear()
+{
+    vidx=iidx=0;
+}
+

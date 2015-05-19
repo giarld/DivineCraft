@@ -370,7 +370,7 @@ void DisplayChunk::updateDisplayList()
     int faceSum=0;
     QVector<Face *> faces;
     QMapIterator<int,Block*> mi(blocks);
-    while(mi.hasNext()){        //计算可绘制的面数，面的消隐
+    while(mi.hasNext()){        //计算可绘制的面数，面的消隐算法
         Block *temp=mi.next().value();
         if(!temp || temp->isAir()) continue;             //空气方块跳过
         for(int i=0;i<temp->faceSum();i++){

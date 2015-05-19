@@ -49,15 +49,25 @@ signals:
     void addBlock();
     void removeBlock();
 
+public slots:
+    void saveOption();                                      //游戏的配置读取与保存
+
 private:
     void initGame();                                                                    //初始化游戏场景
+    void loadTexture();                                                 //加载材质纹理,w:材质长度，h材质高度，s材质数量
 
 private:
     int maxRenderLen;                                                   //最大渲染距离
-    GLTexture2D *blockTexture;                                  //方块材质
+//    GLTexture2D *blockTexture;                                  //方块材质
+    GLTexture3D *blockTexture;
     QGLShader *blockVertexShader;                           //方块顶点着色器
     QGLShader *blockFragmentShader;                     //方块片段着色器
     QGLShaderProgram *blockProgram;                     //方块着色器程序
+
+    QGLShader *lineVertexShader;
+    QGLShader *lineFragmentShader;
+    QGLShaderProgram *lineProgram;
+
     QTime lastTime;
 
     World *world;
@@ -68,6 +78,7 @@ private:
     QPointF centerPoint;
 
     LineMesh *line;
+    LineMesh *lineQua;
 };
 
 

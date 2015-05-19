@@ -38,6 +38,8 @@ public:
     QString getWorldName() const;
     void setWorldName(const QString &value);
 
+    QString getFilePath();                                                      //获得当前世界的存储位置
+
 signals:
     void upProgress(int p);                     //返还更新世界进度的信号
 
@@ -45,6 +47,7 @@ public slots:
     void updateWorld();                     //更新世界的槽,区块的加载生成和保存（会在附线程中被执行）
     void forcedUpdateWorld();           //强制更新世界（会清除chunksMap并重新加载）
     void loadBlockIndex();                  //加载方块索引
+    void setBlockListLength(int len);              //设置方块索引中的材质数量
     void autoSave();                                  //自动保存？每个一个特定时钟周期进行一次保存操作
     void updateDraw();                          //处理显示更新等待队列里的请求
     void changeCameraPosition(const QVector3D &cPos);
@@ -65,7 +68,7 @@ private:
     QVector2D lastCameraChunk;                                  //camera所在区块的坐标记录
     QString worldName;
     QString filePath;                                                               //地图文件所在目录地址
-    QVector<BlockListNode *> mBlockIndex;                                                            //存储所有类型方块的物理属性
+    QVector<BlockListNode *> mBlockIndex;                        //存储所有类型方块的物理属性
     QQueue<QString> updateQueue;                                    //显示更新等待队列，保存等待刷新显示的区块
     bool upLock;                                                                //update单操作锁
 };

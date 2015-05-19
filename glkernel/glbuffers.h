@@ -65,15 +65,6 @@ public:
     virtual void unbind();
 };
 
-class GLTextureArray : public GLTexture
-{
-public:
-    GLTextureArray(int width, int height, int num);
-    void loadNext(const QString& fileName, int texNub=0, int width = 0, int height = 0);
-    virtual void bind();
-    virtual void unbind();
-};
-
 class GLTexture3D : public GLTexture
 {
 public:

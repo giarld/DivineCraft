@@ -17,15 +17,16 @@ struct BlockListNode{
     bool collide;                                   //是实体碰撞方块？
     bool trans;                                         //是否透明
     QString name;                                //方块名称
-    QVector<QVector2D> tex;             //材质坐标列表(起点)
+    QVector<int> tex;             //材质id
     float texWidth,texHeight;      //纹理的逻辑宽和高(texture_index.list第一行)
+    int texLength;                         //纹理的数量
 };
 //////////////////////////////////
 
 //顶点
 struct Vertex{
     QVector3D position;
-    QVector2D texCoord;
+    QVector3D texCoord;
     QVector3D normal;
 };
 

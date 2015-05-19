@@ -113,62 +113,6 @@ void GLTexture2D::unbind()
 }
 
 //============================================================================//
-//                                 GLTextureArray            2D纹理数组                     //
-//============================================================================//
-
-GLTextureArray::GLTextureArray(int width, int height,int num)
-{
-    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, m_texture);
-
-    glTexImage3D(GL_TEXTURE_2D_ARRAY_EXT, 0, 4,
-                 width, height, num, 0, GL_BGRA,  GL_UNSIGNED_BYTE, 0);
-
-    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri( GL_TEXTURE_2D_ARRAY_EXT, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
-}
-
-void GLTextureArray::loadNext(const QString &fileName, int texNub, int width , int height)
-{
-    QImage image(fileName);
-
-    if (image.isNull()) {
-        m_failed = true;
-        return;
-    }
-
-    image = image.convertToFormat(QImage::Format_ARGB32);
-
-    if (width <= 0)
-        width = image.width();
-    if (height <= 0)
-        height = image.height();
-    if (width != image.width() || height != image.height())
-        image = image.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
-    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, m_texture);
-
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY_EXT, 0, 0,0,texNub,
-                    image.width(), image.height(),1,GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
-
-    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0);
-}
-
-void GLTextureArray::bind()
-{
-    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, m_texture);
-    glEnable(GL_TEXTURE_2D_ARRAY_EXT);
-}
-
-void GLTextureArray::unbind()
-{
-    glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0);
-    glDisable(GL_TEXTURE_2D_ARRAY_EXT);
-}
-
-//============================================================================//
 //                                 GLTexture3D            3D材质类                     //
 //============================================================================//
 

@@ -21,7 +21,7 @@
 struct P3T2N3Vertex
 {
     QVector3D position;
-    QVector2D texCoord;
+    QVector3D texCoord;
     QVector3D normal;
     static VertexDescription description[];
 };
@@ -40,6 +40,7 @@ class LineMesh:public GLLineMesh<P3T2N3Vertex, unsigned short>
 public:
     explicit LineMesh(int nLine);
     void addLine(const QVector3D &aPoint,const QVector3D &bPoint);
+    void clear();
 
 private:
     int vidx,iidx;

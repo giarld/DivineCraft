@@ -5,46 +5,42 @@
 #include <math.h>
 #include <string.h>
 #include "gmath.h"
+#include <QDataStream>
 
+QString MyName="xm";
 
 Camera::Camera(Camera::CameraMode mode, QObject *parent)
     :QObject(parent)
     ,mode(mode)
-    ,mRotation(QPointF(0.0,0.0))
     ,mBind(false)
     ,kBind(false)
-    ,mouseLevel(0.5)
-    ,moveSpeed(0.005)
-    ,jumSpeed(0.0125)
-    ,G(0.00005)
-    ,MaxSpeed(0.1)
 {
+    setDefaultValue();
     setMouseLevel(mouseLevel);
     setPosition(QVector3D(0,0,0));
+    setRotation(QPointF(0.0,0.0));
     reMotionVector();
     setGameMode(Camera::SURVIVAL);
     memset(keyMap,0,sizeof(keyMap));
     setPause(true);
+    setBlockId(1);
 }
 
 Camera::Camera(const QVector3D &position, const QPointF &rotation, Camera::CameraMode mode, QObject *parent)
     :QObject(parent)
     ,mode(mode)
-    ,mRotation(rotation)
     ,mBind(false)
     ,kBind(false)
-    ,mouseLevel(0.5)
-    ,moveSpeed(0.005)
-    ,jumSpeed(0.0125)
-    ,G(0.00005)
-    ,MaxSpeed(0.1)
 {
+    setDefaultValue();
     setMouseLevel(mouseLevel);
     setPosition(position);
+    setRotation(rotation);
     reMotionVector();
     setGameMode(Camera::SURVIVAL);
     memset(keyMap,0,sizeof(keyMap));
     setPause(true);
+    setBlockId(1);
 }
 
 void Camera::sightMove(const QPointF &dp)
@@ -155,6 +151,43 @@ void Camera::setPosition(const QVector3D &position)
     mPosition = position;
 }
 
+void Camera::loadPosRot()
+{
+    if(myWorld==NULL){
+        qWarning("警告:可能存在对Camera::loadPosRot的调用顺序错误，本次调用已被判定为无效");
+        return;
+    }
+    QString filePath=tr("%1/%2.dat").arg(myWorld->getFilePath()).arg(MyName);
+    QFile file(filePath);
+    if(file.open(QIODevice::ReadOnly)){
+        QDataStream in(&file);
+        int ak;
+        QVector3D pos=this->position();
+        QPointF rot=this->rotation();
+        in>>ak;
+        if(ak==0x54cbff){
+            in>>pos>>rot;
+        }
+        setPosition(pos);
+        setRotation(rot);
+    }
+    else{
+        savePosRot();
+    }
+    file.close();
+}
+
+void Camera::savePosRot()
+{
+    QString filePath=tr("%1/%2.dat").arg(myWorld->getFilePath()).arg(MyName);
+    QFile file(filePath);
+    if(file.open(QIODevice::WriteOnly)){
+        QDataStream out(&file);
+        out<<0x54cbff<<position()<<rotation();
+    }
+    file.close();
+}
+
 QVector3D Camera::getEyePosition() const
 {
     QVector3D eyeP=position();
@@ -222,7 +255,100 @@ void Camera::cMove()
     }
 
     //!!碰撞检测
+    collision(strafe,timeC);
+    //进行鼠标可操作方块检测
+    hitTest();
 
+    //    qDebug()<<getEyePosition()<<keyBlock<<preBlock;
+    //        qDebug()<<mPosition.y();
+
+    emit cameraMove(mPosition);                     //发出移动了的信号
+
+    lastTime=nowTime;
+}
+
+void Camera::addBlock()
+{
+    if(pause){
+        return ;
+    }
+    if(preBlock.y()<0)              //preBlock没有指定位置或人站在该位置上，则忽略
+        return ;
+
+    float h=1.8;                                        //身高
+    for(float i=0;i<h;i+=0.2){
+        QVector3D temp=GMath::v3toInt(QVector3D(mPosition.x(),mPosition.y()+i,mPosition.z()));
+        if(preBlock==temp)
+            return ;
+    }
+
+    myWorld->addBlock(new Block(preBlock,myWorld->getBlockIndex(this->blockId)),true);
+}
+
+void Camera::setBlockId(int id)
+{
+    blockId=id;
+}
+
+void Camera::removeBlock()
+{
+    if(pause){
+        return ;
+    }
+    if(keyBlock.y()<0)              //keyBlock没有指定位置或人站在该位置上，则忽略
+        return ;
+    myWorld->removeBlock(keyBlock,true);
+}
+
+void Camera::setDefaultValue()
+{
+    mouseLevel=0.5;
+    moveSpeed=0.004;
+    jumSpeed=0.0100;
+    G=0.00003;
+    MaxSpeed=0.1;
+}
+
+void Camera::reMotionVector()
+{
+    QVector3D sv=getSightVector();
+    udMotion=QVector3D(sv.x(),0,sv.z());
+    udMotion.normalize();
+    lfMotion=QVector3D(udMotion.z(),0,-udMotion.x());
+    lfMotion.normalize();
+}
+
+void Camera::hitTest()
+{
+    int handLen=8;      //手长
+    int mm=8;               //分片精度
+    QVector3D keyB;
+    QVector3D preB=QVector3D(0,-100,0);           //一个默认的实体坐标
+    QVector3D temp=getEyePosition();
+    float tx=temp.x();
+    float ty=temp.y();
+    float tz=temp.z();
+    QVector3D sightVector=getSightVector();
+
+    preBlock=keyBlock=preB;                         //初始化放置位置和选定实体
+
+    for(int i=0;i<handLen*mm;i++){
+        keyB=GMath::v3toInt(QVector3D(tx,ty,tz));
+        Block *tb=myWorld->getBlock(keyB);
+        if(keyB!=preB && tb!=NULL && !tb->isAir()){      //找到一个实体方块
+            keyBlock=keyB;
+            preBlock=preB;
+            break;
+        }
+        preB=keyB;
+        tx=tx+sightVector.x()/mm*1.0;
+        ty=ty+sightVector.y()/mm*1.0;
+        tz=tz+sightVector.z()/mm*1.0;
+    }
+}
+
+void Camera::collision(QVector3D strafe,int timeC)
+{
     strafe.normalize();                                             //方向矢量单位化
 
     float m=0.25;                                       //体胖
@@ -243,8 +369,6 @@ void Camera::cMove()
         }
         newPosition.setY(y+ySpeed*timeC);
     }
-
-
 
     //x方向碰撞检测
     for(float i=0;i<h;i+=0.2){
@@ -284,78 +408,6 @@ void Camera::cMove()
     }
 
     mPosition=newPosition;
-
-    //可放置实体检测
-
-    int handLen=8;      //手长
-    int mm=8;               //分片精度
-    QVector3D keyB;
-    QVector3D preB=QVector3D(0,-1,0);
-    QVector3D temp=getEyePosition();
-    float tx=temp.x();
-    float ty=temp.y();
-    float tz=temp.z();
-    QVector3D sightVector=getSightVector();
-
-    preBlock=keyBlock=preB;                         //初始化放置位置和选定实体
-
-    for(int i=0;i<handLen*mm;i++){
-        keyB=GMath::v3toInt(QVector3D(tx,ty,tz));
-        Block *tb=myWorld->getBlock(keyB);
-        if(keyB!=preB && tb!=NULL && !tb->isAir()){      //找到一个实体方块
-            keyBlock=keyB;
-            preBlock=preB;
-            break;
-        }
-        preB=keyB;
-        tx=tx+sightVector.x()/mm*1.0;
-        ty=ty+sightVector.y()/mm*1.0;
-        tz=tz+sightVector.z()/mm*1.0;
-    }
-
-//    qDebug()<<getEyePosition()<<keyBlock<<preBlock;
-//        qDebug()<<mPosition.y();
-
-    emit cameraMove(mPosition);                     //发出移动了的信号
-
-    lastTime=nowTime;
-}
-
-void Camera::addBlock()
-{
-    if(pause){
-        return ;
-    }
-    if(preBlock.y()<0)              //preBlock没有指定位置或人站在该位置上，则忽略
-        return ;
-
-    float h=1.8;                                        //身高
-    for(float i=0;i<h;i+=0.2){
-        QVector3D temp=GMath::v3toInt(QVector3D(mPosition.x(),mPosition.y()+i,mPosition.z()));
-        if(preBlock==temp)
-            return ;
-    }
-
-    myWorld->addBlock(new Block(preBlock,myWorld->getBlockIndex(3)),true);
-}
-
-void Camera::removeBlock()
-{
-    if(pause){
-        return ;
-    }
-    if(keyBlock.y()<0)              //keyBlock没有指定位置或人站在该位置上，则忽略
-        return ;
-    myWorld->removeBlock(keyBlock,true);
-}
-
-void Camera::reMotionVector()
-{
-    QVector3D sv=getSightVector();
-    udMotion=QVector3D(sv.x(),0,sv.z());
-    udMotion.normalize();
-    lfMotion=QVector3D(udMotion.z(),0,-udMotion.x());
-    lfMotion.normalize();
 }
 bool Camera::getPause() const
 {
@@ -365,6 +417,11 @@ bool Camera::getPause() const
 void Camera::setPause(bool value)
 {
     pause = value;
+}
+
+int Camera::getBlockId()
+{
+    return blockId;
 }
 
 

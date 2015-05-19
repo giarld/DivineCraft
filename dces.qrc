@@ -8,5 +8,47 @@
         <file>textures/block_texture.png</file>
         <file>textures/texture_index.list</file>
         <file>block.list</file>
+        <file>shader/line.fsh</file>
+        <file>shader/line.vsh</file>
+        <file>textures/blocks/b0.png</file>
+        <file>textures/blocks/b1.png</file>
+        <file>textures/blocks/b2.png</file>
+        <file>textures/blocks/b3.png</file>
+        <file>textures/blocks/b4.png</file>
+        <file>textures/blocks/b5.png</file>
+        <file>textures/blocks/b6.png</file>
+        <file>textures/blocks/b7.png</file>
+        <file>textures/blocks/b8.png</file>
+        <file>textures/blocks/b9.png</file>
+        <file>textures/blocks/b10.png</file>
+        <file>textures/blocks/b11.png</file>
+        <file>textures/blocks/b12.png</file>
+        <file>textures/blocks/b13.png</file>
+        <file>textures/blocks/b14.png</file>
+        <file>textures/blocks/b15.png</file>
+        <file>textures/blocks/b16.png</file>
+        <file>textures/blocks/b17.png</file>
+        <file>textures/blocks/b18.png</file>
+        <file>textures/blocks/b19.png</file>
+        <file>textures/blocks/b20.png</file>
+        <file>textures/blocks/b21.png</file>
+        <file>textures/blocks/b22.png</file>
+        <file>textures/blocks/b23.png</file>
+        <file>textures/blocks/b24.png</file>
+        <file>textures/blocks/b25.png</file>
+        <file>textures/blocks/b26.png</file>
+        <file>textures/blocks/b27.png</file>
+        <file>textures/blocks/b28.png</file>
+        <file>textures/blocks/b29.png</file>
+        <file>textures/blocks/b30.png</file>
+        <file>textures/blocks/b31.png</file>
+        <file>textures/blocks/b32.png</file>
+        <file>textures/blocks/b33.png</file>
+        <file>textures/blocks/b34.png</file>
+        <file>textures/blocks/b35.png</file>
+        <file>textures/blocks/b36.png</file>
+        <file>textures/blocks/b37.png</file>
+        <file>textures/blocks/b38.png</file>
+        <file>textures/blocks/texture_index.list</file>
     </qresource>
 </RCC>

@@ -8,26 +8,26 @@
 #include "gmath.h"
 
 QVector3D linePoints[][2]={
-    {QVector3D(-0.01,1.01,-0.01),QVector3D(-0.01,1.01,1.01)},
-    {QVector3D(1.01,1.01,-0.01),QVector3D(1.01,1.01,1.01)},
-    {QVector3D(-0.01,1.01,-0.01),QVector3D(1.01,1.01,-0.01)},
-    {QVector3D(-0.01,1.01,1.01),QVector3D(1.01,1.01,1.01)},
+    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,1.005,1.005)},
+    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,1.005,1.005)},
+    {QVector3D(-0.005,1.005,-0.005),QVector3D(1.005,1.005,-0.005)},
+    {QVector3D(-0.005,1.005,1.005),QVector3D(1.005,1.005,1.005)},
 
-    {QVector3D(-0.01,-0.01,-0.01),QVector3D(-0.01,-0.01,1.01)},
-    {QVector3D(1.01,-0.01,-0.01),QVector3D(1.01,-0.01,1.01)},
-    {QVector3D(-0.01,-0.01,-0.01),QVector3D(1.01,-0.01,-0.01)},
-    {QVector3D(-0.01,-0.01,1.01),QVector3D(1.01,-0.01,1.01)},
+    {QVector3D(-0.005,-0.005,-0.005),QVector3D(-0.005,-0.005,1.005)},
+    {QVector3D(1.005,-0.005,-0.005),QVector3D(1.005,-0.005,1.005)},
+    {QVector3D(-0.005,-0.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
+    {QVector3D(-0.005,-0.005,1.005),QVector3D(1.005,-0.005,1.005)},
 
-    {QVector3D(-0.01,1.01,-0.01),QVector3D(-0.01,-0.01,-0.01)},
-    {QVector3D(-0.01,1.01,1.01),QVector3D(-0.01,-0.01,1.01)},
-    {QVector3D(1.01,1.01,-0.01),QVector3D(1.01,-0.01,-0.01)},
-    {QVector3D(1.01,1.01,1.01),QVector3D(1.01,-0.01,1.01)}
+    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,-0.005,-0.005)},
+    {QVector3D(-0.005,1.005,1.005),QVector3D(-0.005,-0.005,1.005)},
+    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
+    {QVector3D(1.005,1.005,1.005),QVector3D(1.005,-0.005,1.005)}
 };
 //================================================//
 //
 //================================================//
 GameScene::GameScene(int width, int height)
-    :maxRenderLen(10)
+    :maxRenderLen(5)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
@@ -44,6 +44,7 @@ GameScene::GameScene(int width, int height)
 
 GameScene::~GameScene()
 {
+    saveOption();           //临时的
     world->autoSave();
     delete blockTexture;
     delete blockVertexShader;
@@ -158,7 +159,44 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->setGameMode(Camera::SURVIVAL);
     }
     else{
-        camera->keyPress(event->key());
+        int bId=1;
+        switch (event->key()) {
+        case Qt::Key_1:
+            bId=1;
+            break;
+        case Qt::Key_2:
+            bId=2;
+            break;
+        case Qt::Key_3:
+            bId=3;
+            break;
+        case Qt::Key_4:
+            bId=4;
+            break;
+        case Qt::Key_5:
+            bId=5;
+            break;
+        case Qt::Key_6:
+            bId=6;
+            break;
+        case Qt::Key_7:
+            bId=7;
+            break;
+        case Qt::Key_8:
+            bId=8;
+            break;
+        case Qt::Key_9:
+            bId=9;
+            break;
+        case Qt::Key_0:
+            bId=10;
+            break;
+        default:
+            bId=camera->getBlockId();
+            camera->keyPress(event->key());
+            break;
+        }
+        camera->setBlockId(bId);
     }
     //    qDebug()<<QTime::currentTime()<<"press:"<<event->key();
 }
@@ -274,29 +312,30 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
     glLineWidth(2.0f);
 
+    lineProgram->bind();
     line->draw();                           //画十字准心
+    lineProgram->release();
 
     glLoadMatrixf(rview.constData());
     glMultMatrixf(view.constData());
-    //    glRotatef(rot,1.0,1.0,1.0);
 
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
-    //    blockProgram->setUniformValue("view",view);
     world->draw();
 
     blockProgram->release();
 
-    LineMesh *lineRect=new LineMesh(12);
-
     QVector3D keyPosition=camera->getKeyPosition();
     if(keyPosition.y()>=0){
-
+        lineQua->clear();
         for(int i=0;i<12;i++){
-            lineRect->addLine(linePoints[i][0]+keyPosition,linePoints[i][1]+keyPosition);
+            lineQua->addLine(linePoints[i][0]+keyPosition,linePoints[i][1]+keyPosition);
         }
-        lineRect->draw();
+        lineProgram->bind();
+        lineQua->draw();
+        lineProgram->release();
     }
+
     if(glActiveTexture){
         glActiveTexture(GL_TEXTURE0);
         blockTexture->unbind();
@@ -308,13 +347,19 @@ void GameScene::firstLoad()
     emit updateWorld();
 }
 
+void GameScene::saveOption()
+{
+    camera->savePosRot();                   //保存camera的坐标和视角
+}
+
 void GameScene::initGame()
 {
     camera=new Camera(QVector3D(8,4,8),QPointF(180.0,0.0));
     //    camera->setMouseLevel(0.5);
-    camera->setGameMode(Camera::GOD);
+//    camera->setGameMode(Camera::GOD);
 
-    blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
+//    blockTexture=new GLTexture2D(":/res/divinecraft/textures/block_texture.png",0,0);
+
 
     blockVertexShader=new QGLShader(QGLShader::Vertex);
     blockVertexShader->compileSourceFile(QLatin1String(":/res/divinecraft/shader/block.vsh"));
@@ -334,12 +379,31 @@ void GameScene::initGame()
                                            "请联系开发者寻求解决方案"),QMessageBox::Ok);
         exit(1);
     }
+
+    lineVertexShader=new QGLShader(QGLShader::Vertex);
+    lineVertexShader->compileSourceFile(QLatin1String(":/res/divinecraft/shader/line.vsh"));
+    lineFragmentShader=new QGLShader(QGLShader::Fragment);
+    lineFragmentShader->compileSourceFile(QLatin1String(":/res/divinecraft/shader/line.fsh"));
+    lineProgram=new QGLShaderProgram;
+    lineProgram->addShader(lineVertexShader);
+    lineProgram->addShader(lineFragmentShader);
+    if(!lineProgram->link()){
+        qWarning("Failed to compile and link shader program");
+        qWarning("Vertex shader log:");
+        qWarning() << lineVertexShader->log();
+        qWarning() << lineFragmentShader->log();
+        qWarning("Shader program log:");
+        qWarning() << lineProgram->log();
+        QMessageBox::warning(0,tr("错误"),tr("着色器程序加载失败造成游戏无法正常启动\n"
+                                           "请联系开发者寻求解决方案"),QMessageBox::Ok);
+        exit(1);
+    }
     ////////////////////////////
     world=new World;
     wThread=new QThread;
     world->moveToThread(wThread);
     connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
-    connect(this,SIGNAL(updateWorld()),world,SLOT(forcedUpdateWorld()));
+    connect(this,SIGNAL(updateWorld()),world,SLOT(forcedUpdateWorld()));                //强制进行世界刷新
     connect(camera,SIGNAL(cameraMove(QVector3D)),world,SLOT(changeCameraPosition(QVector3D)));          //连接camera移动与世界相机位移的槽
     connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()));
     connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()));
@@ -348,15 +412,50 @@ void GameScene::initGame()
     world->setMaxRenderLen(maxRenderLen);
     world->setWorldName("Test");
     camera->setWorld(world);                                //传递世界指针
+    camera->loadPosRot();                                   //加载位置视角信息
     ///////////////////////////
 
-    //    world->setCameraPosition(camera->position());
-    //    world->updateWorld();
+    loadTexture();
+
     firstLoad();            //强制首次加载
 
-    line=new LineMesh(2);
+    line=new LineMesh(2);           //十字准心
     float lineLen=0.0004;
     line->addLine(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
     line->addLine(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
+
+    lineQua=new LineMesh(12);           //被选方块的包围线框
+}
+
+void GameScene::loadTexture()
+{
+        BlockListNode *bn=world->getBlockIndex(0);
+        int tw=bn->texWidth;
+        int th=bn->texHeight;
+
+        QStringList filter;
+        QList<QFileInfo> files;
+
+        filter = QStringList("*.png");                  //索引材质的数量
+        files = QDir(":/res/divinecraft/textures/blocks/").entryInfoList(filter, QDir::Files | QDir::Readable);
+
+        int tc=files.length();
+        qWarning()<<tc;
+        world->setBlockListLength(tc);
+        blockTexture=new GLTexture3D(tw,th,tc+1);               //为了使材质列表的最后一张材质能够使用，需要再增加一张多余的材质来垫底
+        QRgb *data=new QRgb[tw*th*tc];
+    //    memset(data,0,tw*th*tc*sizeof(QRgb));
+        QRgb *p=data;
+        for(int k=0;k<=tc;k++){
+            QImage img(tr(":/res/divinecraft/textures/blocks/b%1.png").arg(k==tc?0:k));
+            for(int i=0;i<tw;i++){
+                for(int j=0;j<th;j++){
+                    *p=img.pixel(j,i);
+                    p++;
+                }
+            }
+        }
+        blockTexture->load(tw,th,tc+1,data);
+        delete [] data;
 }
 

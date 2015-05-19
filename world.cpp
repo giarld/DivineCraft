@@ -2,6 +2,7 @@
  * Author:Gxin
  */
 #include "world.h"
+#include <cmath>
 #include <QDataStream>
 #include <QTextStream>
 #include <QDir>
@@ -98,7 +99,7 @@ void World::updateWorld()
     upLock=true;
 
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
-    QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为其实区块。
+    QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为起始区块。
 
     bfs2World(startCPos);
 
@@ -152,7 +153,7 @@ void World::loadBlockIndex()
     }
     file.close();
 
-    file.setFileName(":/res/divinecraft/textures/texture_index.list");
+    file.setFileName(":/res/divinecraft/textures/blocks/texture_index.list");
     if(file.open(QIODevice::ReadOnly)){
         QTextStream in(&file);
         int index=0;
@@ -176,20 +177,23 @@ void World::loadBlockIndex()
                 if(id>=mBlockIndex.length()) continue;
                 BlockListNode *bl=mBlockIndex[id];
                 while(i<temp.length()){
-                    int u=temp[i++].toFloat();
-                    int v=temp[i++].toFloat();
-                    bl->tex<<QVector2D(u,v);
-                }
-                if(type==0 && i<=10){
-                    bl->tex<<QVector2D(temp[temp.length()-2].toFloat(),temp[temp.length()-1].toFloat());
+                    int u=temp[i++].toInt();
+                    bl->tex<<u;
                 }
             }
             index++;
         }
     }
-    //    foreach (BlockListNode *a, mBlockIndex) {
-    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
+//    foreach (BlockListNode *a, mBlockIndex) {
+//        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
     //    }
+}
+
+void World::setBlockListLength(int len)
+{
+    foreach (BlockListNode *node, mBlockIndex) {
+        node->texLength=len;
+    }
 }
 
 void World::autoSave()
@@ -232,9 +236,7 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
 
     //    qDebug()<<"Load:"<<key;
 
-    if(filePath==NULL || filePath=="")
-        setfilePath();
-    QDir idir(filePath);
+    QDir idir(getFilePath());
     if(idir.absolutePath()!=filePath){
         QMessageBox::warning(0,tr("错误"),tr("游戏无法正确的创建文件和目录，即将被关闭\n此错误可能与文件读写权限有关"));
         exit(1);
@@ -352,9 +354,8 @@ bool World::saveChunk(QString key)
     if(sc->haveChange()==false){            //无修改，直接返还完成
         return true;
     }
-    if(filePath==NULL || filePath=="")
-        setfilePath();
-    QDir sdir(filePath);
+
+    QDir sdir(getFilePath());
     if(sdir.absolutePath()!=filePath){
         QMessageBox::warning(0,tr("错误"),tr("游戏无法正确的创建文件和目录，即将被关闭\n此错误可能与文件读写权限有关"));
         exit(1);
@@ -391,6 +392,11 @@ bool World::saveChunk(QString key)
 
 void World::setfilePath()
 {
+    if(worldName==NULL || worldName=="")
+    {
+        qWarning("警告:在World::setfilePath中可能存在错误，因为worldName为空!");
+        return ;
+    }
     filePath.clear();
     QDir dir(".");
     if(!dir.cd("./.divineCraft/")){
@@ -417,6 +423,13 @@ void World::setWorldName(const QString &value)
     worldName = value;
 }
 
+QString World::getFilePath()
+{
+    if(filePath==NULL || filePath=="")
+        setfilePath();
+    return filePath;
+}
+
 
 int World::getMaxRenderLen() const
 {
@@ -425,7 +438,7 @@ int World::getMaxRenderLen() const
 
 void World::setMaxRenderLen(int value)
 {
-    maxRenderLen = value;
+    maxRenderLen = std::min(value,30);
 }
 
 BlockListNode *World::getBlockIndex(int index)
