@@ -40,6 +40,9 @@ GameScene::GameScene(int width, int height)
     connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
     connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
     timer->start();
+
+    DataPanel *dp=new DataPanel(0,0,400,100);
+    this->addItem(dp);
 }
 
 GameScene::~GameScene()
