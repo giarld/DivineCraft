@@ -99,7 +99,7 @@ void World::updateWorld()
     if(upLock)
         return;
     upLock=true;
-
+    qDebug()<<QTime::currentTime()<<"update world";
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为起始区块。
 
@@ -323,21 +323,12 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
             }
         }
     }
-    //    newChunk->addBlock(new Block(oPos+QVector3D(0,3,0),getBlockIndex(10)),false);
-    //    newChunk->addBlock(new Block(oPos+QVector3D(15,3,0),getBlockIndex(12)),false);
-    //    newChunk->addBlock(new Block(oPos+QVector3D(15,3,15),getBlockIndex(13)),false);
-    //    newChunk->addBlock(new Block(oPos+QVector3D(5,3,8),getBlockIndex(16)),false);
 
-    //    for(i=18;i<34;i++){
-    //        newChunk->addBlock(new Block(oPos+QVector3D(2,5+i-18,8),getBlockIndex(i)),false);
-    //    }
     int x=qrand()%16;
     int z=qrand()%16;
     int b=qrand()%getBlockIndex(0)->texLength;
     newChunk->addBlock(new Block(oPos+QVector3D(x,3,z),getBlockIndex(b)),false);
 
-    //    newChunk->removeBlock(QVector3D(4,2,2),false);
-    //    newChunk->removeBlock(QVector3D(4,1,2),false);
     return newChunk;
 }
 
@@ -359,7 +350,7 @@ void World::bfs2World(const QVector2D &start)
             saveChunk(key);                                                                 //保存一个
             updateQueue.push_back(key);                             //增加到刷新等待队列
         }
-
+        QThread::msleep(1);                             //每一个区块加载完休息1ms
         for(int i=0;i<4;i++){                                                       //遍历是个方向
             int xx=nPos.x()+rr[i][0];
             int yy=nPos.y()+rr[i][1];
@@ -418,7 +409,7 @@ bool World::saveChunk(QString key)
     file.close();
 
     sc->saveAll();                                                                              //标识为已保存
-    qDebug()<<"save ok";
+    qDebug()<<QTime::currentTime()<<"save ok";
     return true;
 }
 

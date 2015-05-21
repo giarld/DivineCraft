@@ -265,6 +265,7 @@ void Camera::cMove()
     //        qDebug()<<mPosition.y();
 
     emit cameraMove(mPosition);                     //发出移动了的信号
+    emit getPositions(position(),getEyePosition());
 
     lastTime=nowTime;
 }

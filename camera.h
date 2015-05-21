@@ -67,6 +67,7 @@ public:
 
 signals:
     void cameraMove(const QVector3D &cPos);
+    void getPositions(const QVector3D & pos, const QVector3D &ePos);        //向外反馈坐标信息的信号
 
 public slots:
     void cMove();                                               //对camera进行移动操作的槽，与timer的timeout信号连接

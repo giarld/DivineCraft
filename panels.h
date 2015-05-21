@@ -16,15 +16,16 @@ protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public:
-    void setFps(float f);                       //接收fps数据
-    void setPosition(QVector3D pos);        //接收坐标数据
-    void setEyePosition(QVector3D ePos);        //接收眼坐标数据
+    void setFps(int f);                       //接收fps数据
+    void setPosition(const QVector3D &pos,const QVector3D &ePos);        //接收坐标数据
+    void setDisplayRadius(int r);
 
 private:
     QRectF rect;
     QVector3D mPosition;                //camera坐标信息
     QVector3D mEyePosition;             //眼坐标信息
-    float fps;                                          //帧数
+    int fps;                                          //帧数
+    int displayRadius;                      //绘制半径信息
 };
 
 #endif // PANELS_H

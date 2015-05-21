@@ -23,6 +23,7 @@ QVector3D linePoints[][2]={
     {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
     {QVector3D(1.005,1.005,1.005),QVector3D(1.005,-0.005,1.005)}
 };
+
 //================================================//
 //
 //================================================//
@@ -40,9 +41,6 @@ GameScene::GameScene(int width, int height)
     connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
     connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
     timer->start();
-
-    DataPanel *dp=new DataPanel(0,0,400,100);
-    this->addItem(dp);
 }
 
 GameScene::~GameScene()
@@ -63,8 +61,6 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 {
     float width=float(painter->device()->width());
     float height=float(painter->device()->height());
-
-    //        QTime lT=QTime::currentTime();
 
     painter->beginNativePainting();
 
@@ -88,8 +84,17 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 
     renderWorld(view,rview);
     defaultStates();
-    //        qDebug()<<"draw:"<<lT.msecsTo(QTime::currentTime());
     painter->endNativePainting();
+
+    drawCount++;
+    QTime currT=QTime::currentTime();
+    int mss=lastTime.msecsTo(currT);
+    if(mss>=100){
+        glFps=(drawCount/(mss*1.0f))*1000;
+        drawCount=0;
+        lastTime=currT;
+        dataPanel->setFps(glFps);
+    }
 }
 
 bool GameScene::isInScene()
@@ -209,6 +214,11 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
     QGraphicsScene::keyReleaseEvent(event);
     camera->keyRelease(event->key());
     //    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
+}
+
+void GameScene::timerEvent(QTimerEvent *event)
+{
+    qWarning("eve");
 }
 
 void GameScene::setStates()
@@ -355,6 +365,11 @@ void GameScene::saveOption()
     camera->savePosRot();                   //保存camera的坐标和视角
 }
 
+void GameScene::dataShowPosition(const QVector3D &pos,const QVector3D &ePos)
+{
+    dataPanel->setPosition(pos,ePos);
+}
+
 void GameScene::initGame()
 {
     blockVertexShader=new QGLShader(QGLShader::Vertex);
@@ -396,7 +411,7 @@ void GameScene::initGame()
     }
     ////////////////////////////
     camera=new Camera(QVector3D(0,4,0),QPointF(180.0,0.0));
-    //    camera->setMouseLevel(0.5);
+//        camera->setMouseLevel(0.5);
     //    camera->setGameMode(Camera::GOD);
 
     world=new World;
@@ -421,13 +436,23 @@ void GameScene::initGame()
     camera->loadPosRot();                                   //加载位置视角信息
     firstLoad();            //强制首次加载
 
-    //---------------------------
+    //======================
     line=new LineMesh(2);           //十字准心
     float lineLen=0.0004;
     line->addLine(QVector3D(-lineLen,0,-0.02),QVector3D(lineLen,0,-0.02));
     line->addLine(QVector3D(0,-lineLen,-0.02),QVector3D(0,lineLen,-0.02));
 
     lineQua=new LineMesh(12);           //被选方块的包围线框
+
+    //=======================
+    //数据面板
+    dataPanel=new DataPanel(0,0,200,100);
+    addItem(dataPanel);
+    glFps=0;
+    drawCount=0;
+    dataPanel->setDisplayRadius(maxRenderLen);
+    connect(camera,SIGNAL(getPositions(QVector3D,QVector3D)),this,SLOT(dataShowPosition(QVector3D,QVector3D)));
+//    dataPanel->hide();
 }
 
 void GameScene:: loadTexture()

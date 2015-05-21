@@ -37,6 +37,7 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    void timerEvent(QTimerEvent *event);
 
     void setStates();               //设置状态，初始化GL绘图
     void setLights();               //光照
@@ -52,6 +53,7 @@ signals:
 
 public slots:
     void saveOption();                                      //游戏的配置读取与保存
+    void dataShowPosition(const QVector3D & pos, const QVector3D &ePos);
 
 private:
     void initGame();                                                                    //初始化游戏场景
@@ -80,6 +82,10 @@ private:
 
     LineMesh *line;
     LineMesh *lineQua;
+
+    DataPanel *dataPanel;
+    int glFps;
+    int drawCount;
 };
 
 

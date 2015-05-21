@@ -17,7 +17,6 @@ DCView::DCView()
     gameScene=new GameScene(w,h) ;
     this->setScene(gameScene);
     //    this->setMouseTracking(true);
-
 }
 
 DCView::~DCView()
@@ -68,6 +67,8 @@ void DCView::keyPressEvent(QKeyEvent *event)
             this->setCursor(Qt::ArrowCursor);
         }
     }
+    else if(event->key()==Qt::Key_Q)
+        exit(1);
     QGraphicsView::keyPressEvent(event);
 }
 

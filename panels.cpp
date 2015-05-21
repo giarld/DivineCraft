@@ -23,22 +23,35 @@ void DataPanel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setBrush(brush);
     painter->drawRect(boundingRect());
     painter->setPen(Qt::white);
-    QRectF fpsRect(5,5,boundingRect().width(),20);
+    QRectF fpsRect(5,0,boundingRect().width()/2,20);
     QString fpsStr="FPS : "+QString::number(fps);
     painter->drawText(fpsRect,fpsStr);
+
+    fpsRect=QRectF(boundingRect().width()/2+5,0,boundingRect().width()/2,20);
+    QString rStr=QObject::tr("Radius : %1").arg(displayRadius);
+    painter->drawText(fpsRect,rStr);
+
+    QRectF posRect(5,20,100,80);
+    QString posStr=QObject::tr("pos: \nX: %1\nY: %2\nZ: %3").arg(mPosition.x()).arg(mPosition.y()).arg(mPosition.z());
+    painter->drawText(posRect,posStr);
+
+    QRectF eyeRect(105,20,100,80);
+    QString eyeStr=QObject::tr("pos: \nX: %1\nY: %2\nZ: %3").arg(mEyePosition.x()).arg(mEyePosition.y()).arg(mEyePosition.z());
+    painter->drawText(eyeRect,eyeStr);
 }
 
-void DataPanel::setFps(float f)
+void DataPanel::setFps(int f)
 {
     this->fps=f;
 }
 
-void DataPanel::setPosition(QVector3D pos)
+void DataPanel::setPosition(const QVector3D &pos, const QVector3D &ePos)
 {
     this->mPosition=pos;
+    this->mEyePosition=ePos;
 }
 
-void DataPanel::setEyePosition(QVector3D ePos)
+void DataPanel::setDisplayRadius(int r)
 {
-    this->mEyePosition=ePos;
+    displayRadius=r;
 }
