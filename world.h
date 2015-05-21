@@ -4,6 +4,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <QtOpenGL>
 #include <QObject>
 #include <QVector>
 #include <QVector2D>
@@ -75,6 +76,7 @@ private:
     QVector<BlockListNode *> mBlockIndex;                        //存储所有类型方块的物理属性
     QQueue<QString> updateQueue;                                    //显示更新等待队列，保存等待刷新显示的区块
     bool upLock;                                                                //update单操作锁
+    GLuint drawID;                                                          //显示列表ID
 };
 
 #endif // WORLD_H

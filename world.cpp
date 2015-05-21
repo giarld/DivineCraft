@@ -15,6 +15,7 @@ World::World(QObject *parent) : QObject(parent)
     setMaxRenderLen(16);
     this->lastCameraChunk=QVector2D(0,0);
     upLock=false;
+    drawID=glGenLists(1);
     qsrand(time(0));            //初始化随机种子
 }
 
@@ -87,11 +88,12 @@ bool World::collision(QVector3D bPos)
 
 void World::draw()
 {
-    foreach (ChunkMap *cm, chunksMap) {
-        if(cm){
-            cm->draw(this->cameraPosition,this->maxRenderLen);
-        }
-    }
+//    foreach (ChunkMap *cm, chunksMap) {
+//        if(cm){
+//            cm->draw(this->cameraPosition,this->maxRenderLen);
+//        }
+//    }
+    glCallList(drawID);
 }
 
 void World::updateWorld()
@@ -242,6 +244,14 @@ void World::updateDraw()
         ChunkMap *ch=chunksMap.value(key);
         if(ch)
             ch->updateAll();
+        //
+        glNewList(drawID,GL_COMPILE);
+        foreach (ChunkMap *cm, chunksMap) {
+            if(cm){
+                cm->draw(this->cameraPosition,this->maxRenderLen);
+            }
+        }
+        glEndList();
     }
 }
 
@@ -351,7 +361,7 @@ void World::bfs2World(const QVector2D &start)
             updateQueue.push_back(key);                             //增加到刷新等待队列
         }
         QThread::msleep(1);                             //每一个区块加载完休息1ms
-        for(int i=0;i<4;i++){                                                       //遍历是个方向
+        for(int i=0;i<4;i++){                                                       //遍历是个方向将没有被加载的区块入队等待加载
             int xx=nPos.x()+rr[i][0];
             int yy=nPos.y()+rr[i][1];
             QVector2D temp(xx,yy);
@@ -363,7 +373,6 @@ void World::bfs2World(const QVector2D &start)
             }
         }
     }
-
     //以下两句其实多余
     flag.clear();
     Q.clear();

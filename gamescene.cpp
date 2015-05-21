@@ -36,7 +36,7 @@ GameScene::GameScene(int width, int height)
     lastTime=QTime::currentTime();
 
     QTimer *timer=new QTimer;
-    timer->setInterval(20);
+    timer->setInterval(10);
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
     connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
     connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
@@ -86,6 +86,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     defaultStates();
     painter->endNativePainting();
 
+    //计算fps
     drawCount++;
     QTime currT=QTime::currentTime();
     int mss=lastTime.msecsTo(currT);
@@ -335,7 +336,6 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
     world->draw();
-
     blockProgram->release();
 
     QVector3D keyPosition=camera->getKeyPosition();
@@ -472,7 +472,7 @@ void GameScene:: loadTexture()
     //        qWarning()<<tc;
     world->setBlockListLength(tc);                                  //更新方块列表的材质数量记录
     blockTexture=new GLTexture3D(tw,th,tc+1);               //为了使材质列表的最后一张材质能够使用，需要再增加一张多余的材质来垫底
-    QRgb *data=new QRgb[tw*th*tc];
+    QRgb *data=new QRgb[tw*th*(tc+1)];
     //    memset(data,0,tw*th*tc*sizeof(QRgb));
     QRgb *p=data;
     for(int k=0;k<=tc;k++){
