@@ -220,8 +220,8 @@ void Camera::cMove()
 
     QTime nowTime=QTime::currentTime();
     int timeC=lastTime.msecsTo(nowTime);
-    if(timeC<20)
-        timeC=20;
+//    if(timeC<20)
+//        timeC=20;
 
     QVector3D strafe(0,0,0);
     if(keyMap[0]){
