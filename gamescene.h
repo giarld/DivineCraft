@@ -54,6 +54,8 @@ signals:
 public slots:
     void saveOption();                                      //游戏的配置读取与保存
     void dataShowPosition(const QVector3D & pos, const QVector3D &ePos);
+    void showItemBar();                                 //显示物品栏
+    void hideItemBar();                                 //隐藏物品栏
 
 private:
     void initGame();                                                                    //初始化游戏场景
@@ -75,6 +77,7 @@ private:
 
     World *world;
     QThread *wThread;
+    QThread *cameraThread;
 
     Camera *camera;
     bool inSence;                                                    //鼠标场景中？
@@ -86,6 +89,9 @@ private:
     DataPanel *dataPanel;
     int glFps;
     int drawCount;
+
+    ItemBar *itemBar;
+    bool isShowItemBar;                                   //itembar是否显示状态
 };
 
 

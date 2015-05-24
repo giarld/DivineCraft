@@ -10,7 +10,7 @@
 class DataPanel : public QGraphicsItem
 {
 public:
-    DataPanel(int x,int y,int w,int z);
+    DataPanel(int x,int y,int w,int h);
 protected:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -26,6 +26,29 @@ private:
     QVector3D mEyePosition;             //眼坐标信息
     int fps;                                          //帧数
     int displayRadius;                      //绘制半径信息
+};
+
+//===============================================//
+class ItemBarWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    ItemBarWidget();
+};
+
+class ItemBar : public QObject
+{
+    Q_OBJECT
+public:
+    ItemBar(QGraphicsScene *scene);
+
+    void show();
+    void hide();
+protected:
+
+private:
+    QRectF rect;
+    QGraphicsProxyWidget *widgetProxy;
 };
 
 #endif // PANELS_H

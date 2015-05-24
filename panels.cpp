@@ -55,3 +55,38 @@ void DataPanel::setDisplayRadius(int r)
 {
     displayRadius=r;
 }
+
+//============================
+//物品栏
+//============================
+ItemBar::ItemBar(QGraphicsScene *scene)
+    :QObject(scene)
+{
+    rect=QRectF(0,0,20,10);
+    widgetProxy=new QGraphicsProxyWidget(0);
+    ItemBarWidget *w=new ItemBarWidget;
+    widgetProxy->setWidget(w);
+    w->setGeometry(100,100,100,200);
+    widgetProxy->show();
+    qobject_cast<QGraphicsScene *>(parent())->addItem(widgetProxy);
+}
+
+void ItemBar::show()
+{
+    widgetProxy->setVisible(true);
+}
+
+void ItemBar::hide()
+{
+    widgetProxy->setVisible(false);
+}
+
+
+ItemBarWidget::ItemBarWidget()
+    :QWidget(0)
+{
+    QHBoxLayout *layout=new QHBoxLayout;
+    this->setLayout(layout);
+    QPushButton *button=new QPushButton(tr("button"),this);
+    layout->addWidget(button);
+}

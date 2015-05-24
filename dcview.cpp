@@ -13,6 +13,7 @@ DCView::DCView()
     int dHeight=QApplication::desktop()->height();
     int w=dWidth*0.618;
     int h=dHeight*0.618;
+    this->setMinimumSize(w,h);
     this->setGeometry((dWidth-w)/2,(dHeight-h)/2,w,h);              //窗口居中，黄金比例。
     gameScene=new GameScene(w,h) ;
     this->setScene(gameScene);
@@ -63,6 +64,11 @@ void DCView::keyPressEvent(QKeyEvent *event)
             this->showFullScreen();
     }
     else if(event->key()==Qt::Key_Escape){
+        if(gameScene->isInScene()){
+            this->setCursor(Qt::ArrowCursor);
+        }
+    }
+    else if(event->key()==Qt::Key_E){
         if(gameScene->isInScene()){
             this->setCursor(Qt::ArrowCursor);
         }
