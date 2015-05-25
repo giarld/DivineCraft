@@ -46,7 +46,12 @@ bool World::addBlock(Block *block, bool update)
     if(!tempc){                                 //区块错误返还false
         return false;
     }
-    return tempc->addBlock(block,update);
+
+    if(tempc->addBlock(block,update)){                               //增加成功则刷新显示列表
+        updateDisplay();
+        return true;
+    }
+    return false;
 }
 
 bool World::removeBlock(QVector3D pos, bool update)
@@ -63,7 +68,12 @@ bool World::removeBlock(QVector3D pos, bool update)
     if(!tempc){                                 //区块错误返还false
         return false;
     }
-    return tempc->removeBlock(pos,update);
+
+    if(tempc->removeBlock(pos,update)){                         //删除成功则刷新显示列表
+        updateDisplay();
+        return true;
+    }
+    return false;
 }
 
 Block *World::getBlock(QVector3D bPos)
@@ -245,13 +255,7 @@ void World::updateDraw()
         if(ch)
             ch->updateAll();
         //
-        glNewList(drawID,GL_COMPILE);
-        foreach (ChunkMap *cm, chunksMap) {
-            if(cm){
-                cm->draw(this->cameraPosition,this->maxRenderLen);
-            }
-        }
-        glEndList();
+        updateDisplay();
     }
 }
 
@@ -444,6 +448,17 @@ void World::setfilePath()
         dir.cd(tr("%1/").arg(worldName));
     }
     filePath=dir.absolutePath();
+}
+
+void World::updateDisplay()
+{
+    glNewList(drawID,GL_COMPILE);
+    foreach (ChunkMap *cm, chunksMap) {
+        if(cm){
+            cm->draw(this->cameraPosition,this->maxRenderLen);
+        }
+    }
+    glEndList();
 }
 QString World::getWorldName() const
 {

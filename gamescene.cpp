@@ -175,6 +175,10 @@ void GameScene::keyPressEvent(QKeyEvent *event)
     else if(event->key()==Qt::Key_E){
         if(isShowItemBar){
             hideItemBar();
+            inSence=true;
+            mouseLock();
+            camera->bind();
+            startGame();
         }
         else{
             showItemBar();

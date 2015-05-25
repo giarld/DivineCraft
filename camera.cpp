@@ -284,7 +284,6 @@ void Camera::addBlock()
         if(preBlock==temp)
             return ;
     }
-
     myWorld->addBlock(new Block(preBlock,myWorld->getBlockIndex(this->blockId)),true);
 }
 

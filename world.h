@@ -65,6 +65,7 @@ private:
     void bfs2World(const QVector2D &start);                                                                    //对当前的world可视化区域进行广搜以完成区块的加载
     bool saveChunk(QString key);                                                              //保存区块修改
     void setfilePath();                                                                                                        //设置文件路径
+    void updateDisplay();                                                                       //刷新显示列表
 
 private:
     QMap<QString,ChunkMap*> chunksMap;               //区块列表。key="chunkX-chunkY"

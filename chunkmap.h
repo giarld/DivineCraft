@@ -74,7 +74,7 @@ class ChunkMap
 {
 public:
     enum{
-        MINLOW=0,MAXHIGHT=255
+        MINLOW=0,MAXHIGHT=255                               //最低处和最高处的层数
     };
     ChunkMap(QVector2D cPos);
     ChunkMap(int cx,int cz);
