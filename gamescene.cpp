@@ -27,8 +27,10 @@ QVector3D linePoints[][2]={
 //================================================//
 //
 //================================================//
-GameScene::GameScene(int width, int height)
-    :maxRenderLen(10)
+GameScene::GameScene(int width, int height, QGraphicsView *parent)
+    :QGraphicsScene(parent)
+    ,maxRenderLen(10)
+    ,GView(parent)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
@@ -40,6 +42,7 @@ GameScene::GameScene(int width, int height)
     connect(timer,SIGNAL(timeout()),this,SLOT(update()));
     connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
     connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
+    connect(timer,SIGNAL(timeout()),this,SLOT(mouseMove()));
     timer->start();
 }
 
@@ -51,9 +54,7 @@ GameScene::~GameScene()
     delete blockVertexShader;
     delete blockFragmentShader;
     delete blockProgram;
-    cameraThread->quit();
-    cameraThread->wait();
-    delete cameraThread;
+    delete camera;
     wThread->quit();
     wThread->wait();
     delete wThread;
@@ -72,7 +73,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 
     glMatrixMode(GL_PROJECTION);
 
-    qgluPerspective(60.0,width/height,0.01f,3000.0f);
+    qgluPerspective(60.0,width/height,0.01f,400.0f);
 
     glMatrixMode(GL_MODELVIEW);
 
@@ -105,7 +106,7 @@ bool GameScene::isInScene()
     return inSence;
 }
 
-void GameScene::setCenterPoint(const QPointF &cp)
+void GameScene::setCenterPoint(const QPoint &cp)
 {
     this->centerPoint=cp;
 }
@@ -127,6 +128,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         if(!isShowItemBar){
             if(!inSence){
                 inSence=true;
+                mouseLock();
                 camera->bind();
                 startGame();
             }
@@ -153,9 +155,6 @@ void GameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     //            qDebug()<<event->scenePos();
-    if(inSence){
-        camera->sightMove(event->screenPos()-centerPoint);
-    }
     QGraphicsScene::mouseMoveEvent(event);
 }
 
@@ -165,6 +164,7 @@ void GameScene::keyPressEvent(QKeyEvent *event)
         inSence=false;
         camera->unBind();
         pauseGame();
+        mouseUnLock();
     }
     else if(event->key()==Qt::Key_M){
         if(camera->getGameMode()==Camera::SURVIVAL)
@@ -181,6 +181,7 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             inSence=false;
             camera->unBind();
             pauseGame();
+            mouseUnLock();
         }
     }
     else{
@@ -229,7 +230,7 @@ void GameScene::keyPressEvent(QKeyEvent *event)
 
 void GameScene::keyReleaseEvent(QKeyEvent *event)
 {
-//    QGraphicsScene::keyReleaseEvent(event);
+    //    QGraphicsScene::keyReleaseEvent(event);
     camera->keyRelease(event->key());
     //    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
 }
@@ -398,6 +399,15 @@ void GameScene::hideItemBar()
     itemBar->hide();
 }
 
+void GameScene::mouseMove()
+{
+    if(inSence){
+        QPoint dtPoint=GView->cursor().pos()-centerPoint;
+        camera->sightMove(QPointF(dtPoint));
+        mouseLock();
+    }
+}
+
 void GameScene::initGame()
 {
     blockVertexShader=new QGLShader(QGLShader::Vertex);
@@ -441,10 +451,6 @@ void GameScene::initGame()
     camera=new Camera(QVector3D(0,4,0),QPointF(180.0,0.0));
     //        camera->setMouseLevel(0.5);
     //    camera->setGameMode(Camera::GOD);
-    cameraThread=new QThread;
-    camera->moveToThread(cameraThread);
-    cameraThread->start();
-    connect(cameraThread,SIGNAL(finished()),camera,SLOT(deleteLater()));
 
     world=new World;
     wThread=new QThread;
@@ -452,8 +458,8 @@ void GameScene::initGame()
     connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
     connect(this,SIGNAL(updateWorld()),world,SLOT(forcedUpdateWorld()));                //强制进行世界刷新
     connect(camera,SIGNAL(cameraMove(QVector3D)),world,SLOT(changeCameraPosition(QVector3D)));          //连接camera移动与世界相机位移的槽
-    connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()),Qt::DirectConnection);
-    connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()),Qt::DirectConnection);
+    connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()));
+    connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()));
     wThread->start();
 
     world->setMaxRenderLen(maxRenderLen);
@@ -525,5 +531,18 @@ void GameScene:: loadTexture()
     delete [] data;
 
     world->calcBlockListNodeTexId(texMap);          //进行名称->ID映射
+}
+
+void GameScene::mouseLock()
+{
+    QPoint po(GView->pos().x()+GView->width()/2,GView->pos().y()+GView->height()/2);
+    GView->cursor().setPos(po);
+    setCenterPoint(po);
+    GView->setCursor(Qt::BlankCursor);
+}
+
+void GameScene::mouseUnLock()
+{
+    GView->setCursor(Qt::ArrowCursor);
 }
 

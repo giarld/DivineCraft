@@ -22,12 +22,12 @@ class GameScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    GameScene(int width, int height);
+    GameScene(int width, int height,QGraphicsView *parent);
     ~GameScene();
     virtual void drawBackground(QPainter *painter, const QRectF &);
 
     bool isInScene();                   //返还是否进入场景控制模式
-    void setCenterPoint(const QPointF &cp);
+    void setCenterPoint(const QPoint &cp);
 
     void startGame();
     void pauseGame();
@@ -56,13 +56,18 @@ public slots:
     void dataShowPosition(const QVector3D & pos, const QVector3D &ePos);
     void showItemBar();                                 //显示物品栏
     void hideItemBar();                                 //隐藏物品栏
+    void mouseMove();                                   //鼠标的移动槽（仅当进入场景）
 
 private:
     void initGame();                                                                    //初始化游戏场景
     void loadTexture();                                                 //加载材质纹理,w:材质长度，h材质高度，s材质数量
 
+    void mouseLock();                                                   //将鼠标锁定入场景
+    void mouseUnLock();
+
 private:
     int maxRenderLen;                                                   //最大渲染距离
+    QGraphicsView *GView;                                           //主窗口的指针（为获得光标的控制权）
 //    GLTexture2D *blockTexture;                                  //方块材质
     GLTexture3D *blockTexture;
     QGLShader *blockVertexShader;                           //方块顶点着色器
@@ -77,11 +82,10 @@ private:
 
     World *world;
     QThread *wThread;
-    QThread *cameraThread;
 
     Camera *camera;
     bool inSence;                                                    //鼠标场景中？
-    QPointF centerPoint;
+    QPoint centerPoint;
 
     LineMesh *line;
     LineMesh *lineQua;

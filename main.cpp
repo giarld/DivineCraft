@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 //                             "测试开始\n");
 
     widget->makeCurrent();
-    widget->setMouseTracking(true);             //鼠标自动跟踪
+//    widget->setMouseTracking(true);             //鼠标自动跟踪
     DCView view;
     view.setViewport(widget);
     view.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);

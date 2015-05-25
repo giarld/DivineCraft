@@ -15,9 +15,9 @@ DCView::DCView()
     int h=dHeight*0.618;
     this->setMinimumSize(w,h);
     this->setGeometry((dWidth-w)/2,(dHeight-h)/2,w,h);              //窗口居中，黄金比例。
-    gameScene=new GameScene(w,h) ;
+    gameScene=new GameScene(w,h,this) ;
     this->setScene(gameScene);
-    //    this->setMouseTracking(true);
+        this->setMouseTracking(false);
 }
 
 DCView::~DCView()
@@ -29,22 +29,11 @@ DCView::~DCView()
 void DCView::mousePressEvent(QMouseEvent *event)
 {
     QGraphicsView::mousePressEvent(event);
-    if(event->button()==Qt::LeftButton){
-        if(gameScene->isInScene()){
-            this->cursor().setPos(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2);
-            gameScene->setCenterPoint(QPointF(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2));
-            this->setCursor(Qt::BlankCursor);
-        }
-    }
 }
 
 void DCView::mouseMoveEvent(QMouseEvent *event)
 {
     QGraphicsView::mouseMoveEvent(event);
-    if(gameScene->isInScene()){
-        this->cursor().setPos(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2);
-        gameScene->setCenterPoint(QPointF(this->pos().x()+this->width()/2,this->pos().y()+this->height()/2));
-    }
 }
 
 void DCView::resizeEvent(QResizeEvent *event)
@@ -62,16 +51,6 @@ void DCView::keyPressEvent(QKeyEvent *event)
             this->showNormal();
         else
             this->showFullScreen();
-    }
-    else if(event->key()==Qt::Key_Escape){
-        if(gameScene->isInScene()){
-            this->setCursor(Qt::ArrowCursor);
-        }
-    }
-    else if(event->key()==Qt::Key_E){
-        if(gameScene->isInScene()){
-            this->setCursor(Qt::ArrowCursor);
-        }
     }
     else if(event->key()==Qt::Key_Q)
         exit(1);

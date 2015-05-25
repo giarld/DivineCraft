@@ -306,7 +306,7 @@ void Camera::removeBlock()
 void Camera::setDefaultValue()
 {
     mouseLevel=0.5;
-    moveSpeed=0.004;
+    moveSpeed=0.0035;
     jumSpeed=0.0100;
     G=0.00003;
     MaxSpeed=0.1;
