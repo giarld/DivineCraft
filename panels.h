@@ -42,13 +42,14 @@ class ItemBar : public QObject
 public:
     ItemBar(QGraphicsScene *scene);
 
-    void show();
+    void show(int x,int y,int w,int h);
     void hide();
 protected:
 
 private:
     QRectF rect;
     QGraphicsProxyWidget *widgetProxy;
+    ItemBarWidget *widget;
 };
 
 #endif // PANELS_H

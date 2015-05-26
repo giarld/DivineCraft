@@ -127,7 +127,7 @@ void Block::createBlock()
         int n=DOWN;
         for(int i=FRONT;i<=n;i++){
             Face *nf=new Face;
-            for(int j=0;j<4;j++){
+            for(int j=0;j<4;j++){               //每个面四个顶点
                 nf->vert[j].position=posAOffsets[i][j]+position;                 //实际坐标
                 nf->vert[j].normal=Anormals[i];                                              //法线
                 nf->vert[j].texCoord=QVector3D(texSwing[j][0],texSwing[j][1],1.0f*mBlock->tex[i]/mBlock->texLength);   //纹理
@@ -158,12 +158,12 @@ void Block::setPosition(const QVector3D &value)
     position = value;
 }
 
-QVector3D Block::vicinityPosition(int site) const
+QVector3D Block::vicinityPosition(QVector3D centerPos, int site)
 {
     if(site<Block::FRONT || site>=Block::MAX_FACE_SUM){
-        return this->getPosition();
+        return centerPos;
     }
-    return this->getPosition()+vicinityOffset[site];
+    return centerPos+vicinityOffset[site];
 }
 
 QString Block::getBName() const
@@ -190,6 +190,11 @@ bool Block::isCollide()
 bool Block::isTrans()
 {
     return mBlock->trans;
+}
+
+bool Block::doNotHideFace()
+{
+    return mBlock->dnotHideFace;
 }
 
 int Block::faceSum()

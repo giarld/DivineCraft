@@ -75,7 +75,8 @@ private:
     QString worldName;
     QString filePath;                                                               //地图文件所在目录地址
     QVector<BlockListNode *> mBlockIndex;                        //存储所有类型方块的物理属性
-    QQueue<QString> updateQueue;                                    //显示更新等待队列，保存等待刷新显示的区块
+    QQueue<QString> updateQueue;                                    //显示更新等待队列，保存等待刷新区块
+    QQueue<QVector3D> updateDisplayChunkQueue;                     //显示区块刷新等待队列
     bool upLock;                                                                //update单操作锁
     GLuint drawID;                                                          //显示列表ID
 };

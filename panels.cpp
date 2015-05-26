@@ -64,21 +64,24 @@ ItemBar::ItemBar(QGraphicsScene *scene)
 {
     rect=QRectF(0,0,20,10);
     widgetProxy=new QGraphicsProxyWidget(0);
-    ItemBarWidget *w=new ItemBarWidget;
-    widgetProxy->setWidget(w);
-    w->setGeometry(100,100,100,200);
+    widget=new ItemBarWidget();
+    widgetProxy->setWidget(widget);
+    widget->setGeometry(100,100,100,200);
     widgetProxy->show();
     qobject_cast<QGraphicsScene *>(parent())->addItem(widgetProxy);
 }
 
-void ItemBar::show()
+void ItemBar::show(int x, int y, int w, int h)
 {
-    widgetProxy->setVisible(true);
+//    widgetProxy->setVisible(true);
+    rect=QRectF(x,y,w,h);
+    widgetProxy->show();
 }
 
 void ItemBar::hide()
 {
-    widgetProxy->setVisible(false);
+//    widgetProxy->setVisible(false);
+    widgetProxy->hide();
 }
 
 

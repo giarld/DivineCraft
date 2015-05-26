@@ -10,6 +10,7 @@
 #include "gmath.h"
 #include <ctime>
 
+
 World::World(QObject *parent) : QObject(parent)
 {
     setMaxRenderLen(16);
@@ -48,7 +49,7 @@ bool World::addBlock(Block *block, bool update)
     }
 
     if(tempc->addBlock(block,update)){                               //增加成功则刷新显示列表
-        updateDisplay();
+        updateDisplayChunkQueue.push_back(block->getPosition());            //增加到刷新等待队列
         return true;
     }
     return false;
@@ -70,7 +71,7 @@ bool World::removeBlock(QVector3D pos, bool update)
     }
 
     if(tempc->removeBlock(pos,update)){                         //删除成功则刷新显示列表
-        updateDisplay();
+        updateDisplayChunkQueue.push_back(pos);                 //增加到刷新等待队列
         return true;
     }
     return false;
@@ -98,11 +99,11 @@ bool World::collision(QVector3D bPos)
 
 void World::draw()
 {
-//    foreach (ChunkMap *cm, chunksMap) {
-//        if(cm){
-//            cm->draw(this->cameraPosition,this->maxRenderLen);
-//        }
-//    }
+    //    foreach (ChunkMap *cm, chunksMap) {
+    //        if(cm){
+    //            cm->draw(this->cameraPosition,this->maxRenderLen);
+    //        }
+    //    }
     glCallList(drawID);
 }
 
@@ -119,7 +120,7 @@ void World::updateWorld()
 
     foreach (ChunkMap *cm, chunksMap) {
         if(cm && !cm->inDraw()){                                        //有效区块且区块不在绘图状态
-            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+2){
+            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+1){
                 cm->setShow(false);
                 QString key=getKey(cm->getChunkPosition());
                 if(cm->haveChange()){                                                               //未保存先保存
@@ -155,6 +156,7 @@ void World::loadBlockIndex()
             int type=temp[1].toInt();
             bool collide=temp[2].toInt();
             bool trans=temp[3].toInt();
+            bool notHide=temp[4].toInt();
             QString name=temp[4];
             BlockListNode *node=new BlockListNode;
             node->id=id;
@@ -162,6 +164,7 @@ void World::loadBlockIndex()
             node->name=name;
             node->collide=collide;
             node->trans=trans;
+            node->dnotHideFace=notHide;
             mBlockIndex<<node;
         }
     }
@@ -257,6 +260,21 @@ void World::updateDraw()
         //
         updateDisplay();
     }
+
+    fTime=QTime::currentTime();
+    while(!updateDisplayChunkQueue.isEmpty() && fTime.msecsTo(QTime::currentTime())<=5){        //增加删除方块后的区块更新处理
+        QVector3D cPos=updateDisplayChunkQueue.front();
+        QVector3D dPos=DisplayChunk::calcChunckPos(cPos);
+        updateDisplayChunkQueue.pop_front();
+        for(int i=0;i<Block::MAX_FACE_SUM;i++){
+            QVector3D tPos=Block::vicinityPosition(cPos,i);
+            QVector3D tdPos=DisplayChunk::calcChunckPos(tPos);
+            if(tdPos!=dPos){
+                chunksMap.value(getKey(GMath::v3d2v2d(tdPos)))->update(tdPos.y());
+            }
+        }
+        updateDisplay();
+    }
 }
 
 
@@ -295,7 +313,7 @@ ChunkMap *World::loadChunk(QVector2D chunkPos)
         int za,zb;
         in>>za>>zb;
         if(za==0x9394ef && zb==0x7b2f5c){                               //如果文件达标，创建并读取区块
-            newChunk=new ChunkMap(chunkPos);
+            newChunk=new ChunkMap(chunkPos,this);
             while(!in.atEnd()){
                 int b;
                 QVector3D blockPos;
@@ -326,7 +344,7 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
 {
     QVector3D nPos=QVector3D(chunkPos.x(),0,chunkPos.y());
     QVector3D oPos=DisplayChunk::calcChunkOriginPos(nPos);                  //计算出区块的偏移坐标
-    ChunkMap *newChunk=new ChunkMap(chunkPos);
+    ChunkMap *newChunk=new ChunkMap(chunkPos,this);
     int i,j,k;
     int cb[]={4,1,2};
     for(k=0;k<3;k++){

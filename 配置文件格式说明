@@ -1,9 +1,9 @@
 block.list格式：
 每一行代表一个方块：
-编号 类型 是否碰撞 是否透明 名称
+编号 类型 是否碰撞 是否透明 是否强制不消隐 名称
 ex:
-0 0 1 0 grass
-1 0 1 1 glass
+0 0 1 0 0 grass
+1 0 1 1 0 glass
 
 texture_index.list格式：
 第一行两个整数:纹理的尺寸

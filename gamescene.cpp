@@ -54,10 +54,20 @@ GameScene::~GameScene()
     delete blockVertexShader;
     delete blockFragmentShader;
     delete blockProgram;
+
+    delete lineVertexShader;
+    delete lineFragmentShader;
+    delete lineProgram;
+
     delete camera;
     wThread->quit();
     wThread->wait();
     delete wThread;
+
+    delete line;
+    delete lineQua;
+    delete dataPanel;
+    delete itemBar;
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -220,6 +230,9 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_0:
             bId=10;
+            break;
+        case Qt::Key_U:
+            bId=34;
             break;
         default:
             bId=camera->getBlockId();
@@ -394,7 +407,7 @@ void GameScene::dataShowPosition(const QVector3D &pos,const QVector3D &ePos)
 void GameScene::showItemBar()
 {
     isShowItemBar=true;
-    itemBar->show();
+    itemBar->show(100,100,200,200);
 }
 
 void GameScene::hideItemBar()
@@ -542,11 +555,13 @@ void GameScene::mouseLock()
     QPoint po(GView->pos().x()+GView->width()/2,GView->pos().y()+GView->height()/2);
     GView->cursor().setPos(po);
     setCenterPoint(po);
-    GView->setCursor(Qt::BlankCursor);
+//    GView->setCursor(Qt::BlankCursor);
+    GView->viewport()->setCursor(Qt::BlankCursor);                  //使用父容器对鼠标进行改变
 }
 
 void GameScene::mouseUnLock()
 {
-    GView->setCursor(Qt::ArrowCursor);
+//    GView->setCursor(Qt::ArrowCursor);
+    GView->viewport()->setCursor(Qt::ArrowCursor);
 }
 

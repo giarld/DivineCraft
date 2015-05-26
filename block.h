@@ -16,6 +16,7 @@ struct BlockListNode{
     int type;                                           //物理类型
     bool collide;                                   //是实体碰撞方块？
     bool trans;                                         //是否透明
+    bool dnotHideFace;                          //是否强制不消隐
     QString name;                                //方块名称
     QVector<int> tex;             //材质id
     QVector<QString> texName;           //材质名称单元
@@ -62,6 +63,7 @@ public:
 
     bool isCollide();                                                       //返还可碰撞状态
     bool isTrans();                                                             //是否透明
+    bool doNotHideFace();                                           //是否强制不消隐
     int faceSum();                                                          //面数
     int getId();                                                                    //给出物理id（不是方块的编号）
     int getType();                                                                //给出类型
@@ -72,7 +74,7 @@ public:
     QVector3D getPosition() const;
     void setPosition(const QVector3D &value);
 
-    QVector3D vicinityPosition(int site) const;                                //计算上下左右前后6个方向的邻近方块坐标
+    static QVector3D vicinityPosition(QVector3D centerPos, int site);                                //计算上下左右前后6个方向的邻近方块坐标
 
 private:
     void createBlock();                                 //创建方块的面纹理等

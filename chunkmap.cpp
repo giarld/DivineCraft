@@ -5,24 +5,26 @@
 #include "block.h"
 #include "glkernel/chunkmesh.h"
 #include "gmath.h"
-
+#include "world.h"
 
 ///========================================//
 ///
 /// ========================================//
-ChunkMap::ChunkMap(QVector2D cPos)
+ChunkMap::ChunkMap(QVector2D cPos, World *myWorld)
     :chunkPosition(cPos)
     ,lastOPDC(NULL)
     ,show(true)
+    ,myWorld(myWorld)
 {
     displayChunk.clear();
     drawLock=false;
 }
 
-ChunkMap::ChunkMap(int cx, int cz)
+ChunkMap::ChunkMap(int cx, int cz, World *myWorld)
     :chunkPosition(QVector2D(cx,cz))
     ,lastOPDC(NULL)
     ,show(true)
+    ,myWorld(myWorld)
 {
     displayChunk.clear();
     drawLock=false;
@@ -161,7 +163,7 @@ bool ChunkMap::createDisplayChunk(QVector3D dcPos)
         return false;
     if(displayChunk.value(key)!=NULL)                                   //存在了，返还完成
         return true;
-    displayChunk.insert(key,new DisplayChunk(dcPos));
+    displayChunk.insert(key,new DisplayChunk(dcPos,myWorld));
     return true;
 }
 QVector2D ChunkMap::getChunkPosition() const
@@ -196,19 +198,21 @@ DisplayChunk::DisplayChunk()
     setHaveChange(false);
 }
 
-DisplayChunk::DisplayChunk(int cx, int cy, int cz)
+DisplayChunk::DisplayChunk(int cx, int cy, int cz, World *myWorld)
     :dcPosition(QVector3D(cx,cy,cz))
     ,blockCount(0)
     ,displayListID(GLuint(0))
+    ,myWorld(myWorld)
 {
     blocks.clear();
     setHaveChange(false);
 }
 
-DisplayChunk::DisplayChunk(QVector3D dcPos)
+DisplayChunk::DisplayChunk(QVector3D dcPos, World *myWorld)
     :dcPosition(dcPos)
     ,blockCount(0)
     ,displayListID(GLuint(0))
+    ,myWorld(myWorld)
 {
     blocks.clear();
 }
@@ -374,18 +378,22 @@ void DisplayChunk::updateDisplayList()
         Block *temp=mi.next().value();
         if(!temp || temp->isAir()) continue;             //空气方块跳过
         for(int i=0;i<temp->faceSum();i++){
-            Block *vis=getBlock(temp->vicinityPosition(i));
+            Block *vis=myWorld->getBlock(Block::vicinityPosition(temp->getPosition(),i));
             if(vis==NULL || vis->isAir()){
                 faces<<temp->getFace(i);
                 continue;
             }
-            if(temp->getType()==1){
+            if(temp->doNotHideFace()){                    //强制不消隐
                 faces<<temp->getFace(i);
                 continue;
             }
-            if(temp->getId()==vis->getId())
+//            if(temp->getType()==1){
+//                faces<<temp->getFace(i);
+//                continue;
+//            }
+            if(temp->getId()==vis->getId())             //相同方块间消隐
                 continue;
-            if(vis->isTrans()==false)
+            if(vis->isTrans()==false)                       //透明方块的邻近方块不消隐
                 continue;
 
             faces<<temp->getFace(i);

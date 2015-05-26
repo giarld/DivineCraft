@@ -14,15 +14,15 @@
 #include <QtOpenGL>
 
 class Block;                                                //block的提前声明
-
+class World;
 
 //显示与处理区块,管理Block
 class DisplayChunk
 {
 public:
     DisplayChunk();
-    DisplayChunk(int cx,int cy,int cz);
-    DisplayChunk(QVector3D dcPos);
+    DisplayChunk(int cx,int cy,int cz,World *myWorld);
+    DisplayChunk(QVector3D dcPos,World *myWorld);
     ~DisplayChunk();
 
     void resetDisplayChunk();
@@ -54,7 +54,7 @@ public:
 
 private:
     int calcKey(QVector3D bPos);                                    //通过方块坐标计算其存储的key
-    void updateDisplayList();                                       //更新显示列表
+    void updateDisplayList();                                       //更新显示列表,包含消隐算法
     void genDisplayList();                                                  //创建显示列表(无的前提下)
     void deleteDisplayList();                                          //移除显示列表
 private:
@@ -64,6 +64,7 @@ private:
     bool haveChange;                            //有修改
 //    bool hasBlock;                                                   //含非空气方块？
     GLuint displayListID;                                       //分配的显示列表编号
+    World *myWorld;
 };
 
 
@@ -76,8 +77,8 @@ public:
     enum{
         MINLOW=0,MAXHIGHT=255                               //最低处和最高处的层数
     };
-    ChunkMap(QVector2D cPos);
-    ChunkMap(int cx,int cz);
+    ChunkMap(QVector2D cPos,World *myWorld);
+    ChunkMap(int cx,int cz,World *myWorld);
     ~ChunkMap();
 
     bool addBlock(Block *block, bool update);                                //增加方块
@@ -110,6 +111,7 @@ private:
     DisplayChunk *lastOPDC;                                                                   //上一个被操作显示区块
     bool show;
     bool drawLock;                                                                              //绘制锁，识别是否在绘制的锁
+    World *myWorld;
 };
 
 #endif // CHUNKMAP_H

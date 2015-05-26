@@ -322,7 +322,7 @@ void Camera::reMotionVector()
 
 void Camera::hitTest()
 {
-    int handLen=8;      //手长
+    int handLen=7;      //手长
     int mm=8;               //分片精度
     QVector3D keyB;
     QVector3D preB=QVector3D(0,-100,0);           //一个默认的实体坐标
