@@ -29,7 +29,7 @@ QVector3D linePoints[][2]={
 //================================================//
 GameScene::GameScene(int width, int height, QGraphicsView *parent)
     :QGraphicsScene(parent)
-    ,maxRenderLen(10)
+    ,maxRenderLen(15)
     ,GView(parent)
     ,inSence(false)
 {
@@ -108,13 +108,14 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     drawCount++;
     QTime currT=QTime::currentTime();
     int mss=lastTime.msecsTo(currT);
-    if(mss>=100){
+    if(mss>=1000){
         glFps=(drawCount/(mss*1.0f))*1000;
         drawCount=0;
         lastTime=currT;
         dataPanel->setFps(glFps);
     }
 
+    //控制物品栏布局
     if(itemBar->isShow()){
         int h=this->height()*0.7;
         int w=h*1.35;

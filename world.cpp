@@ -111,7 +111,7 @@ void World::updateWorld()
     if(upLock)
         return;
     upLock=true;
-    qDebug()<<QTime::currentTime()<<"update world";
+    qDebug()<<QTime::currentTime()<<"update world : "<<this->cameraPosition;
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为起始区块。
 
@@ -538,7 +538,7 @@ int World::getMaxRenderLen() const
 
 void World::setMaxRenderLen(int value)
 {
-    maxRenderLen = std::min(value,24);
+    maxRenderLen = std::min(value/2,16);                        //最大渲染距离是渲染宽度的一般（人在中间嘛）
 }
 
 BlockListNode *World::getBlockIndex(int index)

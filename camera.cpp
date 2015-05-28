@@ -149,7 +149,6 @@ QVector3D Camera::position() const
 void Camera::setPosition(const QVector3D &position)
 {
     mPosition = position;
-    emit cameraMove(mPosition);                     //发出移动了的信号
 }
 
 void Camera::loadPosRot()
@@ -324,7 +323,7 @@ void Camera::reMotionVector()
 void Camera::hitTest()
 {
     int handLen=7;      //手长
-    int mm=8;               //分片精度
+    int mm=8;             //分片精度
     QVector3D keyB;
     QVector3D preB=QVector3D(0,-100,0);           //一个默认的实体坐标
     QVector3D temp=getEyePosition();
@@ -348,6 +347,7 @@ void Camera::hitTest()
         ty=ty+sightVector.y()/mm*1.0;
         tz=tz+sightVector.z()/mm*1.0;
     }
+
 }
 
 void Camera::collision(QVector3D strafe,int timeC)

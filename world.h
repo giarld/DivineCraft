@@ -80,7 +80,7 @@ private:
     QQueue<QVector3D> updateDisplayChunkQueue;                     //显示区块刷新等待队列
     bool upLock;                                                                //update单操作锁
     GLuint drawID;                                                          //显示列表ID
-    bool forcedUpdate;
+    bool forcedUpdate;                                                  //是否是重新刷新之后
 };
 
 #endif // WORLD_H
