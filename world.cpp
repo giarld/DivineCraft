@@ -80,7 +80,6 @@ bool World::removeBlock(QVector3D pos, bool update)
 Block *World::getBlock(QVector3D bPos)
 {
     QVector3D dp=DisplayChunk::calcChunckPos(bPos);
-
     ChunkMap *chunk=chunksMap.value(getKey(GMath::v3d2v2d(dp)));
     if(chunk==NULL)                                                 //空区块返还空方块
         return NULL;
@@ -120,8 +119,8 @@ void World::updateWorld()
 
     foreach (ChunkMap *cm, chunksMap) {
         if(cm && !cm->inDraw()){                                        //有效区块且区块不在绘图状态
-            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>maxRenderLen+1){
-                cm->setShow(false);
+            if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>=maxRenderLen+2){
+                //                cm->setShow(false);
                 QString key=getKey(cm->getChunkPosition());
                 if(cm->haveChange()){                                                               //未保存先保存
                     saveChunk(key);
@@ -139,6 +138,7 @@ void World::updateWorld()
 void World::forcedUpdateWorld()
 {
     chunksMap.clear();
+    forcedUpdate=true;
     updateWorld();
 }
 
@@ -157,7 +157,7 @@ void World::loadBlockIndex()
             bool collide=temp[2].toInt();
             bool trans=temp[3].toInt();
             bool notHide=temp[4].toInt();
-            QString name=temp[4];
+            QString name=temp[5];
             BlockListNode *node=new BlockListNode;
             node->id=id;
             node->type=type;
@@ -194,7 +194,7 @@ void World::loadBlockIndex()
                 if(id>=mBlockIndex.length()) continue;
                 BlockListNode *bl=mBlockIndex[id];
                 int j=0;
-                int nc;
+                int nc=0;
                 if(type==0)
                     nc=6;
                 else if(type==1)
@@ -209,7 +209,7 @@ void World::loadBlockIndex()
         }
     }
     //    foreach (BlockListNode *a, mBlockIndex) {
-    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->tex;
+    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->texName;
     //    }
 }
 
@@ -252,6 +252,9 @@ void World::updateDraw()
 {
     QTime fTime=QTime::currentTime();
     while(!updateQueue.isEmpty() && fTime.msecsTo(QTime::currentTime())<=5){                      //没次刷新最多只进行5ms
+        if(upLock){                     //这在里更新互斥锁的作用是仿制更新线程对chunksMap进行insert时主线程对其进行value的互斥操作
+            break;
+        }
         QString key=updateQueue.front();
         updateQueue.pop_front();
         ChunkMap *ch=chunksMap.value(key);
@@ -259,6 +262,10 @@ void World::updateDraw()
             ch->updateAll();
         //
         updateDisplay();
+        if(forcedUpdate){
+            emit loadOver();
+            forcedUpdate=false;
+        }
     }
 
     fTime=QTime::currentTime();
@@ -351,15 +358,42 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
         for(i=0;i<16;i++){
             for(j=0;j<16;j++){
                 QVector3D bPos=oPos+QVector3D(i,k,j);
-                newChunk->addBlock(new Block(bPos,getBlockIndex(cb[k])),false);
+                if((i==0 || j==0) && k==2)
+                    newChunk->addBlock(new Block(bPos,getBlockIndex(10)),false);
+                else
+                    newChunk->addBlock(new Block(bPos,getBlockIndex(cb[k])),false);
             }
         }
     }
 
-    int x=qrand()%16;
-    int z=qrand()%16;
-    int b=qrand()%getBlockIndex(0)->texLength;
-    newChunk->addBlock(new Block(oPos+QVector3D(x,3,z),getBlockIndex(b)),false);
+    //生成树木
+    bool cT=qrand()%10>=5?1:0;
+    if(cT){
+        int treeH=qrand()%4+5;
+        int sx=7+oPos.x();
+        int sz=7+oPos.z();
+        for(int i=3;i<=treeH+3;i++){
+            newChunk->addBlock(new Block(QVector3D(sx,i,sz),getBlockIndex(5)),false);
+        }
+        //        newChunk->addBlock(new Block(QVector3D(sx,treeH+4,sz),getBlockIndex(34)),false);
+
+        for(int h=treeH/2+3;h<=treeH+4;h++){
+            int r=qrand()%3+2;
+            if(h>treeH/2+3){
+                r-=1;
+            }
+            if(r<2)
+                r=2;
+
+            for(int x=sx-r;x<=sx+r;x++){
+                for(int z=sz-r;z<=sz+r;z++){
+                    if(!(QVector2D(x,z).distanceToPoint(QVector2D(sx,sz))>r || (x==sx&& z==sz))){
+                        newChunk->addBlock(new Block(QVector3D(x,h,z),getBlockIndex(34)),false);
+                    }
+                }
+            }
+        }
+    }
 
     return newChunk;
 }
@@ -478,6 +512,7 @@ void World::updateDisplay()
     }
     glEndList();
 }
+
 QString World::getWorldName() const
 {
     return worldName;
@@ -503,7 +538,7 @@ int World::getMaxRenderLen() const
 
 void World::setMaxRenderLen(int value)
 {
-    maxRenderLen = std::min(value,30);
+    maxRenderLen = std::min(value,24);
 }
 
 BlockListNode *World::getBlockIndex(int index)
@@ -524,10 +559,14 @@ QVector3D World::getCameraPosition() const
 
 void World::changeCameraPosition(const QVector3D &cPos)
 {
-    cameraPosition = cPos;
-    QVector2D nowC=GMath::v3d2v2d(DisplayChunk::calcChunckPos(cameraPosition));
-    if(nowC!=lastCameraChunk){
+    cameraPosition = DisplayChunk::calcChunckPos(cPos);
+    QVector2D nowC=GMath::v3d2v2d(cameraPosition);
+    if(nowC!=lastCameraChunk){                                              //跨越了区块要进行区块更新
         lastCameraChunk=nowC;
         updateWorld();
+    }
+    else if(lastCameraHight!=cameraPosition.y()){                       //随着高度的变化，要刷掉视距以外的物体
+        lastCameraHight=cameraPosition.y();
+        updateDisplayChunkQueue.push_back(cPos);                //由于当前函数不再主线程中，只能寻求主线程进行显示刷新
     }
 }

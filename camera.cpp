@@ -149,6 +149,7 @@ QVector3D Camera::position() const
 void Camera::setPosition(const QVector3D &position)
 {
     mPosition = position;
+    emit cameraMove(mPosition);                     //发出移动了的信号
 }
 
 void Camera::loadPosRot()
@@ -308,7 +309,7 @@ void Camera::setDefaultValue()
     moveSpeed=0.0035;
     jumSpeed=0.0100;
     G=0.00003;
-    MaxSpeed=0.1;
+    MaxSpeed=0.08;
 }
 
 void Camera::reMotionVector()
@@ -408,7 +409,8 @@ void Camera::collision(QVector3D strafe,int timeC)
         newPosition.setY(float(GMath::g2Int(newPosition.y()+h))-h);
         ySpeed=-G;
     }
-
+    if(newPosition.y()<-100)
+        newPosition.setY(200);
     mPosition=newPosition;
 }
 bool Camera::getPause() const
@@ -451,7 +453,3 @@ void Camera::setGameMode(const int &value)
 {
     gameMode = value;
 }
-
-
-
-

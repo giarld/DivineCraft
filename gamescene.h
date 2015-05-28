@@ -31,13 +31,13 @@ public:
 
     void startGame();
     void pauseGame();
+
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
-    void timerEvent(QTimerEvent *event);
 
     void setStates();               //设置状态，初始化GL绘图
     void setLights();               //光照
@@ -57,6 +57,10 @@ public slots:
     void showItemBar();                                 //显示物品栏
     void hideItemBar();                                 //隐藏物品栏
     void mouseMove();                                   //鼠标的移动槽（仅当进入场景）
+    void loadOverSlot();                                    //预加载完毕接收槽
+    void showMessage(QString message, QColor textColor, int textSize,  int showTime);                                     //显示一个MessagePanel;
+private slots:
+    void handleGameMessage();                      //处理消息等待队列
 
 private:
     void initGame();                                                                    //初始化游戏场景
@@ -95,7 +99,9 @@ private:
     int drawCount;
 
     ItemBar *itemBar;
-    bool isShowItemBar;                                   //itembar是否显示状态
+
+    MessagePanel *messagePanel;
+    QQueue<GameMessage *> gameMessages;
 };
 
 

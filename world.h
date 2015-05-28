@@ -47,7 +47,7 @@ public:
     void setFirstCameraPosition(const QVector3D &cPos);                             //设置Camera坐标的初始值
 
 signals:
-    void upProgress(int p);                     //返还更新世界进度的信号
+    void loadOver();                     //预加载完毕信号
 
 public slots:
     void updateWorld();                     //更新世界的槽,区块的加载生成和保存（会在附线程中被执行）
@@ -68,10 +68,11 @@ private:
     void updateDisplay();                                                                       //刷新显示列表
 
 private:
-    QMap<QString,ChunkMap*> chunksMap;               //区块列表。key="chunkX-chunkY"
+    QMap<QString,ChunkMap*> chunksMap;               //区块列表。key="chunkXxchunkY"
     int maxRenderLen;                                            //额，最大的区块显示距离，以camera所在区块为起点(最大加载距离比最大可视距离要大1)
     QVector3D cameraPosition;                                       //camera的坐标，让区块能更新的前提
     QVector2D lastCameraChunk;                                  //camera所在区块的坐标记录
+    int lastCameraHight;                                                    //camera所在区块高度
     QString worldName;
     QString filePath;                                                               //地图文件所在目录地址
     QVector<BlockListNode *> mBlockIndex;                        //存储所有类型方块的物理属性
@@ -79,6 +80,7 @@ private:
     QQueue<QVector3D> updateDisplayChunkQueue;                     //显示区块刷新等待队列
     bool upLock;                                                                //update单操作锁
     GLuint drawID;                                                          //显示列表ID
+    bool forcedUpdate;
 };
 
 #endif // WORLD_H

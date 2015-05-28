@@ -43,6 +43,7 @@ GameScene::GameScene(int width, int height, QGraphicsView *parent)
     connect(timer,SIGNAL(timeout()),camera,SLOT(cMove()));
     connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
     connect(timer,SIGNAL(timeout()),this,SLOT(mouseMove()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(handleGameMessage()));
     timer->start();
 }
 
@@ -68,6 +69,10 @@ GameScene::~GameScene()
     delete lineQua;
     delete dataPanel;
     delete itemBar;
+
+    delete messagePanel;
+    while(!gameMessages.isEmpty())
+        gameMessages.pop_front();
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -83,7 +88,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
 
     glMatrixMode(GL_PROJECTION);
 
-    qgluPerspective(60.0,width/height,0.01f,400.0f);
+    qgluPerspective(60.0,width/height,0.01f,500.0f);
 
     glMatrixMode(GL_MODELVIEW);
 
@@ -108,6 +113,12 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
         drawCount=0;
         lastTime=currT;
         dataPanel->setFps(glFps);
+    }
+
+    if(itemBar->isShow()){
+        int h=this->height()*0.7;
+        int w=h*1.35;
+        itemBar->setGeometry((this->width()-w)/2,(this->height()-h)/2,w,h);
     }
 }
 
@@ -135,7 +146,7 @@ void GameScene::pauseGame()
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->button()==Qt::LeftButton){
-        if(!isShowItemBar){
+        if(!itemBar->isShow()){
             if(!inSence){
                 inSence=true;
                 mouseLock();
@@ -148,7 +159,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
     }
     else if(event->button()==Qt::RightButton){
-        if(!isShowItemBar){
+        if(!itemBar->isShow()){
             if(inSence){
                 emit addBlock();
             }
@@ -183,7 +194,7 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->setGameMode(Camera::SURVIVAL);
     }
     else if(event->key()==Qt::Key_E){
-        if(isShowItemBar){
+        if(itemBar->isShow()){
             hideItemBar();
             inSence=true;
             mouseLock();
@@ -252,15 +263,11 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
     //    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
 }
 
-void GameScene::timerEvent(QTimerEvent *event)
-{
-    qWarning("eve");
-}
-
 void GameScene::setStates()
 {
     //    glShadeModel(GL_SMOOTH);
     glClearColor(0.0,0.65,1.0,0.5);
+//    glClearColor(0.0,0.0,0.0,0.2);
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);                //启用深度测试
     glDepthFunc(GL_LEQUAL);
@@ -272,11 +279,11 @@ void GameScene::setStates()
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
-    //    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-    //        glDepthRange(0.0f,1.0f);
-    //        glClearDepth(1.0f);
-    //            glDepthFunc(GL_LEQUAL);
-    //            glDepthMask(GL_FALSE);
+//        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+//            glDepthRange(0.0f,1.0f);
+//            glClearDepth(1.0f);
+//                glDepthFunc(GL_LEQUAL);
+//                glDepthMask(GL_FALSE);
     //反锯齿
     //    glEnable(GL_BLEND);
     //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -392,6 +399,8 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 void GameScene::firstLoad()
 {
     emit updateWorld();
+    showMessage(tr("世界正在加载中\n"
+                   "请稍等"),Qt::white,10,3);
 }
 
 void GameScene::saveOption()
@@ -406,13 +415,11 @@ void GameScene::dataShowPosition(const QVector3D &pos,const QVector3D &ePos)
 
 void GameScene::showItemBar()
 {
-    isShowItemBar=true;
-    itemBar->show(100,100,200,200);
+    itemBar->show();
 }
 
 void GameScene::hideItemBar()
 {
-    isShowItemBar=false;
     itemBar->hide();
 }
 
@@ -422,6 +429,26 @@ void GameScene::mouseMove()
         QPoint dtPoint=GView->cursor().pos()-centerPoint;
         camera->sightMove(QPointF(dtPoint));
         mouseLock();
+    }
+}
+
+void GameScene::loadOverSlot()
+{
+    showMessage(tr("世界加载完成"),Qt::white,10,5);
+}
+
+void GameScene::showMessage(QString message, QColor textColor, int textSize, int showTime)
+{
+    gameMessages.push_back(new GameMessage(message,textColor,textSize,showTime));
+}
+
+void GameScene::handleGameMessage()
+{
+    if(messagePanel->isVisible()==false){               //messagePanel处于空闲且队列中有消息，则显示消息
+        if(!gameMessages.isEmpty()){
+            messagePanel->showMessage(gameMessages.front(),this);
+            gameMessages.pop_front();
+        }
     }
 }
 
@@ -477,6 +504,7 @@ void GameScene::initGame()
     connect(camera,SIGNAL(cameraMove(QVector3D)),world,SLOT(changeCameraPosition(QVector3D)));          //连接camera移动与世界相机位移的槽
     connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()));
     connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()));
+    connect(world,SIGNAL(loadOver()),this,SLOT(loadOverSlot()));
     wThread->start();
 
     world->setMaxRenderLen(maxRenderLen);
@@ -489,8 +517,6 @@ void GameScene::initGame()
     loadTexture();                      //加载纹理
 
     camera->loadPosRot();                                   //加载位置视角信息
-    firstLoad();            //强制首次加载
-
     //======================
     line=new LineMesh(2);           //十字准心
     float lineLen=0.0004;
@@ -508,8 +534,15 @@ void GameScene::initGame()
     dataPanel->setDisplayRadius(maxRenderLen);
     connect(camera,SIGNAL(getPositions(QVector3D,QVector3D)),this,SLOT(dataShowPosition(QVector3D,QVector3D)));
     //    dataPanel->hide();
+    //物品栏
     itemBar=new ItemBar(this);
     hideItemBar();
+    //=======================
+    gameMessages.clear();
+    messagePanel=new MessagePanel;
+    addItem(messagePanel);
+    //===========================
+    firstLoad();            //强制首次加载
 }
 
 void GameScene:: loadTexture()

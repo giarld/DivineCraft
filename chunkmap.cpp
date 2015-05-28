@@ -96,11 +96,12 @@ void ChunkMap::draw(const QVector3D &pos, int maxLen)
     if(drawLock)
         return ;
     drawLock=true;
-    QVector3D oPos=DisplayChunk::calcChunckPos(pos);
 
     foreach (DisplayChunk *dc, displayChunk) {
-        if(dc && GMath::gAbs(int(dc->getDcPosition().distanceToPoint(oPos)))<=maxLen)          //有效区块且离camera区块的距离小于等于maxLen
+        if(dc && GMath::gAbs(int(dc->getDcPosition().distanceToPoint(pos)))<=maxLen)          //有效区块且离camera区块的距离小于等于maxLen
+        {
             dc->draw();
+        }
     }
     drawLock=false;
 }

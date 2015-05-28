@@ -36,7 +36,7 @@ int GMath::g2Int(float x)
 {
     if(float(int(x))==x)
         return x;
-    if(x>=0.0)
+    if(x>=0.0f)
         return int(x);
     else{
         return int(x)-1;

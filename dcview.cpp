@@ -52,8 +52,7 @@ void DCView::keyPressEvent(QKeyEvent *event)
         else
             this->showFullScreen();
     }
-    else if(event->key()==Qt::Key_Q)
-        exit(1);
+
     QGraphicsView::keyPressEvent(event);
 }
 
