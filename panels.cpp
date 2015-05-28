@@ -129,6 +129,7 @@ void MessagePanel::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->setBrush(QBrush(QColor(0,255,0,alpha)));
 
     QPixmap pixmap(":/res/divinecraft/textures/blocks/brick.png");
+
 //    painter->drawRect(rect);
     painter->drawPixmap(rect,pixmap,QRectF(0,0,pixmap.width(),pixmap.height()));
     painter->setPen(QColor(gMessage->textColor.red()

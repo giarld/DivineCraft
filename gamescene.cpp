@@ -435,6 +435,14 @@ void GameScene::mouseMove()
 void GameScene::loadOverSlot()
 {
     showMessage(tr("世界加载完成"),Qt::white,10,5);
+    if(!itemBar->isShow()){
+        if(!inSence){
+            inSence=true;
+            mouseLock();
+            camera->bind();
+            startGame();
+        }
+    }
 }
 
 void GameScene::showMessage(QString message, QColor textColor, int textSize, int showTime)
