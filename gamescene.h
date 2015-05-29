@@ -36,6 +36,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
@@ -58,7 +59,7 @@ public slots:
     void hideBackPackBar();                                 //隐藏物品栏
     void mouseMove();                                   //鼠标的移动槽（仅当进入场景）
     void loadOverSlot();                                    //预加载完毕接收槽
-    void showMessage(QString message, QColor textColor=Qt::white, int textSize=10,  int showTime=3);                                     //显示一个MessagePanel(含默认值)
+    void showMessage(QString message,int showTime=3, int textSize=10,QColor textColor=Qt::white);                                     //显示一个MessagePanel(含默认值)
 private slots:
     void handleGameMessage();                      //处理消息等待队列
 
@@ -98,10 +99,10 @@ private:
     int glFps;
     int drawCount;
 
-    BackPackBar *backPackBar;
-
+    BackPackBar *backPackBar;                   //背包栏
     MessagePanel *messagePanel;
     QQueue<GameMessage *> gameMessages;
+    ItemBar *itemBar;                                       //物品栏
 };
 
 

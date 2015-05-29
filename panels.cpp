@@ -1,4 +1,4 @@
-#include <panels.h>
+﻿#include <panels.h>
 #include "gmath.h"
 #include "world.h"
 #include "block.h"
@@ -113,6 +113,7 @@ void MessagePanel::showMessage(GameMessage *message, QGraphicsScene *s)
     gMessage->text=str;
     beginTime=QTime::currentTime();
     alpha=255;
+    this->setZValue(0x3f3f3f3f);
     this->show();
 }
 
@@ -173,7 +174,7 @@ BackPackBar::BackPackBar(QGraphicsScene *scene)
     widget=new BackPackBarWidget();
     widgetProxy->setWidget(widget);
     widget->setGeometry(100,100,100,200);
-    widgetProxy->show();
+    //    widgetProxy->show();
     qobject_cast<QGraphicsScene *>(parent())->addItem(widgetProxy);
 }
 
@@ -200,6 +201,11 @@ void BackPackBar::setGeometry(int x, int y, int w, int h)
     widget->setGeometry(rect);
 }
 
+void BackPackBar::setViewPos(QPoint pos)
+{
+    widget->setViewPos(pos);
+}
+
 bool BackPackBar::isShow()
 {
     return widgetProxy->isVisible();
@@ -210,6 +216,11 @@ void BackPackBar::setWorld(World *world)
     widget->setWorld(world);
 }
 
+void BackPackBar::setPocket(ItemBar *itemBar)
+{
+    widget->setPocket(itemBar);
+}
+
 //=========================
 //背包的显示组件
 //=========================
@@ -217,16 +228,14 @@ BackPackBarWidget::BackPackBarWidget()
     :QWidget(0)
 {
     pocketThing.clear();
-    //    for(int i=0;i<5*9;i++){                                         //创建49个物品容器对象
-    //        ThingItemPanel * ti=new ThingItemPanel(16,this);
-    //        barThing.append(ti);
-    //    }
 
     for(int i=0;i<9;i++){
         ThingItemPanel *pi=new ThingItemPanel(16,this);
         pocketThing.append(pi);
+        connect(pi,SIGNAL(mouseChoose()),this,SLOT(chooseItem()));
     }
 
+    this->setMouseTracking(true);
     this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
 }
 
@@ -252,35 +261,70 @@ void BackPackBarWidget::setWorld(World *world)
     initBar();
 }
 
+//这里要求在操作pocket时严格保证其指针不变
+void BackPackBarWidget::setPocket(ItemBar *itemBar)
+{
+    if(itemBar==NULL){
+        qWarning()<<"BackPackBarWidget::setPocket警告：错误的ItemBar类指针传递！当前指针为空";
+        return ;
+    }
+    for(int i=0;i<9;i++){
+        pocketThing[i]->setItem(itemBar->getThingItem(i));
+
+        setPocketThingItem(barThing[i]->getItem(),64,i);
+    }
+}
+
+void BackPackBarWidget::setPocketThingItem(ThingItem *item,int amount,int index)
+{
+    if(index<0 || index>=9)
+        return ;
+    ThingItem *t=item;
+    pocketThing[index]->setItem(t->id,t->name,t->texName,amount);
+}
+
+void BackPackBarWidget::setViewPos(QPoint pos)
+{
+    viewPos=pos;
+}
+
 void BackPackBarWidget::paintEvent(QPaintEvent *)
 {
     QRect wRect(0,0,this->width(),this->height());
     QPainter painter(this);
+    QPixmap pixmap(":/res/divinecraft/textures/ui/back_pack_bar.jpg");
+    //    painter.drawRect(wRect);
+    painter.drawPixmap(wRect,pixmap,QRect(0,0,pixmap.width(),pixmap.height()));
+    painter.setPen(Qt::black);
+    painter.drawText(wRect,Qt::AlignHCenter,tr("物品栏"));
     //对物品容器进行布局
-    int bsize=(wRect.width()-40)/9;
-    int bwh=bsize-5;
+    int bsize=(wRect.width()-60)/9;
+    //    int bwh=bsize-5;
     int startH=wRect.height()-bsize-20;
+
     painter.setPen(Qt::blue);
     for(int i=0;i<9;i++){
-        pocketThing[i]->setSize(bwh);
-        pocketThing[i]->move(20+i*bsize,startH);
-        painter.drawRect(QRect(20+i*bsize,startH,bwh,bwh));
+        pocketThing[i]->setSize(bsize);
+        pocketThing[i]->move(30+i*bsize,startH);
+        painter.drawRect(QRect(30+i*bsize,startH,bsize,bsize));
     }
+
     startH=startH-20-(bsize*5);
     painter.setPen(Qt::red);
     for(int i=0;i<barThing.length();i++){
         int x=i%9;
         int y=i/9;
-        barThing[i]->setSize(bwh);
-        barThing[i]->move(20+x*bsize,startH+y*bsize);
-        painter.drawRect(20+x*bsize,startH+y*bsize,bwh,bwh);
+        barThing[i]->setSize(bsize);
+        barThing[i]->move(30+x*bsize,startH+y*bsize);
+        painter.drawRect(30+x*bsize,startH+y*bsize,bsize,bsize);
     }
+    flowItem->setSize(bsize);
+    flowItem->move(QCursor::pos()-viewPos-this->pos()+QPoint(0,5));
+}
 
-
-    QPen pen;
-    pen.setColor(Qt::red);
-    painter.setPen(pen);
-    painter.drawRect(wRect);
+void BackPackBarWidget::mousePressEvent(QMouseEvent *event)
+{
+    QWidget::mousePressEvent(event);
 }
 
 void BackPackBarWidget::initBar()
@@ -295,6 +339,16 @@ void BackPackBarWidget::initBar()
         ti->setItem(bl->id,bl->name,bl->texName[0],-1);
         barThing.append(ti);
     }
+    flowItem=new ThingItemPanel(16,this);
+    flowItem->setNULLItem();
+    //    flowItem->setItem(barThing[0]->getItem());
+}
+
+void BackPackBarWidget::chooseItem()
+{
+    ThingItemPanel* item = qobject_cast<ThingItemPanel *>(sender());
+
+    flowItem->setItem(item->getItem());
 }
 
 //===========================
@@ -309,8 +363,8 @@ ThingItemPanel::ThingItemPanel(int size, QWidget *parent)
 
 ThingItemPanel::~ThingItemPanel()
 {
-    if(item)
-        delete item;
+    //    if(item)
+    //        delete item;
 }
 
 void ThingItemPanel::setItem(int id, QString table, QString texName, int amount)
@@ -325,12 +379,18 @@ void ThingItemPanel::setItem(int id, QString table, QString texName, int amount)
 
 void ThingItemPanel::setItem(ThingItem *i)
 {
-    if(item==NULL){
-        item=new ThingItem(i->id,i->name,i->texName,i->amount);
-    }
-    else{
-        item->setItem(i->id,i->name,i->texName,i->amount);
-    }
+    item=i;
+}
+
+void ThingItemPanel::setNULLItem()
+{
+    item=new ThingItem(0,"","air.png",-1);
+}
+
+
+ThingItem *ThingItemPanel::getItem()
+{
+    return item;
 }
 
 void ThingItemPanel::setSize(int size)
@@ -338,20 +398,188 @@ void ThingItemPanel::setSize(int size)
     tSize=size;
 }
 
+bool ThingItemPanel::isNULL()
+{
+    if(item==NULL || item->id==0)           //空的条件
+        return true;
+    return false;
+}
+
 void ThingItemPanel::paintEvent(QPaintEvent *)
 {
     this->setFixedSize(tSize,tSize);
     QRect tRect(0,0,tSize,tSize);
     QPainter painter(this);
-//    painter.setPen(Qt::blue);
-//    painter.drawRect(tRect);
-    if(item==NULL)
+    //    painter.setPen(Qt::blue);
+    //    painter.drawRect(tRect);
+    if(item==NULL || item->id==0)
         return;
     QRect texRect(tRect.x()+tRect.width()*0.1,tRect.y()+tRect.height()*0.1
                   ,tRect.width()*0.8,tRect.height()*0.8);
-    QPixmap texmap(tr(":/res/divinecraft/textures/blocks/%1").arg(item->texName));
+    QPixmap texmap(tr(":/res/divinecraft/textures/blocks/%1").arg(item->texName));                  //选取正面材质来作为图标
     painter.drawPixmap(texRect,texmap,QRect(0,0,texmap.width(),texmap.height()));
     painter.setPen(Qt::white);
-    if(item->amount>=0)
-        painter.drawText(tRect,QString::number(item->amount));
+    if(item->amount>=0){
+        painter.drawText(tRect,Qt::AlignBottom | Qt::AlignRight,QString::number(item->amount));
+    }
+}
+
+void ThingItemPanel::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() & Qt::LeftButton){           //按下左键等于选中当前的物品
+        emit mouseChoose();
+    }
+}
+
+//====================================
+///
+/// \brief ItemBar::ItemBar
+/// \param scene
+ItemBar::ItemBar(QGraphicsScene *scene)
+    :QObject(scene)
+{
+    widget=new ItemBarWidget();
+    proxyWidget=new QGraphicsProxyWidget(0);
+    proxyWidget->setWidget(widget);
+    scene->addItem(proxyWidget);
+    connect(widget,SIGNAL(thingIndexChange(int)),this,SIGNAL(thingIndexChange(int)));
+    proxyWidget->show();
+}
+
+ThingItem *ItemBar::getThingItem(int i)
+{
+    return widget->getThingItem(i);
+}
+
+void ItemBar::setThingItem(int id, QString table, QString texName, int amount, int index)
+{
+    widget->setThingItem(id,table,texName,amount,index);
+}
+
+void ItemBar::resetSIze(int sceneW,int sceneH, int h)
+{
+    int size=h*0.8;
+    int ww=size*9+8*(h*0.1)+h*0.4;
+    widget->setGeometry((sceneW-ww)/2,sceneH-h-10,ww,h);
+}
+
+void ItemBar::setIndex(int i)
+{
+    widget->setIndex(i);
+}
+
+void ItemBar::nextIndex()
+{
+    widget->nextIndex();
+}
+
+void ItemBar::lastIndex()
+{
+    widget->lastIndex();
+}
+
+//=========================================
+//物品栏显示组件
+//=========================================
+ItemBarWidget::ItemBarWidget()
+    :QWidget(0)
+{
+    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
+    currentIndex=0;
+    for(int i=0;i<9;i++){
+        ThingItemPanel *item=new ThingItemPanel(16,this);
+        pocketThing.append(item);
+        item->setNULLItem();                                     //设置为默认物品
+    }
+}
+
+ItemBarWidget::~ItemBarWidget()
+{
+
+}
+
+void ItemBarWidget::setThingItem(ThingItem *t, int index)
+{
+    if(index<0 || index>=9)
+        return;
+    pocketThing[index]->setItem(t);
+}
+
+void ItemBarWidget::setThingItem(int id, QString table, QString texName, int amount, int index)
+{
+    pocketThing[index]->setItem(id,table,texName,amount);
+}
+
+ThingItem *ItemBarWidget::currThingItem()
+{
+    return pocketThing[currentIndex]->getItem();
+}
+
+int ItemBarWidget::getCurrThingID()
+{
+    return pocketThing[currentIndex]->getItem()->id;
+}
+
+ThingItem *ItemBarWidget::getThingItem(int i)
+{
+    if(i<0 || i>=9)
+        return NULL;
+    return pocketThing[i]->getItem();
+}
+
+void ItemBarWidget::setIndex(int i)
+{
+    if(i<0 || i>=9)
+        return;
+    currentIndex=i;
+    emit thingIndexChange(pocketThing[currentIndex]->getItem()->id);
+}
+
+void ItemBarWidget::nextIndex()
+{
+    currentIndex++;
+    if(currentIndex>=9)
+        currentIndex=0;
+    emit thingIndexChange(pocketThing[currentIndex]->getItem()->id);
+}
+
+void ItemBarWidget::lastIndex()
+{
+    currentIndex--;
+    if(currentIndex<0)
+        currentIndex=8;
+    emit thingIndexChange(pocketThing[currentIndex]->getItem()->id);
+}
+
+void ItemBarWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    QRect rect(0,0,this->width(),this->height());
+    int size=this->height()*0.8;
+    QPen backPen;
+    backPen.setWidth(2);
+    backPen.setColor(Qt::white);
+    painter.setPen(backPen);
+    painter.setBrush(QBrush(QColor(63,221,111,100)));
+    painter.drawRect(rect);
+
+    int x=this->height()*0.2;           //前空20%高度
+    int y=this->height()*0.1;
+
+    QPen selectPen;
+    selectPen.setWidth(3);
+    selectPen.setColor(Qt::red);
+    for(int i=0;i<9;i++){
+        if(currentIndex==i){
+            painter.setPen(selectPen);
+            painter.drawRect(x-rect.height()*0.1,0,rect.height(),rect.height());
+            pocketThing[i]->setSize(rect.height());
+            pocketThing[i]->move(x-rect.height()*0.1,0);
+        }
+        else{
+            pocketThing[i]->setSize(size);
+            pocketThing[i]->move(x,y);
+        }
+        x=x+size+rect.height()*0.1;
+    }
 }

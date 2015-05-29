@@ -6,34 +6,6 @@
 #include "glkernel/glextensions.h"
 #include <QApplication>
 
-class GraphicsView : public QGraphicsView
-{
-public:
-    GraphicsView()
-    {
-        setWindowTitle(tr("Boxes"));
-        setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-        //setRenderHints(QPainter::SmoothPixmapTransform);
-    }
-
-protected:
-    void resizeEvent(QResizeEvent *event) {
-        if (scene())
-            scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
-        QGraphicsView::resizeEvent(event);
-    }
-    void keyPressEvent(QKeyEvent *event){
-        if(event->key()==Qt::Key_F11){
-            if(this->isFullScreen())
-                this->showNormal();
-            else
-                this->showFullScreen();
-        }
-        QGraphicsView::keyPressEvent(event);
-    }
-};
-
-
 inline bool matchString(const char *extensionString, const char *subString)
 {
     int subStringLength = strlen(subString);

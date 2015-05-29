@@ -95,34 +95,102 @@ public:
     ~ThingItemPanel();
     void setItem(int id,QString table,QString texName,int amount);              //设置item属性
     void setItem(ThingItem *i);
+    void setNULLItem();                                         //设置为空气物品(即空的)
     void setAmount(int s);                                  //设置数量
-
+    ThingItem *getItem();
     void setSize(int size);
+    bool isNULL();                                      //是否为空
 protected:
     void paintEvent(QPaintEvent *);
+    void mousePressEvent(QMouseEvent *event);
+
+signals:
+    void mouseChoose();
+
 private:
     int tSize;
     ThingItem *item;
 };
 
+//======================================
+//物品栏组件
+class ItemBarWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    ItemBarWidget();
+    ~ItemBarWidget();
+
+    void setThingItem(ThingItem *t,int index);                      //设置index位置上的物品为t
+    void setThingItem(int id, QString table, QString texName, int amount, int index);
+    ThingItem *currThingItem();                                             //返还当前位子上的物品
+    int getCurrThingID();                                                           //返还当前所持物品ID
+    ThingItem *getThingItem(int i);                                         //返还i位置上的ThingItem
+    void setIndex(int i);                                               //设置物品选择位置
+    void nextIndex();                                                   //下一个选择位置
+    void lastIndex();                                                   //上一个选择位置
+
+protected:
+    void paintEvent(QPaintEvent *);
+
+signals:
+    void thingIndexChange(int blockId);
+
+private:
+    QVector<ThingItemPanel *>pocketThing;               //物品
+    int currentIndex;                                                           //当前选中的位置
+};
+
+//物品栏
+class ItemBar : public QObject
+{
+    Q_OBJECT
+public:
+    ItemBar(QGraphicsScene *scene);
+    ThingItem *getThingItem(int i);                                         //返还i位置上的ThingItem
+    void setThingItem(int id, QString table, QString texName, int amount, int index);
+    void resetSIze(int sceneW,int sceneH,int h);                //设置物品栏大小，sceneW是场景宽，sceneH是场景高，h是物品栏高度
+
+    void setIndex(int i);                                               //设置物品选择位置
+    void nextIndex();                                                   //下一个选择位置
+    void lastIndex();                                                   //上一个选择位置
+signals:
+    void thingIndexChange(int blockId);                 //传递物品选择变换，传递的是方块id
+
+private:
+    ItemBarWidget *widget;
+    QGraphicsProxyWidget *proxyWidget;
+};
+
+//=======================================
 class BackPackBarWidget : public QWidget
 {
     Q_OBJECT
 public:
     BackPackBarWidget();
     ~BackPackBarWidget();
-    void setWorld(World *world);
+    void setWorld(World *world);                            //引入世界指针
+    void setPocket(ItemBar *itemBar);                           //使用该函数设置物品栏物品
+
+    void setPocketThingItem(ThingItem *item, int amount, int index);
+    void setViewPos(QPoint pos);
 
 protected:
     void paintEvent(QPaintEvent *);
+    void mousePressEvent(QMouseEvent *event);
 
 private:
     void initBar();                         //初始化物品栏
 
+private slots:
+    void chooseItem();
+
 private:
-    QVector<ThingItemPanel*>pocketThing;              //口袋物品
+    QVector<ThingItemPanel*>pocketThing;              //口袋物品  !!其中ThingItem的指针要求保持不变。
     QVector<ThingItemPanel*>barThing;                    //背包栏里的物品
+    ThingItemPanel *flowItem;                                       //漂浮的Item
     World *myWorld;
+    QPoint viewPos;                                                         //全局窗体的坐标
 };
 
 class BackPackBar : public QObject
@@ -135,23 +203,18 @@ public:
     void show();
     void hide();
     void setGeometry(int x,int y,int w,int h);
+    void setViewPos(QPoint pos);
     bool isShow();           //是否呈现
     void setWorld(World *world);
+    void setPocket(ItemBar *itemBar);
 protected:
 
 private:
-    QRect rect;         
+    QRect rect;
     QGraphicsProxyWidget *widgetProxy;
     BackPackBarWidget *widget;
 };
-//======================================
-//物品栏
-class ItemBar : public QObject
-{
-    Q_OBJECT
-public:
-    ItemBar(QGraphicsScene *scene);
-}
+
 
 #endif // PANELS_H
 

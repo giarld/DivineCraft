@@ -9,20 +9,20 @@
 
 //选定线框的顶点偏移
 QVector3D linePoints[][2]={
-    {QVector3D(-0.001,1.001,-0.001),QVector3D(-0.001,1.001,1.001)},
-    {QVector3D(1.001,1.001,-0.001),QVector3D(1.001,1.001,1.001)},
-    {QVector3D(-0.001,1.001,-0.001),QVector3D(1.001,1.001,-0.001)},
-    {QVector3D(-0.001,1.001,1.001),QVector3D(1.001,1.001,1.001)},
+    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,1.005,1.005)},
+    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,1.005,1.005)},
+    {QVector3D(-0.005,1.005,-0.005),QVector3D(1.005,1.005,-0.005)},
+    {QVector3D(-0.005,1.005,1.005),QVector3D(1.005,1.005,1.005)},
 
-    {QVector3D(-0.001,-0.001,-0.001),QVector3D(-0.001,-0.001,1.001)},
-    {QVector3D(1.001,-0.001,-0.001),QVector3D(1.001,-0.001,1.001)},
-    {QVector3D(-0.001,-0.001,-0.001),QVector3D(1.001,-0.001,-0.001)},
-    {QVector3D(-0.001,-0.001,1.001),QVector3D(1.001,-0.001,1.001)},
+    {QVector3D(-0.005,-0.005,-0.005),QVector3D(-0.005,-0.005,1.005)},
+    {QVector3D(1.005,-0.005,-0.005),QVector3D(1.005,-0.005,1.005)},
+    {QVector3D(-0.005,-0.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
+    {QVector3D(-0.005,-0.005,1.005),QVector3D(1.005,-0.005,1.005)},
 
-    {QVector3D(-0.001,1.001,-0.001),QVector3D(-0.001,-0.001,-0.001)},
-    {QVector3D(-0.001,1.001,1.001),QVector3D(-0.001,-0.001,1.001)},
-    {QVector3D(1.001,1.001,-0.001),QVector3D(1.001,-0.001,-0.001)},
-    {QVector3D(1.001,1.001,1.001),QVector3D(1.001,-0.001,1.001)}
+    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,-0.005,-0.005)},
+    {QVector3D(-0.005,1.005,1.005),QVector3D(-0.005,-0.005,1.005)},
+    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
+    {QVector3D(1.005,1.005,1.005),QVector3D(1.005,-0.005,1.005)}
 };
 
 //================================================//
@@ -121,6 +121,11 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
         int h=this->height()*0.7;
         int w=h*1.35;
         backPackBar->setGeometry((this->width()-w)/2,(this->height()-h)/2,w,h);
+        backPackBar->setViewPos(QPoint(GView->pos().x()
+                                       ,GView->pos().y()+(GView->frameSize().height()-GView->height())));
+    }
+    if(itemBar){
+        itemBar->resetSIze(this->width(),this->height(),40);
     }
 }
 
@@ -177,8 +182,22 @@ void GameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    //            qDebug()<<event->scenePos();
     QGraphicsScene::mouseMoveEvent(event);
+}
+
+void GameScene::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+    QGraphicsScene::wheelEvent(event);
+    if (!event->isAccepted()) {
+        int fx= event->delta();
+        if(fx<0){
+            itemBar->nextIndex();
+        }
+        else if(fx>0){
+            itemBar->lastIndex();
+        }
+        event->accept();
+    }
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
@@ -209,51 +228,42 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->unBind();
             pauseGame();
             mouseUnLock();
-            showMessage(tr("打开了物品栏"));
+            showMessage(tr("打开了物品栏"),1);
         }
     }
     else{
-        int bId=1;
         switch (event->key()) {
         case Qt::Key_1:
-            bId=1;
+            itemBar->setIndex(0);
             break;
         case Qt::Key_2:
-            bId=2;
+            itemBar->setIndex(1);
             break;
         case Qt::Key_3:
-            bId=3;
+            itemBar->setIndex(2);
             break;
         case Qt::Key_4:
-            bId=4;
+            itemBar->setIndex(3);
             break;
         case Qt::Key_5:
-            bId=5;
+            itemBar->setIndex(4);
             break;
         case Qt::Key_6:
-            bId=6;
+            itemBar->setIndex(5);
             break;
         case Qt::Key_7:
-            bId=7;
+            itemBar->setIndex(6);
             break;
         case Qt::Key_8:
-            bId=8;
+            itemBar->setIndex(7);
             break;
         case Qt::Key_9:
-            bId=9;
-            break;
-        case Qt::Key_0:
-            bId=10;
-            break;
-        case Qt::Key_U:
-            bId=34;
+            itemBar->setIndex(8);
             break;
         default:
-            bId=camera->getBlockId();
             camera->keyPress(event->key());
             break;
         }
-        camera->setBlockId(bId);
     }
     QGraphicsScene::keyPressEvent(event);
     //    qDebug()<<QTime::currentTime()<<"press:"<<event->key();
@@ -403,7 +413,7 @@ void GameScene::firstLoad()
 {
     emit updateWorld();
     showMessage(tr("世界正在加载中\n"
-                   "请稍等"),Qt::white,10,3);
+                   "请稍等"),3,10,Qt::white);
 }
 
 void GameScene::saveOption()
@@ -437,7 +447,7 @@ void GameScene::mouseMove()
 
 void GameScene::loadOverSlot()
 {
-    showMessage(tr("世界加载完成"),Qt::white,10,5);
+    showMessage(tr("世界加载完成"),2);
     if(!backPackBar->isShow()){
         if(!inSence){
             inSence=true;
@@ -448,7 +458,7 @@ void GameScene::loadOverSlot()
     }
 }
 
-void GameScene::showMessage(QString message, QColor textColor, int textSize, int showTime)
+void GameScene::showMessage(QString message, int showTime, int textSize, QColor textColor)
 {
     gameMessages.push_back(new GameMessage(message,textColor,textSize,showTime));
 }
@@ -526,8 +536,6 @@ void GameScene::initGame()
     world->loadBlockIndex();            //加载方块属性列表
 
     loadTexture();                      //加载纹理
-
-    camera->loadPosRot();                                   //加载位置视角信息
     //======================
     line=new LineMesh(2);           //十字准心
     float lineLen=0.0004;
@@ -549,11 +557,16 @@ void GameScene::initGame()
     backPackBar=new BackPackBar(this);
     hideBackPackBar();
     backPackBar->setWorld(world);               //传递world指针
+
+    itemBar=new ItemBar(this);
+    backPackBar->setPocket(itemBar);
+    connect(itemBar,SIGNAL(thingIndexChange(int)),camera,SLOT(setBlockId(int)));
     //=======================
     gameMessages.clear();
     messagePanel=new MessagePanel;
     addItem(messagePanel);
     //===========================
+    camera->loadPosRot();                                   //加载位置视角信息
     firstLoad();            //强制首次加载
 }
 

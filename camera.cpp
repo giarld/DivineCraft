@@ -149,6 +149,7 @@ QVector3D Camera::position() const
 void Camera::setPosition(const QVector3D &position)
 {
     mPosition = position;
+    emit getPositions(mPosition,getEyePosition());
 }
 
 void Camera::loadPosRot()
@@ -192,7 +193,7 @@ void Camera::savePosRot()
 
 QVector3D Camera::getEyePosition() const
 {
-    QVector3D eyeP=position();
+    QVector3D eyeP=mPosition;
     eyeP.setY(eyeP.y()+1.650);
     return eyeP;
 }
@@ -275,11 +276,14 @@ void Camera::addBlock()
     if(pause){
         return ;
     }
+    if(this->blockId==0)
+        return ;
+
     if(preBlock.y()<0)              //preBlock没有指定位置或人站在该位置上，则忽略
         return ;
 
     float h=1.8;                                        //身高
-    for(float i=0;i<h;i+=0.2){
+    for(float i=0;i<h;i+=0.2){              //判断方块是否会和人所在位置重合，重合则不绘制
         QVector3D temp=GMath::v3toInt(QVector3D(mPosition.x(),mPosition.y()+i,mPosition.z()));
         if(preBlock==temp)
             return ;
