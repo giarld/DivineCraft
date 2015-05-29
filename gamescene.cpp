@@ -7,21 +7,22 @@
 #include "ctime"
 #include "gmath.h"
 
+//选定线框的顶点偏移
 QVector3D linePoints[][2]={
-    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,1.005,1.005)},
-    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,1.005,1.005)},
-    {QVector3D(-0.005,1.005,-0.005),QVector3D(1.005,1.005,-0.005)},
-    {QVector3D(-0.005,1.005,1.005),QVector3D(1.005,1.005,1.005)},
+    {QVector3D(-0.001,1.001,-0.001),QVector3D(-0.001,1.001,1.001)},
+    {QVector3D(1.001,1.001,-0.001),QVector3D(1.001,1.001,1.001)},
+    {QVector3D(-0.001,1.001,-0.001),QVector3D(1.001,1.001,-0.001)},
+    {QVector3D(-0.001,1.001,1.001),QVector3D(1.001,1.001,1.001)},
 
-    {QVector3D(-0.005,-0.005,-0.005),QVector3D(-0.005,-0.005,1.005)},
-    {QVector3D(1.005,-0.005,-0.005),QVector3D(1.005,-0.005,1.005)},
-    {QVector3D(-0.005,-0.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
-    {QVector3D(-0.005,-0.005,1.005),QVector3D(1.005,-0.005,1.005)},
+    {QVector3D(-0.001,-0.001,-0.001),QVector3D(-0.001,-0.001,1.001)},
+    {QVector3D(1.001,-0.001,-0.001),QVector3D(1.001,-0.001,1.001)},
+    {QVector3D(-0.001,-0.001,-0.001),QVector3D(1.001,-0.001,-0.001)},
+    {QVector3D(-0.001,-0.001,1.001),QVector3D(1.001,-0.001,1.001)},
 
-    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,-0.005,-0.005)},
-    {QVector3D(-0.005,1.005,1.005),QVector3D(-0.005,-0.005,1.005)},
-    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
-    {QVector3D(1.005,1.005,1.005),QVector3D(1.005,-0.005,1.005)}
+    {QVector3D(-0.001,1.001,-0.001),QVector3D(-0.001,-0.001,-0.001)},
+    {QVector3D(-0.001,1.001,1.001),QVector3D(-0.001,-0.001,1.001)},
+    {QVector3D(1.001,1.001,-0.001),QVector3D(1.001,-0.001,-0.001)},
+    {QVector3D(1.001,1.001,1.001),QVector3D(1.001,-0.001,1.001)}
 };
 
 //================================================//
@@ -68,7 +69,7 @@ GameScene::~GameScene()
     delete line;
     delete lineQua;
     delete dataPanel;
-    delete itemBar;
+    delete backPackBar;
 
     delete messagePanel;
     while(!gameMessages.isEmpty())
@@ -116,10 +117,10 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     }
 
     //控制物品栏布局
-    if(itemBar->isShow()){
+    if(backPackBar->isShow()){
         int h=this->height()*0.7;
         int w=h*1.35;
-        itemBar->setGeometry((this->width()-w)/2,(this->height()-h)/2,w,h);
+        backPackBar->setGeometry((this->width()-w)/2,(this->height()-h)/2,w,h);
     }
 }
 
@@ -147,7 +148,7 @@ void GameScene::pauseGame()
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->button()==Qt::LeftButton){
-        if(!itemBar->isShow()){
+        if(!backPackBar->isShow()){
             if(!inSence){
                 inSence=true;
                 mouseLock();
@@ -160,7 +161,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
     }
     else if(event->button()==Qt::RightButton){
-        if(!itemBar->isShow()){
+        if(!backPackBar->isShow()){
             if(inSence){
                 emit addBlock();
             }
@@ -195,19 +196,20 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->setGameMode(Camera::SURVIVAL);
     }
     else if(event->key()==Qt::Key_E){
-        if(itemBar->isShow()){
-            hideItemBar();
+        if(backPackBar->isShow()){
+            hideBackPackBar();
             inSence=true;
             mouseLock();
             camera->bind();
             startGame();
         }
         else{
-            showItemBar();
+            showBackPackBar();
             inSence=false;
             camera->unBind();
             pauseGame();
             mouseUnLock();
+            showMessage(tr("打开了物品栏"));
         }
     }
     else{
@@ -414,14 +416,14 @@ void GameScene::dataShowPosition(const QVector3D &pos,const QVector3D &ePos)
     dataPanel->setPosition(pos,ePos);
 }
 
-void GameScene::showItemBar()
+void GameScene::showBackPackBar()
 {
-    itemBar->show();
+    backPackBar->show();
 }
 
-void GameScene::hideItemBar()
+void GameScene::hideBackPackBar()
 {
-    itemBar->hide();
+    backPackBar->hide();
 }
 
 void GameScene::mouseMove()
@@ -436,7 +438,7 @@ void GameScene::mouseMove()
 void GameScene::loadOverSlot()
 {
     showMessage(tr("世界加载完成"),Qt::white,10,5);
-    if(!itemBar->isShow()){
+    if(!backPackBar->isShow()){
         if(!inSence){
             inSence=true;
             mouseLock();
@@ -543,9 +545,10 @@ void GameScene::initGame()
     dataPanel->setDisplayRadius(maxRenderLen);
     connect(camera,SIGNAL(getPositions(QVector3D,QVector3D)),this,SLOT(dataShowPosition(QVector3D,QVector3D)));
     //    dataPanel->hide();
-    //物品栏
-    itemBar=new ItemBar(this);
-    hideItemBar();
+    //背包物品栏
+    backPackBar=new BackPackBar(this);
+    hideBackPackBar();
+    backPackBar->setWorld(world);               //传递world指针
     //=======================
     gameMessages.clear();
     messagePanel=new MessagePanel;

@@ -65,6 +65,8 @@ public:
 
     int getBlockId();           //返还手持方块ID
 
+    QVector3D getPreBlock() const;
+
 signals:
     void cameraMove(const QVector3D &cPos);
     void getPositions(const QVector3D & pos, const QVector3D &ePos);        //向外反馈坐标信息的信号

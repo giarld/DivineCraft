@@ -413,6 +413,12 @@ void Camera::collision(QVector3D strafe,int timeC)
         newPosition.setY(200);
     mPosition=newPosition;
 }
+
+QVector3D Camera::getPreBlock() const
+{
+    return preBlock;
+}
+
 bool Camera::getPause() const
 {
     return pause;

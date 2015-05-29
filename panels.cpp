@@ -1,4 +1,7 @@
 #include <panels.h>
+#include "gmath.h"
+#include "world.h"
+#include "block.h"
 
 //==============================
 //      数据面板
@@ -130,7 +133,7 @@ void MessagePanel::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
     QPixmap pixmap(":/res/divinecraft/textures/blocks/brick.png");
 
-//    painter->drawRect(rect);
+    //    painter->drawRect(rect);
     painter->drawPixmap(rect,pixmap,QRectF(0,0,pixmap.width(),pixmap.height()));
     painter->setPen(QColor(gMessage->textColor.red()
                            ,gMessage->textColor.green(),gMessage->textColor.blue(),alpha));
@@ -160,58 +163,64 @@ void MessagePanel::deleteMessage()
 
 
 //============================
-//物品栏
+//背包栏
 //============================
-ItemBar::ItemBar(QGraphicsScene *scene)
+BackPackBar::BackPackBar(QGraphicsScene *scene)
     :QObject(scene)
 {
     rect=QRect(0,0,20,10);
     widgetProxy=new QGraphicsProxyWidget(0);
-    widget=new ItemBarWidget();
+    widget=new BackPackBarWidget();
     widgetProxy->setWidget(widget);
     widget->setGeometry(100,100,100,200);
     widgetProxy->show();
     qobject_cast<QGraphicsScene *>(parent())->addItem(widgetProxy);
 }
 
-ItemBar::~ItemBar()
+BackPackBar::~BackPackBar()
 {
     //item不需要主动回收Scene会回收所有的Item
 }
 
-void ItemBar::show()
+void BackPackBar::show()
 {
     //    widgetProxy->setVisible(true);
     widgetProxy->show();
 }
 
-void ItemBar::hide()
+void BackPackBar::hide()
 {
     //    widgetProxy->setVisible(false);
     widgetProxy->hide();
 }
 
-void ItemBar::setGeometry(int x, int y, int w, int h)
+void BackPackBar::setGeometry(int x, int y, int w, int h)
 {
     rect=QRect(x,y,w,h);
     widget->setGeometry(rect);
 }
 
-bool ItemBar::isShow()
+bool BackPackBar::isShow()
 {
     return widgetProxy->isVisible();
 }
 
+void BackPackBar::setWorld(World *world)
+{
+    widget->setWorld(world);
+}
 
-ItemBarWidget::ItemBarWidget()
+//=========================
+//背包的显示组件
+//=========================
+BackPackBarWidget::BackPackBarWidget()
     :QWidget(0)
 {
-    barThing.clear();
     pocketThing.clear();
-    for(int i=0;i<5*9;i++){                                         //创建49个物品容器对象
-        ThingItemPanel * ti=new ThingItemPanel(16,this);
-        barThing.append(ti);
-    }
+    //    for(int i=0;i<5*9;i++){                                         //创建49个物品容器对象
+    //        ThingItemPanel * ti=new ThingItemPanel(16,this);
+    //        barThing.append(ti);
+    //    }
 
     for(int i=0;i<9;i++){
         ThingItemPanel *pi=new ThingItemPanel(16,this);
@@ -221,7 +230,7 @@ ItemBarWidget::ItemBarWidget()
     this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
 }
 
-ItemBarWidget::~ItemBarWidget()
+BackPackBarWidget::~BackPackBarWidget()
 {
     foreach (ThingItemPanel *t, barThing) {
         if(t)
@@ -234,31 +243,58 @@ ItemBarWidget::~ItemBarWidget()
     }
 }
 
-void ItemBarWidget::paintEvent(QPaintEvent *)
+void BackPackBarWidget::setWorld(World *world)
+{
+    if(world==NULL){
+        qWarning(" BackPackBarWidget::setWorld警告：错误的World类指针传递！当前指针为空。");
+    }
+    myWorld=world;
+    initBar();
+}
+
+void BackPackBarWidget::paintEvent(QPaintEvent *)
 {
     QRect wRect(0,0,this->width(),this->height());
-
+    QPainter painter(this);
     //对物品容器进行布局
     int bsize=(wRect.width()-40)/9;
     int bwh=bsize-5;
     int startH=wRect.height()-bsize-20;
+    painter.setPen(Qt::blue);
     for(int i=0;i<9;i++){
         pocketThing[i]->setSize(bwh);
         pocketThing[i]->move(20+i*bsize,startH);
+        painter.drawRect(QRect(20+i*bsize,startH,bwh,bwh));
     }
     startH=startH-20-(bsize*5);
+    painter.setPen(Qt::red);
     for(int i=0;i<barThing.length();i++){
         int x=i%9;
         int y=i/9;
         barThing[i]->setSize(bwh);
         barThing[i]->move(20+x*bsize,startH+y*bsize);
+        painter.drawRect(20+x*bsize,startH+y*bsize,bwh,bwh);
     }
 
-    QPainter painter(this);
+
     QPen pen;
     pen.setColor(Qt::red);
     painter.setPen(pen);
     painter.drawRect(wRect);
+}
+
+void BackPackBarWidget::initBar()
+{
+    barThing.clear();
+    int k=1;
+    for(;;k++){
+        BlockListNode *bl=myWorld->getBlockIndex(k);
+        if(bl->id==0)
+            break;
+        ThingItemPanel * ti=new ThingItemPanel(16,this);
+        ti->setItem(bl->id,bl->name,bl->texName[0],-1);
+        barThing.append(ti);
+    }
 }
 
 //===========================
@@ -268,7 +304,33 @@ ThingItemPanel::ThingItemPanel(int size, QWidget *parent)
     :QWidget(parent)
     ,tSize(size)
 {
+    item=NULL;
+}
 
+ThingItemPanel::~ThingItemPanel()
+{
+    if(item)
+        delete item;
+}
+
+void ThingItemPanel::setItem(int id, QString table, QString texName, int amount)
+{
+    if(item==NULL){
+        item=new ThingItem(id,table,texName,amount);
+    }
+    else{
+        item->setItem(id,table,texName,amount);
+    }
+}
+
+void ThingItemPanel::setItem(ThingItem *i)
+{
+    if(item==NULL){
+        item=new ThingItem(i->id,i->name,i->texName,i->amount);
+    }
+    else{
+        item->setItem(i->id,i->name,i->texName,i->amount);
+    }
 }
 
 void ThingItemPanel::setSize(int size)
@@ -281,21 +343,15 @@ void ThingItemPanel::paintEvent(QPaintEvent *)
     this->setFixedSize(tSize,tSize);
     QRect tRect(0,0,tSize,tSize);
     QPainter painter(this);
-    painter.setPen(Qt::blue);
-    painter.drawRect(tRect);
+//    painter.setPen(Qt::blue);
+//    painter.drawRect(tRect);
+    if(item==NULL)
+        return;
+    QRect texRect(tRect.x()+tRect.width()*0.1,tRect.y()+tRect.height()*0.1
+                  ,tRect.width()*0.8,tRect.height()*0.8);
+    QPixmap texmap(tr(":/res/divinecraft/textures/blocks/%1").arg(item->texName));
+    painter.drawPixmap(texRect,texmap,QRect(0,0,texmap.width(),texmap.height()));
     painter.setPen(Qt::white);
-    painter.drawText(tRect,"64");
+    if(item->amount>=0)
+        painter.drawText(tRect,QString::number(item->amount));
 }
-
-//=======================
-// //物品容器类
-//=======================
-ThingItem::ThingItem(int id, QString name, QString texName, int amount)
-    :id(id)
-    ,name(name)
-    ,texName(texName)
-    ,amount(amount)
-{
-
-}
-

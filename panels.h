@@ -8,6 +8,8 @@
 #include <QGraphicsItem>
 #include <QVector>
 
+class World;                //world类的引用
+
 class DataPanel : public QGraphicsItem
 {
 public:
@@ -34,10 +36,6 @@ private:
 struct GameMessage{
 public:
     GameMessage(QString message, QColor textColor, int textSize,  int showTime){
-//        :text(message)
-//        ,textSize(textSize)
-//        ,textColor(textColor)
-//        ,showTime(showTime)
         text=message;
         this->textSize=textSize;
         this->textColor=textColor;
@@ -69,11 +67,20 @@ private :
 };
 
 //===============================================//
-class ThingItem
+//物品单元结构
+struct ThingItem
 {
 public:
-    ThingItem(int id,QString name,QString texName,int amount);                  //方块id,方块名称，材质文件名，数量
-private:
+    ThingItem(int id,QString name,QString texName,int amount){                  //方块id,方块名称，材质文件名，数量
+        setItem(id,name,texName,amount);
+    }
+    void setItem(int id,QString name,QString texName,int amount){
+        this->id=id;
+        this->name=name;
+        this->texName=texName;
+        this->amount=amount;
+    }
+
     int id;
     QString name;
     QString texName;
@@ -85,44 +92,66 @@ class ThingItemPanel : public QWidget
     Q_OBJECT
 public:
     ThingItemPanel(int size,QWidget *parent);
+    ~ThingItemPanel();
+    void setItem(int id,QString table,QString texName,int amount);              //设置item属性
+    void setItem(ThingItem *i);
+    void setAmount(int s);                                  //设置数量
+
     void setSize(int size);
+protected:
+    void paintEvent(QPaintEvent *);
+private:
+    int tSize;
+    ThingItem *item;
+};
+
+class BackPackBarWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    BackPackBarWidget();
+    ~BackPackBarWidget();
+    void setWorld(World *world);
+
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    int tSize;
-};
+    void initBar();                         //初始化物品栏
 
-class ItemBarWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    ItemBarWidget();
-    ~ItemBarWidget();
-protected:
-    void paintEvent(QPaintEvent *);
+private:
     QVector<ThingItemPanel*>pocketThing;              //口袋物品
-    QVector<ThingItemPanel*>barThing;                    //物品栏里的物品
+    QVector<ThingItemPanel*>barThing;                    //背包栏里的物品
+    World *myWorld;
 };
 
-class ItemBar : public QObject
+class BackPackBar : public QObject
 {
     Q_OBJECT
 public:
-    ItemBar(QGraphicsScene *scene);
-    ~ItemBar();
+    BackPackBar(QGraphicsScene *scene);
+    ~BackPackBar();
 
     void show();
     void hide();
     void setGeometry(int x,int y,int w,int h);
     bool isShow();           //是否呈现
+    void setWorld(World *world);
 protected:
 
 private:
     QRect rect;         
     QGraphicsProxyWidget *widgetProxy;
-    ItemBarWidget *widget;
+    BackPackBarWidget *widget;
 };
+//======================================
+//物品栏
+class ItemBar : public QObject
+{
+    Q_OBJECT
+public:
+    ItemBar(QGraphicsScene *scene);
+}
 
 #endif // PANELS_H
 

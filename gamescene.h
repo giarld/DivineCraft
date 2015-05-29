@@ -54,11 +54,11 @@ signals:
 public slots:
     void saveOption();                                      //游戏的配置读取与保存
     void dataShowPosition(const QVector3D & pos, const QVector3D &ePos);
-    void showItemBar();                                 //显示物品栏
-    void hideItemBar();                                 //隐藏物品栏
+    void showBackPackBar();                                 //显示物品栏
+    void hideBackPackBar();                                 //隐藏物品栏
     void mouseMove();                                   //鼠标的移动槽（仅当进入场景）
     void loadOverSlot();                                    //预加载完毕接收槽
-    void showMessage(QString message, QColor textColor, int textSize,  int showTime);                                     //显示一个MessagePanel;
+    void showMessage(QString message, QColor textColor=Qt::white, int textSize=10,  int showTime=3);                                     //显示一个MessagePanel(含默认值)
 private slots:
     void handleGameMessage();                      //处理消息等待队列
 
@@ -98,7 +98,7 @@ private:
     int glFps;
     int drawCount;
 
-    ItemBar *itemBar;
+    BackPackBar *backPackBar;
 
     MessagePanel *messagePanel;
     QQueue<GameMessage *> gameMessages;
