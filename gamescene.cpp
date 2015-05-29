@@ -202,11 +202,20 @@ void GameScene::wheelEvent(QGraphicsSceneWheelEvent *event)
 
 void GameScene::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key()==Qt::Key_Escape && inSence){
-        inSence=false;
-        camera->unBind();
-        pauseGame();
-        mouseUnLock();
+    if(event->key()==Qt::Key_Escape){
+        if(backPackBar->isShow()){
+            hideBackPackBar();
+            inSence=true;
+            mouseLock();
+            camera->bind();
+            startGame();
+        }
+        else{
+            inSence=false;
+            camera->unBind();
+            pauseGame();
+            mouseUnLock();
+        }
     }
     else if(event->key()==Qt::Key_M){
         if(camera->getGameMode()==Camera::SURVIVAL)
@@ -280,7 +289,7 @@ void GameScene::setStates()
 {
     //    glShadeModel(GL_SMOOTH);
     glClearColor(0.0,0.65,1.0,0.5);
-//    glClearColor(0.0,0.0,0.0,0.2);
+    //    glClearColor(0.0,0.0,0.0,0.2);
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);                //启用深度测试
     glDepthFunc(GL_LEQUAL);
@@ -292,11 +301,11 @@ void GameScene::setStates()
     glEnable(GL_TEXTURE_2D);                //2D材质
     glEnable(GL_NORMALIZE);                 //法线
 
-//        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-//            glDepthRange(0.0f,1.0f);
-//            glClearDepth(1.0f);
-//                glDepthFunc(GL_LEQUAL);
-//                glDepthMask(GL_FALSE);
+    //        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    //            glDepthRange(0.0f,1.0f);
+    //            glClearDepth(1.0f);
+    //                glDepthFunc(GL_LEQUAL);
+    //                glDepthMask(GL_FALSE);
     //反锯齿
     //    glEnable(GL_BLEND);
     //    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -613,13 +622,13 @@ void GameScene::mouseLock()
     QPoint po(GView->pos().x()+GView->width()/2,GView->pos().y()+GView->height()/2);
     GView->cursor().setPos(po);
     setCenterPoint(po);
-//    GView->setCursor(Qt::BlankCursor);
+    //    GView->setCursor(Qt::BlankCursor);
     GView->viewport()->setCursor(Qt::BlankCursor);                  //使用父容器对鼠标进行改变
 }
 
 void GameScene::mouseUnLock()
 {
-//    GView->setCursor(Qt::ArrowCursor);
+    //    GView->setCursor(Qt::ArrowCursor);
     GView->viewport()->setCursor(Qt::ArrowCursor);
 }
 

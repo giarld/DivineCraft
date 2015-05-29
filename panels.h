@@ -95,11 +95,15 @@ public:
     ~ThingItemPanel();
     void setItem(int id,QString table,QString texName,int amount);              //设置item属性
     void setItem(ThingItem *i);
+    void copyItem(ThingItem *i);                            //复制Item，而不是传递指针
     void setNULLItem();                                         //设置为空气物品(即空的)
-    void setAmount(int s);                                  //设置数量
+    void setAmount(int s);                                  //设置数量(-1<=amount<=64,当等于-1时,为无限拾取，当为0时会被自动隐藏)
+    int getAmount();
     ThingItem *getItem();
     void setSize(int size);
+
     bool isNULL();                                      //是否为空
+    bool isPick();                                          //能否被拾取（amount>0）
 protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *event);
@@ -150,6 +154,7 @@ public:
     ThingItem *getThingItem(int i);                                         //返还i位置上的ThingItem
     void setThingItem(int id, QString table, QString texName, int amount, int index);
     void resetSIze(int sceneW,int sceneH,int h);                //设置物品栏大小，sceneW是场景宽，sceneH是场景高，h是物品栏高度
+    int getCurrThingID();                                                           //返还当前所持物品ID
 
     void setIndex(int i);                                               //设置物品选择位置
     void nextIndex();                                                   //下一个选择位置
@@ -189,6 +194,7 @@ private:
     QVector<ThingItemPanel*>pocketThing;              //口袋物品  !!其中ThingItem的指针要求保持不变。
     QVector<ThingItemPanel*>barThing;                    //背包栏里的物品
     ThingItemPanel *flowItem;                                       //漂浮的Item
+    ItemBar *pocketBar;
     World *myWorld;
     QPoint viewPos;                                                         //全局窗体的坐标
 };

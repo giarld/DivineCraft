@@ -16,6 +16,7 @@ World::World(QObject *parent) : QObject(parent)
     setMaxRenderLen(16);
     this->lastCameraChunk=QVector2D(0,0);
     upLock=false;
+    lockDQueue=false;
     drawID=glGenLists(1);
     qsrand(time(0));            //初始化随机种子
 }
@@ -269,6 +270,7 @@ void World::updateDraw()
     }
 
     fTime=QTime::currentTime();
+    lockDQueue=true;
     while(!updateDisplayChunkQueue.isEmpty() && fTime.msecsTo(QTime::currentTime())<=5){        //增加删除方块后的区块更新处理
         QVector3D cPos=updateDisplayChunkQueue.front();
         QVector3D dPos=DisplayChunk::calcChunckPos(cPos);
@@ -282,6 +284,7 @@ void World::updateDraw()
         }
         updateDisplay();
     }
+    lockDQueue=false;
 }
 
 
@@ -565,7 +568,7 @@ void World::changeCameraPosition(const QVector3D &cPos)
         lastCameraChunk=nowC;
         updateWorld();
     }
-    else if(lastCameraHight!=cameraPosition.y()){                       //随着高度的变化，要刷掉视距以外的物体
+    else if(!lockDQueue && lastCameraHight!=cameraPosition.y()){                       //随着高度的变化，要刷掉视距以外的物体
         lastCameraHight=cameraPosition.y();
         updateDisplayChunkQueue.push_back(cPos);                //由于当前函数不再主线程中，只能寻求主线程进行显示刷新
     }

@@ -268,9 +268,9 @@ void BackPackBarWidget::setPocket(ItemBar *itemBar)
         qWarning()<<"BackPackBarWidget::setPocket警告：错误的ItemBar类指针传递！当前指针为空";
         return ;
     }
+    this->pocketBar=itemBar;
     for(int i=0;i<9;i++){
         pocketThing[i]->setItem(itemBar->getThingItem(i));
-
         setPocketThingItem(barThing[i]->getItem(),64,i);
     }
 }
@@ -338,17 +338,60 @@ void BackPackBarWidget::initBar()
         ThingItemPanel * ti=new ThingItemPanel(16,this);
         ti->setItem(bl->id,bl->name,bl->texName[0],-1);
         barThing.append(ti);
+        connect(ti,SIGNAL(mouseChoose()),this,SLOT(chooseItem()));
     }
     flowItem=new ThingItemPanel(16,this);
     flowItem->setNULLItem();
-    //    flowItem->setItem(barThing[0]->getItem());
 }
 
 void BackPackBarWidget::chooseItem()
 {
     ThingItemPanel* item = qobject_cast<ThingItemPanel *>(sender());
-
-    flowItem->setItem(item->getItem());
+    if(item->isNULL()){                                     //如果目标位置为空
+        if(flowItem->isNULL()==false){              //如果悬浮item不空则填充
+            item->copyItem(flowItem->getItem());
+            flowItem->setNULLItem();
+        }
+    }
+    else{
+        if(item->isPick()){                         //非无限方块的处理
+            ThingItem *t=flowItem->getItem();
+            ThingItem *temp=new ThingItem(t->id,t->name,t->texName,t->amount);
+            if(item->getItem()->id==flowItem->getItem()->id){               //相同合并
+                int sum=t->amount+item->getItem()->amount;
+                int sy=0;
+                if(sum>=64){
+                    sy=sum-64;
+                    sum=64;
+                }
+                else{
+                    sy=0;
+                }
+                flowItem->copyItem(item->getItem());
+                flowItem->setAmount(sy);
+                temp->amount=sum;
+            }
+            else{
+                flowItem->copyItem(item->getItem());
+            }
+            item->copyItem(temp);
+            delete temp;
+        }
+        else{               //无限的处理
+            if(item->getItem()->id==flowItem->getItem()->id){
+                flowItem->setAmount(flowItem->getAmount()+1);
+            }
+            else{
+                if(flowItem->isNULL()){
+                    flowItem->copyItem(item->getItem());
+                    flowItem->setAmount(1);
+                }
+                else
+                    flowItem->setNULLItem();
+            }
+        }
+    }
+    emit pocketBar->thingIndexChange(pocketBar->getCurrThingID());
 }
 
 //===========================
@@ -382,9 +425,29 @@ void ThingItemPanel::setItem(ThingItem *i)
     item=i;
 }
 
+void ThingItemPanel::copyItem(ThingItem *i)
+{
+    setItem(i->id,i->name,i->texName,i->amount);
+}
+
 void ThingItemPanel::setNULLItem()
 {
-    item=new ThingItem(0,"","air.png",-1);
+    if(item==NULL)
+        item=new ThingItem(0,"","air.png",-1);
+    else
+        item->setItem(0,"","air.png",-1);
+}
+
+void ThingItemPanel::setAmount(int s)
+{
+    if(s>64 || s<-1)
+        return ;
+    item->amount=s;
+}
+
+int ThingItemPanel::getAmount()
+{
+    return item->amount;
 }
 
 
@@ -405,6 +468,13 @@ bool ThingItemPanel::isNULL()
     return false;
 }
 
+bool ThingItemPanel::isPick()
+{
+    if(item->amount<0)
+        return false;
+    return true;
+}
+
 void ThingItemPanel::paintEvent(QPaintEvent *)
 {
     this->setFixedSize(tSize,tSize);
@@ -412,7 +482,10 @@ void ThingItemPanel::paintEvent(QPaintEvent *)
     QPainter painter(this);
     //    painter.setPen(Qt::blue);
     //    painter.drawRect(tRect);
-    if(item==NULL || item->id==0)
+    if(item->amount==0){
+        this->setNULLItem();
+    }
+    if(item==NULL || item->id==0)            //为空不显示
         return;
     QRect texRect(tRect.x()+tRect.width()*0.1,tRect.y()+tRect.height()*0.1
                   ,tRect.width()*0.8,tRect.height()*0.8);
@@ -461,6 +534,11 @@ void ItemBar::resetSIze(int sceneW,int sceneH, int h)
     int size=h*0.8;
     int ww=size*9+8*(h*0.1)+h*0.4;
     widget->setGeometry((sceneW-ww)/2,sceneH-h-10,ww,h);
+}
+
+int ItemBar::getCurrThingID()
+{
+    return widget->getCurrThingID();
 }
 
 void ItemBar::setIndex(int i)
