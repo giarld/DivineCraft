@@ -172,6 +172,15 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             }
         }
     }
+    else if(event->button() & Qt::MidButton){       //中间拾取
+        if(!backPackBar->isShow()){
+            if(inSence){
+                //...获得已选中方块的属性并传给物品栏
+                if(camera->getKeyPosition().y()>=0)
+                    itemBar->midBlock(world->getBlockIndex(world->getBlock(camera->getKeyPosition())->getId()));
+            }
+        }
+    }
     QGraphicsScene::mousePressEvent(event);
 }
 

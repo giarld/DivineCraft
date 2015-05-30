@@ -568,7 +568,7 @@ void World::changeCameraPosition(const QVector3D &cPos)
         lastCameraChunk=nowC;
         updateWorld();
     }
-    else if(!lockDQueue && lastCameraHight!=cameraPosition.y()){                       //随着高度的变化，要刷掉视距以外的物体
+    else if(!lockDQueue && lastCameraHight!=cameraPosition.y()){                       //随着高度的变化，要刷掉视距以外的物体（考虑队列互斥）
         lastCameraHight=cameraPosition.y();
         updateDisplayChunkQueue.push_back(cPos);                //由于当前函数不再主线程中，只能寻求主线程进行显示刷新
     }

@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include <QGraphicsItem>
 #include <QVector>
+#include "block.h"
 
 class World;                //world类的引用
 
@@ -55,7 +56,7 @@ public:
     void showMessage(GameMessage *message,QGraphicsScene *s);
 protected:
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *);
 private:
     void deleteMessage();           //清理消息内存
 private :
@@ -134,6 +135,7 @@ public:
     void nextIndex();                                                   //下一个选择位置
     void lastIndex();                                                   //上一个选择位置
 
+    void midBlock(BlockListNode *blockIndex);                   //中间拾取方块
 protected:
     void paintEvent(QPaintEvent *);
 
@@ -159,6 +161,8 @@ public:
     void setIndex(int i);                                               //设置物品选择位置
     void nextIndex();                                                   //下一个选择位置
     void lastIndex();                                                   //上一个选择位置
+
+    void midBlock(BlockListNode *blockIndex);                   //中间拾取方块
 signals:
     void thingIndexChange(int blockId);                 //传递物品选择变换，传递的是方块id
 

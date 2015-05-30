@@ -271,7 +271,7 @@ void BackPackBarWidget::setPocket(ItemBar *itemBar)
     this->pocketBar=itemBar;
     for(int i=0;i<9;i++){
         pocketThing[i]->setItem(itemBar->getThingItem(i));
-        setPocketThingItem(barThing[i]->getItem(),64,i);
+        setPocketThingItem(barThing[i]->getItem(),1,i);
     }
 }
 
@@ -491,8 +491,12 @@ void ThingItemPanel::paintEvent(QPaintEvent *)
                   ,tRect.width()*0.8,tRect.height()*0.8);
     QPixmap texmap(tr(":/res/divinecraft/textures/blocks/%1").arg(item->texName));                  //选取正面材质来作为图标
     painter.drawPixmap(texRect,texmap,QRect(0,0,texmap.width(),texmap.height()));
-    painter.setPen(Qt::white);
+
     if(item->amount>=0){
+        QFont font;
+        font.setPointSize(tSize*0.3);
+        painter.setPen(Qt::white);
+        painter.setFont(font);
         painter.drawText(tRect,Qt::AlignBottom | Qt::AlignRight,QString::number(item->amount));
     }
 }
@@ -556,6 +560,11 @@ void ItemBar::lastIndex()
     widget->lastIndex();
 }
 
+void ItemBar::midBlock(BlockListNode *blockIndex)
+{
+    widget->midBlock(blockIndex);
+}
+
 //=========================================
 //物品栏显示组件
 //=========================================
@@ -610,7 +619,7 @@ void ItemBarWidget::setIndex(int i)
     if(i<0 || i>=9)
         return;
     currentIndex=i;
-    emit thingIndexChange(pocketThing[currentIndex]->getItem()->id);
+    emit thingIndexChange(getCurrThingID());
 }
 
 void ItemBarWidget::nextIndex()
@@ -618,7 +627,7 @@ void ItemBarWidget::nextIndex()
     currentIndex++;
     if(currentIndex>=9)
         currentIndex=0;
-    emit thingIndexChange(pocketThing[currentIndex]->getItem()->id);
+    emit thingIndexChange(getCurrThingID());
 }
 
 void ItemBarWidget::lastIndex()
@@ -626,7 +635,22 @@ void ItemBarWidget::lastIndex()
     currentIndex--;
     if(currentIndex<0)
         currentIndex=8;
-    emit thingIndexChange(pocketThing[currentIndex]->getItem()->id);
+    emit thingIndexChange(getCurrThingID());
+}
+
+void ItemBarWidget::midBlock(BlockListNode *blockIndex)
+{
+    bool isC=false;
+    for(int i=0;i<pocketThing.length();i++){
+        if(pocketThing[i]->getItem()->id == blockIndex->id){
+            currentIndex=i;
+            isC=true;
+            break;
+        }
+    }
+    if(!isC)
+        pocketThing[currentIndex]->setItem(blockIndex->id,blockIndex->name,blockIndex->texName[0],1);
+    emit thingIndexChange(getCurrThingID());
 }
 
 void ItemBarWidget::paintEvent(QPaintEvent *)
