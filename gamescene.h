@@ -15,7 +15,7 @@
 #include "chunkmap.h"
 #include "camera.h"
 #include "world.h"
-#include "panels.h"
+#include "module/panels.h"
 
 class GameScene : public QGraphicsScene
 {

@@ -33,7 +33,7 @@ SOURCES += main.cpp\
     chunkmap.cpp \
     world.cpp \
     gmath.cpp \
-    panels.cpp
+    module/panels.cpp
 
 HEADERS  += dcview.h \
     glkernel/glextensions.h \
@@ -46,7 +46,7 @@ HEADERS  += dcview.h \
     chunkmap.h \
     world.h \
     gmath.h \
-    panels.h
+    module/panels.h
 
 
 wince*: {
