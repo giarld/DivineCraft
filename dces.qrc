@@ -48,6 +48,6 @@
         <file>textures/blocks/wool_colored_white.png</file>
         <file>textures/blocks/wool_colored_yellow.png</file>
         <file>textures/blocks/glass.png</file>
-        <file>textures/ui/back_pack_bar.jpg</file>
+        <file>textures/ui/back_pack_bar.png</file>
     </qresource>
 </RCC>

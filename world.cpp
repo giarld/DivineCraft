@@ -115,7 +115,7 @@ void World::updateWorld()
     qDebug()<<QTime::currentTime()<<"update world : "<<this->cameraPosition;
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为起始区块。
-    qDebug()<<cdPos;
+
     bfs2World(startCPos);
 
     foreach (ChunkMap *cm, chunksMap) {

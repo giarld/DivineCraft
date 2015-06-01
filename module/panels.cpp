@@ -1,4 +1,4 @@
-﻿#include <panels.h>
+﻿#include "module/panels.h"
 #include "gmath.h"
 #include "world.h"
 #include "block.h"
@@ -229,11 +229,19 @@ BackPackBarWidget::BackPackBarWidget()
 {
     pocketThing.clear();
 
-    for(int i=0;i<9;i++){
+    for(int i=0;i<9;i++){                   //创建物品栏的9个映射格子
         ThingItemPanel *pi=new ThingItemPanel(16,this);
         pocketThing.append(pi);
         connect(pi,SIGNAL(mouseChoose()),this,SLOT(chooseItem()));
     }
+
+    lastPageButton=new QPushButton("<",this);
+    nextPageButton=new QPushButton(">",this);
+
+    connect(lastPageButton,SIGNAL(clicked()),this,SLOT(lastPage()));
+    connect(nextPageButton,SIGNAL(clicked()),this,SLOT(nextPage()));
+    page=0;
+    lastPageButton->setDisabled(true);
 
     this->setMouseTracking(true);
     this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
@@ -292,7 +300,7 @@ void BackPackBarWidget::paintEvent(QPaintEvent *)
 {
     QRect wRect(0,0,this->width(),this->height());
     QPainter painter(this);
-    QPixmap pixmap(":/res/divinecraft/textures/ui/back_pack_bar.jpg");
+    QPixmap pixmap(":/res/divinecraft/textures/ui/back_pack_bar.png");
     //    painter.drawRect(wRect);
     painter.drawPixmap(wRect,pixmap,QRect(0,0,pixmap.width(),pixmap.height()));
     painter.setPen(Qt::black);
@@ -311,13 +319,23 @@ void BackPackBarWidget::paintEvent(QPaintEvent *)
 
     startH=startH-20-(bsize*5);
     painter.setPen(Qt::red);
-    for(int i=0;i<barThing.length();i++){
+
+    for(int i=0;i<5*9;i++){
         int x=i%9;
         int y=i/9;
-        barThing[i]->setSize(bsize);
-        barThing[i]->move(30+x*bsize,startH+y*bsize);
+        int index=page*45+i;
+        if(index>=barThing.length())
+            break;
+        barThing[index]->setVisible(true);
+        barThing[index]->setSize(bsize);
+        barThing[index]->move(30+x*bsize,startH+y*bsize);
         painter.drawRect(30+x*bsize,startH+y*bsize,bsize,bsize);
     }
+    QRect PBRect(5,startH+bsize*2,20,bsize);
+    lastPageButton->setGeometry(PBRect);
+    PBRect.setRect(35+9*bsize,startH+bsize*2,20,bsize);
+    nextPageButton->setGeometry(PBRect);
+
     flowItem->setSize(bsize);
     flowItem->move(QCursor::pos()-viewPos-this->pos()+QPoint(0,5));
 }
@@ -340,6 +358,10 @@ void BackPackBarWidget::initBar()
         barThing.append(ti);
         connect(ti,SIGNAL(mouseChoose()),this,SLOT(chooseItem()));
     }
+    maxPage=barThing.length()/45+1;
+    if(maxPage<=1)
+        nextPageButton->setDisabled(true);
+
     flowItem=new ThingItemPanel(16,this);
     flowItem->setNULLItem();
 }
@@ -392,6 +414,36 @@ void BackPackBarWidget::chooseItem()
         }
     }
     emit pocketBar->thingIndexChange(pocketBar->getCurrThingID());
+}
+
+void BackPackBarWidget::lastPage()
+{
+    page--;
+    if(page<=0){
+        page=0;
+        lastPageButton->setDisabled(true);
+    }
+    if(page<maxPage-1){
+        nextPageButton->setEnabled(true);
+    }
+    for(int i=0;i<barThing.length();i++){
+        barThing[i]->setVisible(false);
+    }
+}
+
+void BackPackBarWidget::nextPage()
+{
+    page++;
+    if(page>=maxPage-1){
+        page=maxPage-1;
+        nextPageButton->setDisabled(true);
+    }
+    if(page>0){
+        lastPageButton->setEnabled(true);
+    }
+    for(int i=0;i<barThing.length();i++){
+        barThing[i]->setVisible(false);
+    }
 }
 
 //===========================
@@ -692,3 +744,4 @@ void ItemBarWidget::paintEvent(QPaintEvent *)
         x=x+size+rect.height()*0.1;
     }
 }
+

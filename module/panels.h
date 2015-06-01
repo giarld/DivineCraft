@@ -193,6 +193,8 @@ private:
 
 private slots:
     void chooseItem();
+    void lastPage();                //上一页
+    void nextPage();            //下一页
 
 private:
     QVector<ThingItemPanel*>pocketThing;              //口袋物品  !!其中ThingItem的指针要求保持不变。
@@ -201,6 +203,11 @@ private:
     ItemBar *pocketBar;
     World *myWorld;
     QPoint viewPos;                                                         //全局窗体的坐标
+
+    QPushButton *lastPageButton;                   //上一页按钮
+    QPushButton *nextPageButton;               //下一页按钮
+    int page;
+    int maxPage;                        //最大页码（也就是总页数）
 };
 
 class BackPackBar : public QObject

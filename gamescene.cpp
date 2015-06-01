@@ -9,20 +9,20 @@
 
 //选定线框的顶点偏移
 QVector3D linePoints[][2]={
-    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,1.005,1.005)},
-    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,1.005,1.005)},
-    {QVector3D(-0.005,1.005,-0.005),QVector3D(1.005,1.005,-0.005)},
-    {QVector3D(-0.005,1.005,1.005),QVector3D(1.005,1.005,1.005)},
+    {QVector3D(-0.003,1.003,-0.003),QVector3D(-0.003,1.003,1.003)},
+    {QVector3D(1.003,1.003,-0.003),QVector3D(1.003,1.003,1.003)},
+    {QVector3D(-0.003,1.003,-0.003),QVector3D(1.003,1.003,-0.003)},
+    {QVector3D(-0.003,1.003,1.003),QVector3D(1.003,1.003,1.003)},
 
-    {QVector3D(-0.005,-0.005,-0.005),QVector3D(-0.005,-0.005,1.005)},
-    {QVector3D(1.005,-0.005,-0.005),QVector3D(1.005,-0.005,1.005)},
-    {QVector3D(-0.005,-0.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
-    {QVector3D(-0.005,-0.005,1.005),QVector3D(1.005,-0.005,1.005)},
+    {QVector3D(-0.003,-0.003,-0.003),QVector3D(-0.003,-0.003,1.003)},
+    {QVector3D(1.003,-0.003,-0.003),QVector3D(1.003,-0.003,1.003)},
+    {QVector3D(-0.003,-0.003,-0.003),QVector3D(1.003,-0.003,-0.003)},
+    {QVector3D(-0.003,-0.003,1.003),QVector3D(1.003,-0.003,1.003)},
 
-    {QVector3D(-0.005,1.005,-0.005),QVector3D(-0.005,-0.005,-0.005)},
-    {QVector3D(-0.005,1.005,1.005),QVector3D(-0.005,-0.005,1.005)},
-    {QVector3D(1.005,1.005,-0.005),QVector3D(1.005,-0.005,-0.005)},
-    {QVector3D(1.005,1.005,1.005),QVector3D(1.005,-0.005,1.005)}
+    {QVector3D(-0.003,1.003,-0.003),QVector3D(-0.003,-0.003,-0.003)},
+    {QVector3D(-0.003,1.003,1.003),QVector3D(-0.003,-0.003,1.003)},
+    {QVector3D(1.003,1.003,-0.003),QVector3D(1.003,-0.003,-0.003)},
+    {QVector3D(1.003,1.003,1.003),QVector3D(1.003,-0.003,1.003)}
 };
 
 //================================================//
@@ -72,8 +72,12 @@ GameScene::~GameScene()
     delete backPackBar;
 
     delete messagePanel;
-    while(!gameMessages.isEmpty())
+    while(!gameMessages.isEmpty()){
+        GameMessage *g=gameMessages.front();
+        if(g)
+            delete g;
         gameMessages.pop_front();
+    }
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -102,6 +106,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     rview.rotate(rot.y(),cos(GMath::radians(rot.x())),0,sin(GMath::radians(rot.x())));
 
     renderWorld(view,rview);
+
     defaultStates();
     painter->endNativePainting();
 
@@ -284,7 +289,6 @@ void GameScene::keyPressEvent(QKeyEvent *event)
         }
     }
     QGraphicsScene::keyPressEvent(event);
-    //    qDebug()<<QTime::currentTime()<<"press:"<<event->key();
 }
 
 void GameScene::keyReleaseEvent(QKeyEvent *event)
@@ -329,7 +333,7 @@ void GameScene::setStates()
 
     //png透明
     glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER,0.0);
+    glAlphaFunc(GL_GREATER,0.1);
 
     glMatrixMode(GL_PROJECTION);            //设置矩阵模式
     glPushMatrix();
