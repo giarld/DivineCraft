@@ -115,7 +115,7 @@ void World::updateWorld()
     qDebug()<<QTime::currentTime()<<"update world : "<<this->cameraPosition;
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为起始区块。
-
+    qDebug()<<cdPos;
     bfs2World(startCPos);
 
     foreach (ChunkMap *cm, chunksMap) {
@@ -541,7 +541,7 @@ int World::getMaxRenderLen() const
 
 void World::setMaxRenderLen(int value)
 {
-    maxRenderLen = std::min(value/2,16);                        //最大渲染距离是渲染宽度的一般（人在中间嘛）
+    maxRenderLen = std::min(value/2,16);                        //最大渲染距离是渲染宽度的一半（人在中间嘛）
 }
 
 BlockListNode *World::getBlockIndex(int index)
@@ -562,14 +562,16 @@ QVector3D World::getCameraPosition() const
 
 void World::changeCameraPosition(const QVector3D &cPos)
 {
-    cameraPosition = DisplayChunk::calcChunckPos(cPos);
-    QVector2D nowC=GMath::v3d2v2d(cameraPosition);
+    cameraPosition = cPos;
+    QVector3D bPos=DisplayChunk::calcChunckPos(cPos);
+    QVector2D nowC=GMath::v3d2v2d(bPos);
     if(nowC!=lastCameraChunk){                                              //跨越了区块要进行区块更新
         lastCameraChunk=nowC;
         updateWorld();
     }
-    else if(!lockDQueue && lastCameraHight!=cameraPosition.y()){                       //随着高度的变化，要刷掉视距以外的物体（考虑队列互斥）
-        lastCameraHight=cameraPosition.y();
+    else if(!lockDQueue && lastCameraHight!=bPos.y()){                       //随着高度的变化，要刷掉视距以外的物体（考虑队列互斥）
+        lastCameraHight=bPos.y();
         updateDisplayChunkQueue.push_back(cPos);                //由于当前函数不再主线程中，只能寻求主线程进行显示刷新
     }
+
 }

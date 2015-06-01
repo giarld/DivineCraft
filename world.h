@@ -70,7 +70,7 @@ private:
 private:
     QMap<QString,ChunkMap*> chunksMap;               //区块列表。key="chunkXxchunkY"
     int maxRenderLen;                                            //额，最大的区块显示距离，以camera所在区块为起点(最大加载距离比最大可视距离要大1)
-    QVector3D cameraPosition;                                       //camera的坐标，让区块能更新的前提
+    QVector3D cameraPosition;                                       //camera的坐标(不是所在区块坐标)，让区块能更新的前提
     QVector2D lastCameraChunk;                                  //camera所在区块的坐标记录
     int lastCameraHight;                                                    //camera所在区块高度
     QString worldName;

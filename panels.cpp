@@ -642,14 +642,21 @@ void ItemBarWidget::midBlock(BlockListNode *blockIndex)
 {
     bool isC=false;
     for(int i=0;i<pocketThing.length();i++){
-        if(pocketThing[i]->getItem()->id == blockIndex->id){
+        if(pocketThing[i]->getItem()->id == blockIndex->id){                //物品栏中有对应方块，则选中
             currentIndex=i;
             isC=true;
             break;
         }
     }
-    if(!isC)
+    if(!isC){
+        for(int i=0;i<pocketThing.length();i++){
+            if(pocketThing[i]->isNULL()){                                       //物品栏中有空位置则放置在空位置
+                currentIndex=i;
+                break;
+            }
+        }
         pocketThing[currentIndex]->setItem(blockIndex->id,blockIndex->name,blockIndex->texName[0],1);
+    }
     emit thingIndexChange(getCurrThingID());
 }
 
