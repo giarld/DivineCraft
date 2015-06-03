@@ -175,7 +175,7 @@ void World::loadBlockIndex()
     if(file.open(QIODevice::ReadOnly)){
         QTextStream in(&file);
         int index=0;
-        while(!in.atEnd()){
+        while(!in.atEnd() && index<=mBlockIndex.length()){
             QString line=in.readLine();
             if(line=="" || line==NULL) continue;
             if(index==0){
@@ -209,9 +209,24 @@ void World::loadBlockIndex()
             index++;
         }
     }
-    //    foreach (BlockListNode *a, mBlockIndex) {
-    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->texName;
-    //    }
+    QString unknown="unknown";
+    for(int ii=0;ii < mBlockIndex.length();ii++){                 //未找到材质的用未知材质覆盖
+        int type=mBlockIndex[ii]->type;
+        int x=6;
+        if(type==1)
+            x=4;
+        int k;
+        for(k=0;k<mBlockIndex[ii]->texName.length();k++){       //空白覆盖
+            if(mBlockIndex[ii]->texName[k]=="")
+                mBlockIndex[ii]->texName[k]=unknown;
+        }
+        for(;k<x;k++){              //缺失覆盖
+            mBlockIndex[ii]->texName<<unknown;
+        }
+    }
+//    foreach (BlockListNode *a, mBlockIndex) {
+//        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->texName;
+//    }
 }
 
 void World::setBlockListLength(int len)
@@ -227,8 +242,14 @@ void World::calcBlockListNodeTexId(const QMap<QString, int> &texMap)
     foreach (BlockListNode *node, mBlockIndex) {
         if(node){
             node->tex.clear();
-            foreach (QString name, node->texName) {
-                node->tex.append(texMap.value(name));
+            for(int i=0;i<node->texName.length();i++){
+                QString name = node->texName[i];
+                int dep=texMap.value(name);
+                if(dep==0 && node->id!=0){
+                    dep=texMap.value("unknown");
+                    node->texName[i]="unknown";
+                }
+                node->tex.append(dep);
             }
         }
     }
@@ -371,14 +392,16 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
 
     //生成树木
     bool cT=qrand()%10>=5?1:0;
+    int tree[][2]={{35,41},{36,42},{37,43}};
+    int tn=qrand()%3;
     if(cT){
         int treeH=qrand()%4+5;
         int sx=7+oPos.x();
         int sz=7+oPos.z();
         for(int i=3;i<=treeH+3;i++){
-            newChunk->addBlock(new Block(QVector3D(sx,i,sz),getBlockIndex(5)),false);
+            newChunk->addBlock(new Block(QVector3D(sx,i,sz),getBlockIndex(tree[tn][0])),false);
         }
-        //        newChunk->addBlock(new Block(QVector3D(sx,treeH+4,sz),getBlockIndex(34)),false);
+        newChunk->addBlock(new Block(QVector3D(sx,treeH+4,sz),getBlockIndex(tree[tn][1])),false);
 
         for(int h=treeH/2+3;h<=treeH+4;h++){
             int r=qrand()%3+2;
@@ -391,7 +414,7 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
             for(int x=sx-r;x<=sx+r;x++){
                 for(int z=sz-r;z<=sz+r;z++){
                     if(!(QVector2D(x,z).distanceToPoint(QVector2D(sx,sz))>r || (x==sx&& z==sz))){
-                        newChunk->addBlock(new Block(QVector3D(x,h,z),getBlockIndex(34)),false);
+                        newChunk->addBlock(new Block(QVector3D(x,h,z),getBlockIndex(tree[tn][1])),false);
                     }
                 }
             }

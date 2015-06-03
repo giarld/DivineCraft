@@ -279,8 +279,9 @@ void BackPackBarWidget::setPocket(ItemBar *itemBar)
     this->pocketBar=itemBar;
     for(int i=0;i<9;i++){
         pocketThing[i]->setItem(itemBar->getThingItem(i));
-        setPocketThingItem(barThing[i]->getItem(),1,i);
     }
+    setPocketThingItem(barThing[2]->getItem(),1,0);
+    emit pocketBar->thingIndexChange(pocketBar->getCurrThingID());
 }
 
 void BackPackBarWidget::setPocketThingItem(ThingItem *item,int amount,int index)
@@ -314,6 +315,7 @@ void BackPackBarWidget::paintEvent(QPaintEvent *)
     for(int i=0;i<9;i++){
         pocketThing[i]->setSize(bsize);
         pocketThing[i]->move(30+i*bsize,startH);
+        pocketThing[i]->updateToolTip();
         painter.drawRect(QRect(30+i*bsize,startH,bsize,bsize));
     }
 
@@ -354,7 +356,9 @@ void BackPackBarWidget::initBar()
         if(bl->id==0)
             break;
         ThingItemPanel * ti=new ThingItemPanel(16,this);
+        ti->setVisible(false);
         ti->setItem(bl->id,bl->name,bl->texName[0],-1);
+        ti->updateToolTip();
         barThing.append(ti);
         connect(ti,SIGNAL(mouseChoose()),this,SLOT(chooseItem()));
     }
@@ -398,8 +402,9 @@ void BackPackBarWidget::chooseItem()
             }
             item->copyItem(temp);
             delete temp;
+            item->setToolTip(item->getItem()->name);
         }
-        else{               //无限的处理
+        else{               //无限物品的处理
             if(item->getItem()->id==flowItem->getItem()->id){
                 flowItem->setAmount(flowItem->getAmount()+1);
             }
@@ -413,6 +418,7 @@ void BackPackBarWidget::chooseItem()
             }
         }
     }
+
     emit pocketBar->thingIndexChange(pocketBar->getCurrThingID());
 }
 
@@ -426,7 +432,7 @@ void BackPackBarWidget::lastPage()
     if(page<maxPage-1){
         nextPageButton->setEnabled(true);
     }
-    for(int i=0;i<barThing.length();i++){
+    for(int i=0;i<barThing.length();i++){               //隐藏所有的item以防止重叠
         barThing[i]->setVisible(false);
     }
 }
@@ -441,7 +447,7 @@ void BackPackBarWidget::nextPage()
     if(page>0){
         lastPageButton->setEnabled(true);
     }
-    for(int i=0;i<barThing.length();i++){
+    for(int i=0;i<barThing.length();i++){       //隐藏所有的item以防止重叠
         barThing[i]->setVisible(false);
     }
 }
@@ -513,6 +519,11 @@ void ThingItemPanel::setSize(int size)
     tSize=size;
 }
 
+void ThingItemPanel::updateToolTip()
+{
+    this->setToolTip(item->name);
+}
+
 bool ThingItemPanel::isNULL()
 {
     if(item==NULL || item->id==0)           //空的条件
@@ -544,13 +555,16 @@ void ThingItemPanel::paintEvent(QPaintEvent *)
     QPixmap texmap(tr(":/res/divinecraft/textures/blocks/%1").arg(item->texName));                  //选取正面材质来作为图标
     painter.drawPixmap(texRect,texmap,QRect(0,0,texmap.width(),texmap.height()));
 
-    if(item->amount>=0){
+    if(item->amount>=0){            //画数量
         QFont font;
         font.setPointSize(tSize*0.3);
         painter.setPen(Qt::white);
         painter.setFont(font);
         painter.drawText(tRect,Qt::AlignBottom | Qt::AlignRight,QString::number(item->amount));
     }
+
+    QFont font;
+
 }
 
 void ThingItemPanel::mousePressEvent(QMouseEvent *event)

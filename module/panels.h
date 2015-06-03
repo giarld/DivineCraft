@@ -103,6 +103,8 @@ public:
     ThingItem *getItem();
     void setSize(int size);
 
+    void updateToolTip();                           //更新标签
+
     bool isNULL();                                      //是否为空
     bool isPick();                                          //能否被拾取（amount>0）
 protected:

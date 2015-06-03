@@ -1,36 +1,54 @@
-64 64
+32 32
 0 0    air air air air air air
-1 0    dirt dirt dirt dirt dirt dirt
-2 0    grass_side grass_side grass_side grass_side grass_top dirt
-3 0    cobblestone cobblestone cobblestone cobblestone cobblestone cobblestone
-4 0    stone stone stone stone stone stone
-5 0    oak oak oak oak oak_top oak_top
-6 0    grass_side_snowed grass_side_snowed grass_side_snowed grass_side_snowed snow dirt
-7 0    sand sand sand sand sand sand
-8 0    brick brick brick brick brick brick
-9 0    cobblestone_mossy cobblestone_mossy cobblestone_mossy cobblestone_mossy cobblestone_mossy cobblestone_mossy
-10 0    glass glass glass glass glass glass 
-11 0  iron_block iron_block iron_block iron_block iron_block iron_block
-12 0  gold_block gold_block gold_block gold_block gold_block gold_block
-13 0  diamond_block diamond_block diamond_block diamond_block diamond_block diamond_block
-14 0  ice ice ice ice ice ice
-15 0  melon_side melon_side melon_side melon_side melon_top melon_top
-16 1  wheat wheat wheat wheat
-17 1  carrots carrots carrots carrots
-18 0  wool_colored_black wool_colored_black wool_colored_black wool_colored_black wool_colored_black wool_colored_black
-19 0  wool_colored_blue wool_colored_blue wool_colored_blue wool_colored_blue wool_colored_blue wool_colored_blue
-20 0  wool_colored_brown wool_colored_brown wool_colored_brown wool_colored_brown wool_colored_brown wool_colored_brown
-21 0  wool_colored_cyan wool_colored_cyan wool_colored_cyan wool_colored_cyan wool_colored_cyan wool_colored_cyan
-22 0  wool_colored_gray wool_colored_gray wool_colored_gray wool_colored_gray wool_colored_gray wool_colored_gray
-23 0  wool_colored_green wool_colored_green wool_colored_green wool_colored_green wool_colored_green wool_colored_green
-24 0  wool_colored_light_blue wool_colored_light_blue wool_colored_light_blue wool_colored_light_blue wool_colored_light_blue wool_colored_light_blue
-25 0  wool_colored_lime wool_colored_lime wool_colored_lime wool_colored_lime wool_colored_lime wool_colored_lime
-26 0  wool_colored_magenta wool_colored_magenta wool_colored_magenta wool_colored_magenta wool_colored_magenta wool_colored_magenta
-27 0  wool_colored_orange wool_colored_orange wool_colored_orange wool_colored_orange wool_colored_orange wool_colored_orange
-28 0  wool_colored_pink wool_colored_pink wool_colored_pink wool_colored_pink wool_colored_pink wool_colored_pink
-29 0  wool_colored_purple wool_colored_purple wool_colored_purple wool_colored_purple wool_colored_purple wool_colored_purple
-30 0  wool_colored_red wool_colored_red wool_colored_red wool_colored_red wool_colored_red wool_colored_red
-31 0  wool_colored_silver wool_colored_silver wool_colored_silver wool_colored_silver wool_colored_silver wool_colored_silver
-32 0  wool_colored_white wool_colored_white wool_colored_white wool_colored_white wool_colored_white wool_colored_white
-33 0  wool_colored_yellow wool_colored_yellow wool_colored_yellow wool_colored_yellow wool_colored_yellow wool_colored_yellow
-34 0  leaves_birch leaves_birch leaves_birch leaves_birch leaves_birch leaves_birch
+1 0    dirt  dirt  dirt  dirt  dirt  dirt
+2 0    grass_side grass_side grass_side grass_side  grass_top  dirt
+3 0    stone  stone  stone  stone  stone  stone
+4 0    rough_stone  rough_stone  rough_stone  rough_stone  rough_stone  rough_stone
+5 0    sand  sand  sand  sand  sand  sand
+6 0    limestone  limestone  limestone  limestone  limestone  limestone
+7 0    mossy_stone  mossy_stone  mossy_stone  mossy_stone  mossy_stone  mossy_stone
+8 0    marble  marble  marble  marble  marble  marble
+9 0    reddirt  reddirt  reddirt  reddirt  reddirt  reddirt
+10 0  glass  glass  glass  glass  glass  glass
+11 0    brick  brick  brick  brick  brick  brick
+12 0    iron_block  iron_block  iron_block  iron_block  iron_block  iron_block
+13 0    gold_block  gold_block  gold_block  gold_block  gold_block  gold_block
+14 0    diamond_block  diamond_block  diamond_block  diamond_block  diamond_block  diamond_block
+15 0    melon_side  melon_side  melon_side  melon_side  melon_top  melon_top
+16 0    pumpkin_side  pumpkin_side  pumpkin_side  pumpkin_side  pumpkin_top  pumpkin_button
+17 0    emerald_block  emerald_block  emerald_block  emerald_block  emerald_block  emerald_block
+18 0    wool_colored_black  wool_colored_black  wool_colored_black  wool_colored_black  wool_colored_black  wool_colored_black
+19 0    wool_colored_blue  wool_colored_blue  wool_colored_blue  wool_colored_blue  wool_colored_blue  wool_colored_blue
+20 0    wool_colored_brown  wool_colored_brown  wool_colored_brown  wool_colored_brown  wool_colored_brown  wool_colored_brown
+21 0    wool_colored_cyan  wool_colored_cyan  wool_colored_cyan  wool_colored_cyan  wool_colored_cyan  wool_colored_cyan
+22 0    wool_colored_gray  wool_colored_gray  wool_colored_gray  wool_colored_gray  wool_colored_gray  wool_colored_gray
+23 0    wool_colored_green  wool_colored_green  wool_colored_green  wool_colored_green  wool_colored_green  wool_colored_green
+24 0    wool_colored_light_blue  wool_colored_light_blue  wool_colored_light_blue  wool_colored_light_blue  wool_colored_light_blue  wool_colored_light_blue
+25 0    wool_colored_lime  wool_colored_lime  wool_colored_lime  wool_colored_lime  wool_colored_lime  wool_colored_lime
+26 0    wool_colored_magenta  wool_colored_magenta  wool_colored_magenta  wool_colored_magenta  wool_colored_magenta  wool_colored_magenta
+27 0    wool_colored_orange  wool_colored_orange  wool_colored_orange  wool_colored_orange  wool_colored_orange  wool_colored_orange
+28 0    wool_colored_pink  wool_colored_pink  wool_colored_pink  wool_colored_pink  wool_colored_pink  wool_colored_pink
+29 0    wool_colored_purple  wool_colored_purple  wool_colored_purple  wool_colored_purple  wool_colored_purple  wool_colored_purple
+30 0    wool_colored_red  wool_colored_red  wool_colored_red  wool_colored_red  wool_colored_red  wool_colored_red
+31 0    wool_colored_silver  wool_colored_silver  wool_colored_silver  wool_colored_silver  wool_colored_silver  wool_colored_silver
+32 0   wool_colored_white  wool_colored_white  wool_colored_white  wool_colored_white  wool_colored_white  wool_colored_white
+33 0   wool_colored_yellow  wool_colored_yellow  wool_colored_yellow  wool_colored_yellow  wool_colored_yellow  wool_colored_yellow
+34 0   sapphire  sapphire  sapphire  sapphire  sapphire  sapphire
+35 0   birch  birch  birch  birch  birch_top  birch_top
+36 0   spruce  spruce  spruce  spruce  spruce_top  spruce_top
+37 0   pine  pine  pine  pine  pine_top  pine_top
+38 0   planks_birch  planks_birch  planks_birch  planks_birch  planks_birch  planks_birch
+39 0   planks_spruce  planks_spruce  planks_spruce  planks_spruce  planks_spruce  planks_spruce
+40 0   planks_pine  planks_pine  planks_pine  planks_pine  planks_pine  planks_pine
+41 0   leaves_birch  leaves_birch  leaves_birch  leaves_birch  leaves_birch  leaves_birch
+42 0   leaves_spruce  leaves_spruce  leaves_spruce  leaves_spruce  leaves_spruce  leaves_spruce
+43 0   leaves_pine  leaves_pine  leaves_pine  leaves_pine  leaves_pine  leaves_pine
+
+44 1   plant_grass  plant_grass  plant_grass  plant_grass
+45 1   wheat_stage  wheat_stage  wheat_stage  wheat_stage
+46 1   aloe  aloe  aloe  aloe
+47 1   potatoes_stage  potatoes_stage  potatoes_stage  potatoes_stage
+48 1   carrots_stage  carrots_stage  carrots_stage  carrots_stage
+
+49 1   flower_rose  flower_rose  flower_rose  flower_rose
+50 1   chrysanthemum  chrysanthemum  chrysanthemum  chrysanthemum

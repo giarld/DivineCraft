@@ -551,7 +551,7 @@ void GameScene::initGame()
     wThread->start();
 
     world->setMaxRenderLen(maxRenderLen);
-    world->setWorldName("Test");
+    world->setWorldName("new_world");
     camera->setWorld(world);                                //传递世界指针
     ///////////////////////////
     //这里是一个规定的加载顺序，后步骤会依赖于前步骤
@@ -581,8 +581,8 @@ void GameScene::initGame()
     backPackBar->setWorld(world);               //传递world指针
 
     itemBar=new ItemBar(this);
-    backPackBar->setPocket(itemBar);
     connect(itemBar,SIGNAL(thingIndexChange(int)),camera,SLOT(setBlockId(int)));
+    backPackBar->setPocket(itemBar);
     //=======================
     gameMessages.clear();
     messagePanel=new MessagePanel;

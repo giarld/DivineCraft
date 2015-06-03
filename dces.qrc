@@ -9,28 +9,32 @@
         <file>shader/line.fsh</file>
         <file>shader/line.vsh</file>
         <file>textures/blocks/texture_index.list</file>
+        <file>textures/ui/back_pack_bar.png</file>
         <file>textures/blocks/air.png</file>
+        <file>textures/blocks/birch_top.png</file>
+        <file>textures/blocks/birch.png</file>
         <file>textures/blocks/brick.png</file>
-        <file>textures/blocks/carrots.png</file>
-        <file>textures/blocks/cobblestone_mossy.png</file>
-        <file>textures/blocks/cobblestone.png</file>
         <file>textures/blocks/diamond_block.png</file>
         <file>textures/blocks/dirt.png</file>
+        <file>textures/blocks/emerald_block.png</file>
+        <file>textures/blocks/glass.png</file>
         <file>textures/blocks/gold_block.png</file>
-        <file>textures/blocks/grass_side_snowed.png</file>
         <file>textures/blocks/grass_side.png</file>
         <file>textures/blocks/grass_top.png</file>
-        <file>textures/blocks/ice.png</file>
         <file>textures/blocks/iron_block.png</file>
-        <file>textures/blocks/leaves_birch.png</file>
-        <file>textures/blocks/oak_top.png</file>
-        <file>textures/blocks/oak.png</file>
+        <file>textures/blocks/limestone.png</file>
+        <file>textures/blocks/marble.png</file>
         <file>textures/blocks/melon_side.png</file>
         <file>textures/blocks/melon_top.png</file>
+        <file>textures/blocks/mossy_stone.png</file>
+        <file>textures/blocks/pumpkin_button.png</file>
+        <file>textures/blocks/pumpkin_side.png</file>
+        <file>textures/blocks/pumpkin_top.png</file>
+        <file>textures/blocks/reddirt.png</file>
+        <file>textures/blocks/rough_stone.png</file>
         <file>textures/blocks/sand.png</file>
-        <file>textures/blocks/snow.png</file>
+        <file>textures/blocks/sapphire.png</file>
         <file>textures/blocks/stone.png</file>
-        <file>textures/blocks/wheat.png</file>
         <file>textures/blocks/wool_colored_black.png</file>
         <file>textures/blocks/wool_colored_blue.png</file>
         <file>textures/blocks/wool_colored_brown.png</file>
@@ -47,7 +51,23 @@
         <file>textures/blocks/wool_colored_silver.png</file>
         <file>textures/blocks/wool_colored_white.png</file>
         <file>textures/blocks/wool_colored_yellow.png</file>
-        <file>textures/blocks/glass.png</file>
-        <file>textures/ui/back_pack_bar.png</file>
+        <file>textures/blocks/unknown.png</file>
+        <file>textures/blocks/spruce.png</file>
+        <file>textures/blocks/spruce_top.png</file>
+        <file>textures/blocks/pine.png</file>
+        <file>textures/blocks/pine_top.png</file>
+        <file>textures/blocks/planks_birch.png</file>
+        <file>textures/blocks/planks_pine.png</file>
+        <file>textures/blocks/planks_spruce.png</file>
+        <file>textures/blocks/leaves_birch.png</file>
+        <file>textures/blocks/leaves_pine.png</file>
+        <file>textures/blocks/leaves_spruce.png</file>
+        <file>textures/blocks/aloe.png</file>
+        <file>textures/blocks/carrots_stage.png</file>
+        <file>textures/blocks/plant_grass.png</file>
+        <file>textures/blocks/potatoes_stage.png</file>
+        <file>textures/blocks/wheat_stage.png</file>
+        <file>textures/blocks/flower_rose.png</file>
+        <file>textures/blocks/chrysanthemum.png</file>
     </qresource>
 </RCC>
