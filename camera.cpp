@@ -53,6 +53,10 @@ void Camera::sightMove(const QPointF &dp)
     float x=mRotation.x()+xr;
     float y=mRotation.y()+yr;
     y=GMath::gMax(-89.999,GMath::gMin(89.999,y));                                         //俯仰度在-89.999到89.999度之间(不限制在90度是为了让位移向量能识别到前进方向)
+    if(x>360)                   //防止扭度过大
+        x-=360;
+    if(x<-360)
+        x+=360;
     mRotation=QPointF(x,y);
     reMotionVector();
 }
@@ -377,6 +381,30 @@ void Camera::collision(QVector3D strafe,int timeC)
         newPosition.setY(y+ySpeed*timeC);
     }
 
+
+    //y方向的检测
+    bool coY=false;
+    float ym=0.2;
+    static float corr[][2]={                          //要向自己的
+        {1,0},{-1,0},{0,1},{0,-1},{-0.7071,-0.7071},{-0.7071,0.7071},{0.7071,-0.7071},{0.7071,0.7071}
+    };
+    for(int i=0;i<8;i++){                   //以脚底为圆心，0.2为半径检测脚下方块这样就可以站在方块边缘了
+        if(myWorld->collision(QVector3D(x+corr[i][0]*ym,newPosition.y(),z+corr[i][1]*ym))){
+            coY=true;
+            break;
+        }
+    }
+
+    if(coY){             //脚踩在方块上
+        newPosition.setY(mBPos.y());
+        ySpeed=0.0;
+    }
+
+    if(myWorld->collision(QVector3D(x,newPosition.y()+h,z))){                   //头顶住方块，回弹
+        newPosition.setY(float(GMath::g2Int(newPosition.y()+h))-h);
+        ySpeed=-G;
+    }
+
     //x方向碰撞检测
     for(float i=0;i<h;i+=0.2){
         if(myWorld->collision(QVector3D(newPosition.x()+(strafe.x()>=0?m:-m),y+i,newPosition.z()))){
@@ -386,6 +414,7 @@ void Camera::collision(QVector3D strafe,int timeC)
             else{
                 newPosition.setX(mBPos.x()+1-m);
             }
+//            newPosition.setX(mPosition.x());
             break;
         }
     }
@@ -399,20 +428,11 @@ void Camera::collision(QVector3D strafe,int timeC)
             else{
                 newPosition.setZ(mBPos.z()+1-m);
             }
+//            newPosition.setZ(mPosition.z());
             break;
         }
     }
 
-    //y方向的检测
-    if(myWorld->collision(QVector3D(x,newPosition.y(),z))){             //脚踩在方块上
-        newPosition.setY(mBPos.y());
-        ySpeed=0.0;
-    }
-
-    if(myWorld->collision(QVector3D(x,newPosition.y()+h,z))){                   //头顶住方块，回弹
-        newPosition.setY(float(GMath::g2Int(newPosition.y()+h))-h);
-        ySpeed=-G;
-    }
     if(newPosition.y()<-100)
         newPosition.setY(200);
     mPosition=newPosition;

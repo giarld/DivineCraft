@@ -104,6 +104,7 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     QPointF rot=camera->rotation();
     rview.rotate(rot.x(),0,1,0);
     rview.rotate(rot.y(),cos(GMath::radians(rot.x())),0,sin(GMath::radians(rot.x())));
+    qWarning()<<rot.x();
 
     renderWorld(view,rview);
 
