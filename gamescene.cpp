@@ -38,6 +38,7 @@ GameScene::GameScene(int width, int height, QGraphicsView *parent)
     setSceneRect(0,0,width,height);
     initGame();
     lastTime=QTime::currentTime();
+    saveTime=lastTime;
 
     QTimer *timer=new QTimer;
     timer->setInterval(10);
@@ -46,6 +47,7 @@ GameScene::GameScene(int width, int height, QGraphicsView *parent)
     connect(timer,SIGNAL(timeout()),world,SLOT(updateDraw()),Qt::DirectConnection);         //在主线程中执行
     connect(timer,SIGNAL(timeout()),this,SLOT(mouseMove()));
     connect(timer,SIGNAL(timeout()),this,SLOT(handleGameMessage()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(autoSave()));                                                     //
     timer->start();
 }
 
@@ -318,6 +320,19 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
     //    qDebug()<<QTime::currentTime()<<"relese:"<<event->key();
 }
 
+void GameScene::focusOutEvent(QFocusEvent *event)
+{
+    //窗口脱离焦点后暂停游戏
+    if(inSence){
+        inSence=false;
+        camera->unBind();
+        pauseGame();
+        mouseUnLock();
+        opWidgetProxy->show();
+        inOpWidget=true;
+    }
+}
+
 void GameScene::setStates()
 {
     //    glShadeModel(GL_SMOOTH);
@@ -455,6 +470,8 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
 
 void GameScene::setRenderLen(int len)
 {
+    world->autoSave();
+    saveTime=QTime::currentTime();
     maxRenderLen=len;
     world->setMaxRenderLen(len);
     emit updateWorld();
@@ -495,14 +512,14 @@ void GameScene::loadOverSlot()
 {
     showMessage(tr("世界加载完成"),2);
     dataPanel->setRenderLen(maxRenderLen);
-    if(!backPackBar->isShow() && !inOpWidget){
-        if(!inSence){
-            inSence=true;
-            mouseLock();
-            camera->bind();
-            startGame();
-        }
-    }
+//    if(!backPackBar->isShow() && !inOpWidget){
+//        if(!inSence){
+//            inSence=true;
+//            mouseLock();
+//            camera->bind();
+//            startGame();
+//        }
+//    }
 }
 
 void GameScene::showMessage(QString message, int showTime, int textSize, QColor textColor)
@@ -519,6 +536,15 @@ void GameScene::continueGame()
     startGame();
     inOpWidget=false;
     opWidgetProxy->hide();
+}
+
+void GameScene::autoSave()
+{
+    //每60s保存一次
+    if(saveTime.secsTo(QTime::currentTime())>=60){
+        world->autoSave();
+        saveTime=QTime::currentTime();
+    }
 }
 
 void GameScene::handleGameMessage()
@@ -634,6 +660,7 @@ void GameScene::initGame()
     connect(opWidget,SIGNAL(continueGame()),this,SLOT(continueGame()));
     connect(opWidget,SIGNAL(mouseLevelValueChange(int)),camera,SLOT(setMouseLevel(int)));
     connect(opWidget,SIGNAL(renderValueChange(int)),this,SLOT(setRenderLen(int)));
+    connect(opWidget,SIGNAL(quitClick()),gView,SLOT(close()));
     //=============================
     loadSettings();
     camera->loadPosRot();                                   //加载位置视角信息

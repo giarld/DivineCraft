@@ -38,12 +38,16 @@ OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
     aboutButton=new QPushButton(tr("帮助与说明"),this);
     connect(aboutButton,SIGNAL(clicked()),this,SLOT(aboutGame()));
 
+    quitButton=new QPushButton(tr("退出游戏"),this);
+    connect(quitButton,SIGNAL(clicked()),this,SIGNAL(quitClick()));
+
     QVBoxLayout *mainLayout=new QVBoxLayout;
     this->setLayout(mainLayout);
     mainLayout->addLayout(mLayout);
     mainLayout->addLayout(rLayout);
     mainLayout->addStretch(20);
     mainLayout->addWidget(aboutButton);
+    mainLayout->addWidget(quitButton);
     mainLayout->addWidget(continueButton);
 
     //    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明

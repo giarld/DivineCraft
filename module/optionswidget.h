@@ -19,6 +19,8 @@ signals:
     void continueGame();
     void mouseLevelValueChange(int v);
     void renderValueChange(int v);
+    void quitClick();
+
 private slots:
     void mouseLevelChange(int v);
     void renderChange(int v);
@@ -27,6 +29,7 @@ private slots:
 private:
     QPushButton *aboutButton;
     QPushButton *continueButton;                //继续按钮
+    QPushButton *quitButton;
     QSlider *mouseLevelSlider;
     QLabel *mouseLevelLabel;
     QSlider *renderSlider;

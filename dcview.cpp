@@ -95,8 +95,7 @@ DCView::DCView()
 
 DCView::~DCView()
 {
-    if(gameScene)
-        delete gameScene;
+
 }
 
 void DCView::mousePressEvent(QMouseEvent *event)
@@ -127,5 +126,14 @@ void DCView::keyPressEvent(QKeyEvent *event)
     }
 
     QGraphicsView::keyPressEvent(event);
+}
+
+void DCView::closeEvent(QCloseEvent *)
+{
+    qWarning()<<"close";
+    if(gameScene)
+        delete gameScene;
+    delete widget;
+    exit(0);
 }
 

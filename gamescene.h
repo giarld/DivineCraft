@@ -40,6 +40,7 @@ protected:
     virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    void focusOutEvent(QFocusEvent *event);
 
     void setStates();               //设置状态，初始化GL绘图
     void setLights();               //光照
@@ -61,6 +62,7 @@ public slots:
     void loadOverSlot();                                    //预加载完毕接收槽
     void showMessage(QString message,int showTime=3, int textSize=10,QColor textColor=Qt::white);                                     //显示一个MessagePanel(含默认值)
     void continueGame();
+    void autoSave();                                                //自动保存（按时钟周期）
 
 private slots:
     void handleGameMessage();                      //处理消息等待队列
@@ -89,6 +91,7 @@ private:
     QGLShaderProgram *lineProgram;
 
     QTime lastTime;
+    QTime saveTime;
 
     World *world;
     QThread *wThread;

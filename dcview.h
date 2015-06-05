@@ -20,7 +20,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
-
+    void closeEvent(QCloseEvent *);
 
 private:
     QGLWidget *widget;
