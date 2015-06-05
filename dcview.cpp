@@ -19,7 +19,6 @@ DCView::DCView()
     gameScene=new GameScene(w,h,this) ;
     this->setScene(gameScene);
         this->setMouseTracking(false);
-    this->close();
 }
 
 DCView::~DCView()
