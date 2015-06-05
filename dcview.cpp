@@ -134,6 +134,7 @@ void DCView::closeEvent(QCloseEvent *)
     if(gameScene)
         delete gameScene;
     delete widget;
+    QApplication::exit(0);
     exit(0);
 }
 
