@@ -23,7 +23,9 @@ private slots:
     void mouseLevelChange(int v);
     void renderChange(int v);
     void clickOkRender();
+    void aboutGame();
 private:
+    QPushButton *aboutButton;
     QPushButton *continueButton;                //继续按钮
     QSlider *mouseLevelSlider;
     QLabel *mouseLevelLabel;

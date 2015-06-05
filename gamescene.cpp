@@ -4,6 +4,7 @@
 #include "gamescene.h"
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDateTime>
 #include "ctime"
 #include "gmath.h"
 
@@ -31,7 +32,7 @@ QVector3D linePoints[][2]={
 GameScene::GameScene(int width, int height, QGraphicsView *parent)
     :QGraphicsScene(parent)
     ,maxRenderLen(15)
-    ,GView(parent)
+    ,gView(parent)
     ,inSence(false)
 {
     setSceneRect(0,0,width,height);
@@ -130,8 +131,8 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
         int h=this->height()*0.7;
         int w=h*1.35;
         backPackBar->setGeometry((this->width()-w)/2,(this->height()-h)/2,w,h);
-        backPackBar->setViewPos(QPoint(GView->pos().x()
-                                       ,GView->pos().y()+(GView->frameSize().height()-GView->height())));
+        backPackBar->setViewPos(QPoint(gView->pos().x()
+                                       ,gView->pos().y()+(gView->frameSize().height()-gView->height())));
     }
     if(itemBar){                        //刷新物品栏位置大小
         itemBar->resetSIze(this->width(),this->height(),40);
@@ -200,7 +201,6 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void GameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    qWarning("relese");
     QGraphicsScene::mouseReleaseEvent(event);
 }
 
@@ -270,6 +270,9 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             mouseUnLock();
             showMessage(tr("打开了物品栏"),2);
         }
+    }
+    else if(event->key()==Qt::Key_F2){
+        screenShots();
     }
     else{
         switch (event->key()) {
@@ -482,7 +485,7 @@ void GameScene::hideBackPackBar()
 void GameScene::mouseMove()
 {
     if(inSence){
-        QPoint dtPoint=GView->cursor().pos()-centerPoint;
+        QPoint dtPoint=gView->cursor().pos()-centerPoint;
         camera->sightMove(QPointF(dtPoint));
         mouseLock();
     }
@@ -679,17 +682,17 @@ void GameScene:: loadTexture()
 
 void GameScene::mouseLock()
 {
-    QPoint po(GView->pos().x()+GView->width()/2,GView->pos().y()+GView->height()/2);
-    GView->cursor().setPos(po);
+    QPoint po(gView->pos().x()+gView->width()/2,gView->pos().y()+gView->height()/2);
+    gView->cursor().setPos(po);
     setCenterPoint(po);
-    //    GView->setCursor(Qt::BlankCursor);
-    GView->viewport()->setCursor(Qt::BlankCursor);                  //使用父容器对鼠标进行改变
+    //    gView->setCursor(Qt::BlankCursor);
+    gView->viewport()->setCursor(Qt::BlankCursor);                  //使用父容器对鼠标进行改变
 }
 
 void GameScene::mouseUnLock()
 {
-    //    GView->setCursor(Qt::ArrowCursor);
-    GView->viewport()->setCursor(Qt::ArrowCursor);
+    //    gView->setCursor(Qt::ArrowCursor);
+    gView->viewport()->setCursor(Qt::ArrowCursor);
 }
 
 void GameScene::loadSettings()
@@ -749,5 +752,27 @@ void GameScene::defaultSettings()
 {
     maxRenderLen=15;
     camera->setMouseLevel(50);
+}
+
+void GameScene::screenShots()
+{
+    QGLWidget *glWidget=qobject_cast<QGLWidget*>(gView->viewport());
+    QImage pix =glWidget->grabFrameBuffer(false);               //从帧缓存区中截取画面
+    QDateTime dtime=QDateTime::currentDateTime();
+
+    QDir dir(".");
+    if(!dir.cd("./.divineCraft/")){
+        dir.mkdir("./.divineCraft/");
+        dir.cd("./.divineCraft/");
+    }
+    if(!dir.cd("screenshots/")){
+        dir.mkdir("screenshots/");
+        dir.cd("screenshots/");
+    }
+    QString fileName=tr("%1/%2-%3-%4_%5:%6:%7:%8.png").arg(dir.absolutePath()).arg(dtime.date().year()).arg(dtime.date().month())
+            .arg(dtime.date().day()).arg(dtime.time().hour()).arg(dtime.time().minute()).arg(dtime.time().second())
+            .arg(dtime.time().msec());
+    pix.save(fileName,"PNG");
+    showMessage("截图保存成功");
 }
 

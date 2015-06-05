@@ -73,10 +73,11 @@ private:
     void loadSettings();                                    //读取设置
     void saveSettings();
     void defaultSettings();                                 //使用默认设置
+    void screenShots();                                     //截取屏幕
 
 private:
     int maxRenderLen;                                                   //最大渲染距离
-    QGraphicsView *GView;                                           //主窗口的指针（为获得光标的控制权）
+    QGraphicsView *gView;                                           //主窗口的指针（为获得光标的控制权）
     //    GLTexture2D *blockTexture;                                  //方块材质
     GLTexture3D *blockTexture;
     QGLShader *blockVertexShader;                           //方块顶点着色器

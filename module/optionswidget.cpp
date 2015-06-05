@@ -35,14 +35,18 @@ OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
     continueButton=new QPushButton(tr("返回游戏"),this);
     connect(continueButton,SIGNAL(clicked()),this,SIGNAL(continueGame()));
 
+    aboutButton=new QPushButton(tr("帮助与说明"),this);
+    connect(aboutButton,SIGNAL(clicked()),this,SLOT(aboutGame()));
+
     QVBoxLayout *mainLayout=new QVBoxLayout;
     this->setLayout(mainLayout);
     mainLayout->addLayout(mLayout);
     mainLayout->addLayout(rLayout);
     mainLayout->addStretch(20);
+    mainLayout->addWidget(aboutButton);
     mainLayout->addWidget(continueButton);
 
-//    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
+    //    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
 }
 
 OptionsWidget::~OptionsWidget()
@@ -86,6 +90,24 @@ void OptionsWidget::renderChange(int v)
 
 void OptionsWidget::clickOkRender()
 {
-        emit renderValueChange(renderSlider->value());
+    emit renderValueChange(renderSlider->value());
+}
+
+void OptionsWidget::aboutGame()
+{
+    QMessageBox::about(0,tr("DivineCraft帮助与说明"),tr("DivineCraft是一款开放式创造类沙盘游戏"
+                                                   "玩家可以在游戏中随意创造与破坏。\n"
+                                                   "当前版本为:%1\n"
+                                                   "开放者 by Gxin (请关注DivineCraft官方贴吧)\n\n"
+                                                   "操作说明:\n"
+                                                   "W,S,A,D: \t前进,后退,向左,向右\n"
+                                                   "M: \t切换飞行模式与重力模式\n"
+                                                   "空格键: \t重力模式下跳跃,飞行模式下上升\n"
+                                                   "Shift: \t飞行模式下下降\n"
+                                                   "E: \t物品背包栏\n"
+                                                   "1~9: \t切换物品栏当前物品\n"
+                                                   "Esc: \t进入设置菜单或退出物品栏\n"
+                                                   "F11: \t切换全屏\n"
+                                                   "F2: \t截图(图片会被保存在screenshots目录下).").arg(QApplication::applicationVersion()));
 }
 

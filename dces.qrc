@@ -67,5 +67,11 @@
         <file>textures/blocks/flower_rose.png</file>
         <file>textures/blocks/chrysanthemum.png</file>
         <file>icon.png</file>
+        <file>image/image.png</file>
+        <file>image/logo_16x16.png</file>
+        <file>image/logo_32x32.png</file>
+        <file>image/logo_64x64.png</file>
+        <file>image/logo_128x128.png</file>
+        <file>image/logo_256x256.png</file>
     </qresource>
 </RCC>

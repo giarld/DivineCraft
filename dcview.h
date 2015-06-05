@@ -21,8 +21,10 @@ protected:
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
 
+
 private:
-     GameScene *gameScene;
+    QGLWidget *widget;
+    GameScene *gameScene;
 };
 
 #endif // DCVIEW_H
