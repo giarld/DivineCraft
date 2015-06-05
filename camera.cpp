@@ -433,7 +433,7 @@ void Camera::collision(QVector3D strafe,int timeC)
         }
     }
 
-    if(newPosition.y()<-100)
+    if(newPosition.y()<-100 || newPosition.y()>100000)
         newPosition.setY(200);
     mPosition=newPosition;
 }

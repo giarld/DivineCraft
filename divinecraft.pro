@@ -15,10 +15,12 @@ contains(QT_CONFIG, opengles.) {
 }
 
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = divinecraft
 TEMPLATE = app
+
+#RC_ICONS = icon.ico
 
 # LIBS += -lglut -lGLU
 

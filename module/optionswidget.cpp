@@ -2,9 +2,9 @@
 
 OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
 {
-    this->setStyleSheet("QPushButton{"
-                        "font: bold 10pt;"
-                        "}");
+//    this->setStyleSheet("QPushButton{"
+//                        "font: bold 10pt;"
+//                        "}");
     QLabel *mLabel=new QLabel(tr("鼠标灵敏度:"),this);
     mouseLevelLabel=new QLabel(this);
     mouseLevelSlider=new QSlider(Qt::Horizontal,this);
