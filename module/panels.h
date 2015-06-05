@@ -22,7 +22,7 @@ protected:
 public:
     void setFps(int f);                       //接收fps数据
     void setPosition(const QVector3D &pos,const QVector3D &ePos);        //接收坐标数据
-    void setDisplayRadius(int r);
+    void setRenderLen(int r);
 
 private:
     QRectF rect;
@@ -186,6 +186,9 @@ public:
     void setPocketThingItem(ThingItem *item, int amount, int index);
     void setViewPos(QPoint pos);
 
+    void loadPocketData();                                      //从保存的文件中读取物品栏（口袋）物品
+    void savePocketData();                                          //保存物品栏（口袋）到文件
+
 protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *event);
@@ -226,6 +229,7 @@ public:
     bool isShow();           //是否呈现
     void setWorld(World *world);
     void setPocket(ItemBar *itemBar);
+    void savePocketData();                                          //保存物品栏（口袋）到文件
 protected:
 
 private:

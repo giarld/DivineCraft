@@ -8,6 +8,7 @@ DCView::DCView()
 {
     this->setWindowTitle(tr("DivineCraft"));
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    this->setWindowIcon(QIcon(":/res/divinecraft/icon.png"));
 
     int dWidth=QApplication::desktop()->width();
     int dHeight=QApplication::desktop()->height();
@@ -18,6 +19,7 @@ DCView::DCView()
     gameScene=new GameScene(w,h,this) ;
     this->setScene(gameScene);
         this->setMouseTracking(false);
+    this->close();
 }
 
 DCView::~DCView()

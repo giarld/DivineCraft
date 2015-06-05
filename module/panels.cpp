@@ -54,7 +54,7 @@ void DataPanel::setPosition(const QVector3D &pos, const QVector3D &ePos)
     this->mEyePosition=ePos;
 }
 
-void DataPanel::setDisplayRadius(int r)
+void DataPanel::setRenderLen(int r)
 {
     displayRadius=r;
 }
@@ -132,7 +132,7 @@ void MessagePanel::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->setPen(QColor(0,255,0,alpha));
     painter->setBrush(QBrush(QColor(0,255,0,alpha)));
 
-    QPixmap pixmap(":/res/divinecraft/textures/blocks/brick.png");
+    QPixmap pixmap(":/res/divinecraft/textures/blocks/planks_spruce.png");
 
     //    painter->drawRect(rect);
     painter->drawPixmap(rect,pixmap,QRectF(0,0,pixmap.width(),pixmap.height()));
@@ -221,6 +221,11 @@ void BackPackBar::setPocket(ItemBar *itemBar)
     widget->setPocket(itemBar);
 }
 
+void BackPackBar::savePocketData()
+{
+    widget->savePocketData();
+}
+
 //=========================
 //背包的显示组件
 //=========================
@@ -280,8 +285,7 @@ void BackPackBarWidget::setPocket(ItemBar *itemBar)
     for(int i=0;i<9;i++){
         pocketThing[i]->setItem(itemBar->getThingItem(i));
     }
-    setPocketThingItem(barThing[2]->getItem(),1,0);
-    emit pocketBar->thingIndexChange(pocketBar->getCurrThingID());
+    loadPocketData();
 }
 
 void BackPackBarWidget::setPocketThingItem(ThingItem *item,int amount,int index)
@@ -295,6 +299,41 @@ void BackPackBarWidget::setPocketThingItem(ThingItem *item,int amount,int index)
 void BackPackBarWidget::setViewPos(QPoint pos)
 {
     viewPos=pos;
+}
+
+void BackPackBarWidget::loadPocketData()
+{
+    QFile file(tr("%1/pocketItems.dat").arg(myWorld->getFilePath()));
+    if(file.open(QIODevice::ReadOnly)){
+        QDataStream in(&file);
+        int code;
+        in>>code;
+        if(code==0xe1234){
+            for(int i=0;i<9;i++){
+                int id;
+                QString name,texName;
+                int amount;
+                in>>id>>name>>texName>>amount;
+                pocketThing[i]->setItem(id,name,texName,amount);
+            }
+        }
+    }
+    else
+        setPocketThingItem(barThing[2]->getItem(),1,0);
+    emit pocketBar->thingIndexChange(pocketBar->getCurrThingID());
+}
+
+void BackPackBarWidget::savePocketData()
+{
+    QFile file(tr("%1/pocketItems.dat").arg(myWorld->getFilePath()));
+    if(file.open(QIODevice::WriteOnly)){
+        QDataStream out(&file);
+        out<<0xe1234;
+        for(int i=0;i<9;i++){
+           ThingItem *t=pocketThing[i]->getItem();
+           out<<t->id<<t->name<<t->texName<<t->amount;
+        }
+    }
 }
 
 void BackPackBarWidget::paintEvent(QPaintEvent *)

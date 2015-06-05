@@ -1,8 +1,5 @@
 <RCC>
     <qresource prefix="/res/divinecraft">
-        <file>shader/basic.fsh</file>
-        <file>shader/basic.vsh</file>
-        <file>shader/plain.fsh</file>
         <file>shader/block.fsh</file>
         <file>shader/block.vsh</file>
         <file>block.list</file>
@@ -69,5 +66,6 @@
         <file>textures/blocks/wheat_stage.png</file>
         <file>textures/blocks/flower_rose.png</file>
         <file>textures/blocks/chrysanthemum.png</file>
+        <file>icon.png</file>
     </qresource>
 </RCC>

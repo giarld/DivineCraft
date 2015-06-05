@@ -51,6 +51,8 @@ GameScene::GameScene(int width, int height, QGraphicsView *parent)
 GameScene::~GameScene()
 {
     saveOption();           //临时的
+    saveSettings();
+    backPackBar->savePocketData();
     world->autoSave();
     delete blockTexture;
     delete blockVertexShader;
@@ -78,6 +80,8 @@ GameScene::~GameScene()
             delete g;
         gameMessages.pop_front();
     }
+
+    delete opWidgetProxy;
 }
 
 void GameScene::drawBackground(QPainter *painter, const QRectF &)
@@ -104,7 +108,6 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
     QPointF rot=camera->rotation();
     rview.rotate(rot.x(),0,1,0);
     rview.rotate(rot.y(),cos(GMath::radians(rot.x())),0,sin(GMath::radians(rot.x())));
-    qWarning()<<rot.x();
 
     renderWorld(view,rview);
 
@@ -130,8 +133,13 @@ void GameScene::drawBackground(QPainter *painter, const QRectF &)
         backPackBar->setViewPos(QPoint(GView->pos().x()
                                        ,GView->pos().y()+(GView->frameSize().height()-GView->height())));
     }
-    if(itemBar){
+    if(itemBar){                        //刷新物品栏位置大小
         itemBar->resetSIze(this->width(),this->height(),40);
+    }
+    if(inOpWidget){                                             //刷新选项菜单位置和大小
+        int h=this->height()*0.8;
+        int w=h;
+        opWidget->setGeometry((this->width()-w)/2,(this->height()-h)/2,w,h);
     }
 }
 
@@ -159,7 +167,7 @@ void GameScene::pauseGame()
 void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->button()==Qt::LeftButton){
-        if(!backPackBar->isShow()){
+        if(!backPackBar->isShow() && !inOpWidget){
             if(!inSence){
                 inSence=true;
                 mouseLock();
@@ -172,7 +180,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
     }
     else if(event->button()==Qt::RightButton){
-        if(!backPackBar->isShow()){
+        if(!backPackBar->isShow() && !inOpWidget){
             if(inSence){
                 emit addBlock();
             }
@@ -192,6 +200,7 @@ void GameScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void GameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    qWarning("relese");
     QGraphicsScene::mouseReleaseEvent(event);
 }
 
@@ -218,7 +227,10 @@ void GameScene::wheelEvent(QGraphicsSceneWheelEvent *event)
 void GameScene::keyPressEvent(QKeyEvent *event)
 {
     if(event->key()==Qt::Key_Escape){
-        if(backPackBar->isShow()){
+        if(inOpWidget){
+            continueGame();
+        }
+        else if(backPackBar->isShow()){
             hideBackPackBar();
             inSence=true;
             mouseLock();
@@ -230,13 +242,17 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->unBind();
             pauseGame();
             mouseUnLock();
+            opWidgetProxy->show();
+            inOpWidget=true;
         }
     }
     else if(event->key()==Qt::Key_M){
-        if(camera->getGameMode()==Camera::SURVIVAL)
-            camera->setGameMode(Camera::GOD);
-        else
-            camera->setGameMode(Camera::SURVIVAL);
+        if(inSence){
+            if(camera->getGameMode()==Camera::SURVIVAL)
+                camera->setGameMode(Camera::GOD);
+            else
+                camera->setGameMode(Camera::SURVIVAL);
+        }
     }
     else if(event->key()==Qt::Key_E){
         if(backPackBar->isShow()){
@@ -246,13 +262,13 @@ void GameScene::keyPressEvent(QKeyEvent *event)
             camera->bind();
             startGame();
         }
-        else{
+        else if(inSence){
             showBackPackBar();
             inSence=false;
             camera->unBind();
             pauseGame();
             mouseUnLock();
-            showMessage(tr("打开了物品栏"),1);
+            showMessage(tr("打开了物品栏"),2);
         }
     }
     else{
@@ -346,20 +362,20 @@ void GameScene::setStates()
 
     setLights();
 
-    float materialSpecular[]={0.5f,0.5f,0.5f,1.0f};
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,materialSpecular);           //设置有质感的光照效果
-    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
+//    float materialSpecular[]={0.5f,0.5f,0.5f,1.0f};
+//    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,materialSpecular);           //设置有质感的光照效果
+//    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,32.0f);
 }
 
 void GameScene::setLights()
 {
     glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-    float lightDir[]={0.0,0.0,1.0,0.0};
+    float lightDir[]={0.8,1.0,0.5,0.0};
     float lightAmbient[]={0.2,0.2,0.2,1.0};      //环境光
-    //    float lightDiffuse[]={1.0,1.0,1.0,1.0};      //漫射光
+//        float lightDiffuse[]={1.0,1.0,1.0,0.7};      //漫射光
     glLightfv(GL_LIGHT0,GL_POSITION,lightDir);
     glLightfv(GL_LIGHT0,GL_AMBIENT,lightAmbient);
-    //    glLightfv(GL_LIGHT0,GL_DIFFUSE,lightDiffuse);
+//        glLightfv(GL_LIGHT0,GL_DIFFUSE,lightDiffuse);
     glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER,1.0f);
     glEnable(GL_LIGHT0);
 }
@@ -389,10 +405,10 @@ void GameScene::defaultStates()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
-    glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER, 0.0f);
-    float defaultMaterialSpecular[] = {0.0f, 0.0f, 0.0f, 1.0f};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, defaultMaterialSpecular);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
+//    glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER, 0.0f);
+//    float defaultMaterialSpecular[] = {0.0f, 0.0f, 0.0f, 1.0f};
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, defaultMaterialSpecular);
+//    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
 }
 
 void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
@@ -410,8 +426,10 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
     glLoadMatrixf(rview.constData());
     glMultMatrixf(view.constData());
 
+
     blockProgram->bind();
     blockProgram->setUniformValue("tex",GLint(0));
+    blockProgram->setUniformValue("view",view*rview);
     world->draw();
     blockProgram->release();
 
@@ -432,8 +450,10 @@ void GameScene::renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview)
     }
 }
 
-void GameScene::firstLoad()
+void GameScene::setRenderLen(int len)
 {
+    maxRenderLen=len;
+    world->setMaxRenderLen(len);
     emit updateWorld();
     showMessage(tr("世界正在加载中\n"
                    "请稍等"),3,10,Qt::white);
@@ -471,7 +491,8 @@ void GameScene::mouseMove()
 void GameScene::loadOverSlot()
 {
     showMessage(tr("世界加载完成"),2);
-    if(!backPackBar->isShow()){
+    dataPanel->setRenderLen(maxRenderLen);
+    if(!backPackBar->isShow() && !inOpWidget){
         if(!inSence){
             inSence=true;
             mouseLock();
@@ -484,6 +505,17 @@ void GameScene::loadOverSlot()
 void GameScene::showMessage(QString message, int showTime, int textSize, QColor textColor)
 {
     gameMessages.push_back(new GameMessage(message,textColor,textSize,showTime));
+}
+
+void GameScene::continueGame()
+{
+    hideBackPackBar();
+    inSence=true;
+    mouseLock();
+    camera->bind();
+    startGame();
+    inOpWidget=false;
+    opWidgetProxy->hide();
 }
 
 void GameScene::handleGameMessage()
@@ -537,8 +569,6 @@ void GameScene::initGame()
     }
     ////////////////////////////
     camera=new Camera(QVector3D(0,4,0),QPointF(180.0,0.0));
-    //        camera->setMouseLevel(0.5);
-    //    camera->setGameMode(Camera::GOD);
 
     world=new World;
     wThread=new QThread;
@@ -551,7 +581,7 @@ void GameScene::initGame()
     connect(world,SIGNAL(loadOver()),this,SLOT(loadOverSlot()));
     wThread->start();
 
-    world->setMaxRenderLen(maxRenderLen);
+    //    world->setMaxRenderLen(maxRenderLen);
     world->setWorldName("new_world");
     camera->setWorld(world);                                //传递世界指针
     ///////////////////////////
@@ -573,24 +603,40 @@ void GameScene::initGame()
     addItem(dataPanel);
     glFps=0;
     drawCount=0;
-    dataPanel->setDisplayRadius(maxRenderLen);
+    dataPanel->setRenderLen(maxRenderLen);
     connect(camera,SIGNAL(getPositions(QVector3D,QVector3D)),this,SLOT(dataShowPosition(QVector3D,QVector3D)));
     //    dataPanel->hide();
     //背包物品栏
     backPackBar=new BackPackBar(this);
     hideBackPackBar();
     backPackBar->setWorld(world);               //传递world指针
-
+    //物品栏
     itemBar=new ItemBar(this);
     connect(itemBar,SIGNAL(thingIndexChange(int)),camera,SLOT(setBlockId(int)));
     backPackBar->setPocket(itemBar);
     //=======================
+    //消息面板
     gameMessages.clear();
     messagePanel=new MessagePanel;
     addItem(messagePanel);
     //===========================
+    //选项菜单
+    opWidget=new OptionsWidget();
+    opWidgetProxy=new QGraphicsProxyWidget(0);
+    opWidgetProxy->setWidget(opWidget);
+    this->addItem(opWidgetProxy);
+    opWidgetProxy->hide();
+    inOpWidget=false;
+
+    connect(opWidget,SIGNAL(continueGame()),this,SLOT(continueGame()));
+    connect(opWidget,SIGNAL(mouseLevelValueChange(int)),camera,SLOT(setMouseLevel(int)));
+    connect(opWidget,SIGNAL(renderValueChange(int)),this,SLOT(setRenderLen(int)));
+    //=============================
+    loadSettings();
     camera->loadPosRot();                                   //加载位置视角信息
-    firstLoad();            //强制首次加载
+    setRenderLen(maxRenderLen);                     //设置渲染距离并刷新整个世界
+    opWidget->setRenderLen(maxRenderLen);
+    opWidget->setMouseLevel(camera->getMouseLevel());
 }
 
 void GameScene:: loadTexture()
@@ -644,5 +690,64 @@ void GameScene::mouseUnLock()
 {
     //    GView->setCursor(Qt::ArrowCursor);
     GView->viewport()->setCursor(Qt::ArrowCursor);
+}
+
+void GameScene::loadSettings()
+{
+    QDir dir(".");
+    if(!dir.cd("./.divineCraft/")){
+        dir.mkdir("./.divineCraft/");
+        dir.cd("./.divineCraft/");
+    }
+    QFile file(tr("%1/settings.dat").arg(dir.absolutePath()));
+    if(file.open(QIODevice::ReadOnly)){
+        int d;
+        QDataStream in(&file);
+        in>>d;
+        if(d==0x5678){
+            int renderlen,mouseLevel;
+            int mode;
+            in>>renderlen>>mouseLevel>>mode;
+            maxRenderLen=renderlen;
+            camera->setMouseLevel(mouseLevel);
+            if(mode==0){
+                camera->setGameMode(Camera::SURVIVAL);
+            }
+            else if(mode==1){
+                camera->setGameMode(Camera::GOD);
+            }
+        }
+    }
+    else
+    {
+        defaultSettings();
+    }
+}
+
+void GameScene::saveSettings()
+{
+    QDir dir(".");
+    if(!dir.cd("./.divineCraft/")){
+        dir.mkdir("./.divineCraft/");
+        dir.cd("./.divineCraft/");
+    }
+    QFile file(tr("%1/settings.dat").arg(dir.absolutePath()));
+    if(file.open(QIODevice::WriteOnly)){
+        QDataStream out(&file);
+        out<<0x5678<<maxRenderLen<<camera->getMouseLevel();
+        if(camera->getGameMode()==Camera::SURVIVAL){
+            out<<0;
+        }
+        else if(camera->getGameMode()==Camera::GOD){
+            out<<1;
+        }
+    }
+    qDebug("save settings over..");
+}
+
+void GameScene::defaultSettings()
+{
+    maxRenderLen=15;
+    camera->setMouseLevel(50);
 }
 

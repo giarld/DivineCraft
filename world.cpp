@@ -139,6 +139,8 @@ void World::updateWorld()
 void World::forcedUpdateWorld()
 {
     chunksMap.clear();
+    updateQueue.clear();
+    updateDisplayChunkQueue.clear();
     forcedUpdate=true;
     updateWorld();
 }
@@ -224,9 +226,9 @@ void World::loadBlockIndex()
             mBlockIndex[ii]->texName<<unknown;
         }
     }
-//    foreach (BlockListNode *a, mBlockIndex) {
-//        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->texName;
-//    }
+    //    foreach (BlockListNode *a, mBlockIndex) {
+    //        qDebug()<<a->id<<" "<<a->type<<" "<<a->name<<" "<<a->texName;
+    //    }
 }
 
 void World::setBlockListLength(int len)
@@ -377,15 +379,15 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
     QVector3D oPos=DisplayChunk::calcChunkOriginPos(nPos);                  //计算出区块的偏移坐标
     ChunkMap *newChunk=new ChunkMap(chunkPos,this);
     int i,j,k;
-    int cb[]={4,1,2};
-    for(k=0;k<3;k++){
+    int cb[]={3,5,1,2};
+    for(k=0;k<4;k++){
         for(i=0;i<16;i++){
             for(j=0;j<16;j++){
                 QVector3D bPos=oPos+QVector3D(i,k,j);
-                if((i==0 || j==0) && k==2)
-                    newChunk->addBlock(new Block(bPos,getBlockIndex(10)),false);
-                else
-                    newChunk->addBlock(new Block(bPos,getBlockIndex(cb[k])),false);
+                //                if((i==0 || j==0) && k==2)
+                //                    newChunk->addBlock(new Block(bPos,getBlockIndex(10)),false);
+                //                else
+                newChunk->addBlock(new Block(bPos,getBlockIndex(cb[k])),false);
             }
         }
     }
@@ -398,14 +400,14 @@ ChunkMap *World::createChunk(QVector2D chunkPos)
         int treeH=qrand()%4+5;
         int sx=7+oPos.x();
         int sz=7+oPos.z();
-        for(int i=3;i<=treeH+3;i++){
+        for(int i=4;i<=treeH+4;i++){
             newChunk->addBlock(new Block(QVector3D(sx,i,sz),getBlockIndex(tree[tn][0])),false);
         }
         newChunk->addBlock(new Block(QVector3D(sx,treeH+4,sz),getBlockIndex(tree[tn][1])),false);
 
-        for(int h=treeH/2+3;h<=treeH+4;h++){
+        for(int h=treeH/2+4;h<=treeH+4;h++){
             int r=qrand()%3+2;
-            if(h>treeH/2+3){
+            if(h>treeH/2+4){
                 r-=1;
             }
             if(r<2)

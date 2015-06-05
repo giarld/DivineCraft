@@ -37,8 +37,7 @@ public:
 
     QVector3D getSightVector() const;                                                 //返还视线向量
 
-    float getMouseLevel() const;                                            //对于鼠标灵敏度的设置与返还
-    void setMouseLevel(float value);
+    int getMouseLevel() const;                                            //对于鼠标灵敏度的设置与返还
 
     QVector3D position() const;                                                     //位置坐标的设置与返还
     void setPosition(const QVector3D &position);
@@ -76,6 +75,7 @@ public slots:
     void addBlock();
     void setBlockId(int id);
     void removeBlock();
+    void setMouseLevel(int v);
 
 private:
     void setDefaultValue();                                  //将速度鼠标灵敏度等设置为默认参数

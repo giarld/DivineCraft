@@ -16,7 +16,6 @@ Camera::Camera(Camera::CameraMode mode, QObject *parent)
     ,kBind(false)
 {
     setDefaultValue();
-    setMouseLevel(mouseLevel);
     setPosition(QVector3D(0,0,0));
     setRotation(QPointF(0.0,0.0));
     reMotionVector();
@@ -33,7 +32,6 @@ Camera::Camera(const QVector3D &position, const QPointF &rotation, Camera::Camer
     ,kBind(false)
 {
     setDefaultValue();
-    setMouseLevel(mouseLevel);
     setPosition(position);
     setRotation(rotation);
     reMotionVector();
@@ -131,13 +129,14 @@ QVector3D Camera::getSightVector() const
     QVector3D vec=QVector3D(dx,-dy,dz);
     return vec.normalized();
 }
-float Camera::getMouseLevel() const
+int Camera::getMouseLevel() const
 {
-    return mouseLevel;
+    return mouseLevel*100;
 }
 
-void Camera::setMouseLevel(float value)
+void Camera::setMouseLevel(int v)
 {
+    float value=v/100.0;
     if(value<0.01)
         value=0.01;
     if(value>1.0)
@@ -312,11 +311,12 @@ void Camera::removeBlock()
 
 void Camera::setDefaultValue()
 {
-    mouseLevel=0.5;
-    moveSpeed=0.0035;
+    setMouseLevel(50);
+    moveSpeed=0.0030;
     jumSpeed=0.0100;
     G=0.00003;
     MaxSpeed=0.08;
+    keyBlock=QVector3D(0,-10000,0);
 }
 
 void Camera::reMotionVector()
@@ -333,7 +333,7 @@ void Camera::hitTest()
     int handLen=7;      //手长
     int mm=8;             //分片精度
     QVector3D keyB;
-    QVector3D preB=QVector3D(0,-100,0);           //一个默认的实体坐标
+    QVector3D preB=QVector3D(0,-10000,0);           //一个默认的实体坐标
     QVector3D temp=getEyePosition();
     float tx=temp.x();
     float ty=temp.y();
@@ -388,7 +388,7 @@ void Camera::collision(QVector3D strafe,int timeC)
     static float corr[][2]={                          //要向自己的
         {1,0},{-1,0},{0,1},{0,-1},{-0.7071,-0.7071},{-0.7071,0.7071},{0.7071,-0.7071},{0.7071,0.7071}
     };
-    for(int i=0;i<8;i++){                   //以脚底为圆心，0.2为半径检测脚下方块这样就可以站在方块边缘了
+    for(int i=0;i<8;i++){                   //以脚底为圆心，0.2为半径检测脚下方块,这样就可以站在方块边缘了
         if(myWorld->collision(QVector3D(x+corr[i][0]*ym,newPosition.y(),z+corr[i][1]*ym))){
             coY=true;
             break;

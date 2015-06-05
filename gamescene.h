@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "world.h"
 #include "module/panels.h"
+#include "module/optionswidget.h"
 
 class GameScene : public QGraphicsScene
 {
@@ -45,14 +46,13 @@ protected:
     void defaultStates();           //还原GL设置
     void renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview);                                          //变换与绘制，view是位移矩阵，rview是旋转矩阵
 
-    void firstLoad();                                                                                                                                   //第一次加载世界
-
 signals:
     void updateWorld();                                     //从场景要求更新世界的信号
     void addBlock();
     void removeBlock();
 
 public slots:
+    void setRenderLen(int len);                         //设置渲染距离并刷新
     void saveOption();                                      //游戏的配置读取与保存
     void dataShowPosition(const QVector3D & pos, const QVector3D &ePos);
     void showBackPackBar();                                 //显示物品栏
@@ -60,20 +60,24 @@ public slots:
     void mouseMove();                                   //鼠标的移动槽（仅当进入场景）
     void loadOverSlot();                                    //预加载完毕接收槽
     void showMessage(QString message,int showTime=3, int textSize=10,QColor textColor=Qt::white);                                     //显示一个MessagePanel(含默认值)
+    void continueGame();
+
 private slots:
     void handleGameMessage();                      //处理消息等待队列
 
 private:
     void initGame();                                                                    //初始化游戏场景
     void loadTexture();                                                 //加载材质纹理,w:材质长度，h材质高度，s材质数量
-
     void mouseLock();                                                   //将鼠标锁定入场景
     void mouseUnLock();
+    void loadSettings();                                    //读取设置
+    void saveSettings();
+    void defaultSettings();                                 //使用默认设置
 
 private:
     int maxRenderLen;                                                   //最大渲染距离
     QGraphicsView *GView;                                           //主窗口的指针（为获得光标的控制权）
-//    GLTexture2D *blockTexture;                                  //方块材质
+    //    GLTexture2D *blockTexture;                                  //方块材质
     GLTexture3D *blockTexture;
     QGLShader *blockVertexShader;                           //方块顶点着色器
     QGLShader *blockFragmentShader;                     //方块片段着色器
@@ -103,6 +107,10 @@ private:
     MessagePanel *messagePanel;
     QQueue<GameMessage *> gameMessages;
     ItemBar *itemBar;                                       //物品栏
+
+    OptionsWidget *opWidget;
+    QGraphicsProxyWidget *opWidgetProxy;
+    bool inOpWidget;
 };
 
 
