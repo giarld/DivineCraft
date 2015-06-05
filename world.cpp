@@ -151,6 +151,7 @@ void World::loadBlockIndex()
     QFile file(":/res/divinecraft/block.list");
     if(file.open(QIODevice::ReadOnly)){
         QTextStream in(&file);
+        in.setCodec("utf-8");
         while(!in.atEnd()){
             QString line=in.readLine();
             if(line=="" || line==NULL) continue;
@@ -176,6 +177,7 @@ void World::loadBlockIndex()
     file.setFileName(":/res/divinecraft/textures/blocks/texture_index.list");
     if(file.open(QIODevice::ReadOnly)){
         QTextStream in(&file);
+        in.setCodec("utf-8");
         int index=0;
         while(!in.atEnd() && index<=mBlockIndex.length()){
             QString line=in.readLine();
