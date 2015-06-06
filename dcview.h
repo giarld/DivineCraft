@@ -23,7 +23,6 @@ protected:
     void closeEvent(QCloseEvent *);
 
 private:
-    QGLWidget *widget;
     GameScene *gameScene;
 };
 
