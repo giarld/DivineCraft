@@ -48,7 +48,8 @@ protected:
     void renderWorld(const QMatrix4x4 &view,const QMatrix4x4 &rview);                                          //变换与绘制，view是位移矩阵，rview是旋转矩阵
 
 signals:
-    void updateWorld();                                     //从场景要求更新世界的信号
+    void reloadWorld();                                     //从场景要求更新世界的信号
+    void resetRenderLen();                              //重新设置渲染距离
     void addBlock();
     void removeBlock();
 

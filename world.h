@@ -78,6 +78,7 @@ private:
     QVector<BlockListNode *> mBlockIndex;                        //存储所有类型方块的物理属性
     QQueue<QString> updateQueue;                                    //显示更新等待队列，保存等待刷新区块
     QQueue<QVector3D> updateDisplayChunkQueue;                     //显示区块刷新等待队列
+    QQueue<ChunkMap *> deleteChunckQueue;                           //等待释放内存的区块队列
     bool lockDQueue;                                                                //updateDisplayChunkQueue的线程锁
     bool upLock;                                                                //update单操作锁
     GLuint drawID;                                                          //显示列表ID

@@ -51,6 +51,10 @@ OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(continueButton);
 
     //    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
+    this->setAutoFillBackground(true);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, QBrush(QPixmap(":/res/divinecraft/textures/ui/back_pack_bar.png")));
+    this->setPalette(palette);
 }
 
 OptionsWidget::~OptionsWidget()
@@ -70,15 +74,6 @@ void OptionsWidget::setMouseLevel(int v)
 void OptionsWidget::setRenderLen(int v)
 {
     renderSlider->setValue(v);
-}
-
-void OptionsWidget::paintEvent(QPaintEvent *)
-{
-    QRect wRect(0,0,this->width(),this->height());
-    QPainter painter(this);
-    QPixmap pixmap(":/res/divinecraft/textures/ui/back_pack_bar.png");
-    //    painter.drawRect(wRect);
-    painter.drawPixmap(wRect,pixmap,QRect(0,0,pixmap.width(),pixmap.height()));
 }
 
 void OptionsWidget::mouseLevelChange(int v)

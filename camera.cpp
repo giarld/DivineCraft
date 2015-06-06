@@ -312,7 +312,7 @@ void Camera::removeBlock()
 void Camera::setDefaultValue()
 {
     setMouseLevel(50);
-    moveSpeed=0.0030;
+    moveSpeed=0.0035;
     jumSpeed=0.0100;
     G=0.00003;
     MaxSpeed=0.08;
@@ -434,7 +434,7 @@ void Camera::collision(QVector3D strafe,int timeC)
     }
 
     if(newPosition.y()<-100 || newPosition.y()>100000)
-        newPosition.setY(200);
+        newPosition.setY(300);
     mPosition=newPosition;
 }
 

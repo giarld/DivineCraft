@@ -474,7 +474,7 @@ void GameScene::setRenderLen(int len)
     saveTime=QTime::currentTime();
     maxRenderLen=len;
     world->setMaxRenderLen(len);
-    emit updateWorld();
+    emit resetRenderLen();
     showMessage(tr("世界正在加载中\n"
                    "请稍等"),3,10,Qt::white);
 }
@@ -603,8 +603,9 @@ void GameScene::initGame()
     wThread=new QThread;
     world->moveToThread(wThread);
     connect(wThread,SIGNAL(finished()),world,SLOT(deleteLater()));              //线程被销毁的同时销毁world
-    connect(this,SIGNAL(updateWorld()),world,SLOT(forcedUpdateWorld()));                //强制进行世界刷新
+    connect(this,SIGNAL(reloadWorld()),world,SLOT(forcedUpdateWorld()));                //强制进行世界刷新
     connect(camera,SIGNAL(cameraMove(QVector3D)),world,SLOT(changeCameraPosition(QVector3D)));          //连接camera移动与世界相机位移的槽
+    connect(this,SIGNAL(resetRenderLen()),world,SLOT(updateWorld()));
     connect(this,SIGNAL(addBlock()),camera,SLOT(addBlock()));
     connect(this,SIGNAL(removeBlock()),camera,SLOT(removeBlock()));
     connect(world,SIGNAL(loadOver()),this,SLOT(loadOverSlot()));
@@ -796,10 +797,10 @@ void GameScene::screenShots()
         dir.mkdir("screenshots/");
         dir.cd("screenshots/");
     }
-    QString fileName=tr("%1/%2-%3-%4_%5:%6:%7:%8.png").arg(dir.absolutePath()).arg(dtime.date().year()).arg(dtime.date().month())
+    QString fileName=tr("%1/%2_%3_%4_%5:%6:%7:%8.jpg").arg(dir.absolutePath()).arg(dtime.date().year()).arg(dtime.date().month())
             .arg(dtime.date().day()).arg(dtime.time().hour()).arg(dtime.time().minute()).arg(dtime.time().second())
             .arg(dtime.time().msec());
-    pix.save(fileName,"PNG");
+    pix.save(fileName,"JPG");
     showMessage("截图保存成功");
 }
 

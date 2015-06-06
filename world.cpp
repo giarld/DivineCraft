@@ -23,15 +23,15 @@ World::World(QObject *parent) : QObject(parent)
 
 World::~World()
 {
-    foreach (BlockListNode *t, mBlockIndex) {
-        if(t)
-            delete t;
-    }
     foreach (ChunkMap *c, chunksMap) {
         if(c)
             delete c;
     }
     chunksMap.clear();
+    foreach (BlockListNode *t, mBlockIndex) {
+        if(t)
+            delete t;
+    }
 }
 
 bool World::addBlock(Block *block, bool update)
@@ -116,10 +116,8 @@ void World::updateWorld()
     QVector3D cdPos=DisplayChunk::calcChunckPos(this->cameraPosition);          //给出当前所在的区块
     QVector2D startCPos=GMath::v3d2v2d(cdPos);                                                  //将所在区块定义为起始区块。
 
-    bfs2World(startCPos);
-
-    foreach (ChunkMap *cm, chunksMap) {
-        if(cm && !cm->inDraw()){                                        //有效区块且区块不在绘图状态
+    foreach (ChunkMap *cm, chunksMap) {                         //移除视野外方块
+        if(cm){                                        //有效区
             if(GMath::gAbs(int(cm->getChunkPosition().distanceToPoint(startCPos)))>=maxRenderLen+2){
                 //                cm->setShow(false);
                 QString key=getKey(cm->getChunkPosition());
@@ -127,10 +125,12 @@ void World::updateWorld()
                     saveChunk(key);
                 }
                 chunksMap.remove(key);
-                delete cm;
+                deleteChunckQueue.push_back(cm);                        //推送到队列准备销毁
             }
         }
     }
+
+    bfs2World(startCPos);               //遍历可见区
 
     qDebug()<<"load end";
     upLock=false;
@@ -138,9 +138,13 @@ void World::updateWorld()
 
 void World::forcedUpdateWorld()
 {
-    chunksMap.clear();
     updateQueue.clear();
     updateDisplayChunkQueue.clear();
+
+    foreach (ChunkMap *ch, chunksMap) {
+        deleteChunckQueue.push_back(ch);
+    }
+    chunksMap.clear();
     forcedUpdate=true;
     updateWorld();
 }
@@ -310,6 +314,13 @@ void World::updateDraw()
         updateDisplay();
     }
     lockDQueue=false;
+    fTime=QTime::currentTime();
+    while(!deleteChunckQueue.isEmpty() && fTime.msecsTo(QTime::currentTime())<=5){                      //释放内存的操作
+        ChunkMap *cm=deleteChunckQueue.front();
+        deleteChunckQueue.pop_front();
+        if(cm)
+            delete cm;
+    }
 }
 
 

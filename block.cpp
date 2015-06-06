@@ -95,9 +95,10 @@ Block::Block(QVector3D position, const BlockListNode *mb)
 Block::~Block()
 {
     foreach (Face *f, face) {
-        if(f)
+//        if(f)
             delete f;
     }
+
 }
 
 bool Block::isAir()
