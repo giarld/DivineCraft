@@ -12,6 +12,8 @@ public:
     void setMouseLevel(int v);
     void setRenderLen(int v);
 
+protected:
+    void paintEvent(QPaintEvent *);
 
 signals:
     void continueGame();

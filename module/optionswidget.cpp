@@ -2,11 +2,11 @@
 
 OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
 {
-//    this->setStyleSheet("QPushButton{"
-//                        "font: bold 10pt;"
-//                        "}");
+    //    this->setStyleSheet("QPushButton{"
+    //                        "font: bold 10pt;"
+    //                        "}");
     QLabel *mLabel=new QLabel(tr("鼠标灵敏度:"),this);
-    mouseLevelLabel=new QLabel(this);
+    mouseLevelLabel=new QLabel(tr("1"),this);
     mouseLevelSlider=new QSlider(Qt::Horizontal,this);
     mouseLevelSlider->setRange(1,100);
     connect(mouseLevelSlider,SIGNAL(valueChanged(int)),this,SLOT(mouseLevelChange(int)));
@@ -20,12 +20,11 @@ OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
     QLabel *rLabel=new QLabel(tr("渲染距离:"),this);
     renderSlider=new QSlider(Qt::Horizontal,this);
     renderSlider->setRange(2,32);
-    renderLabel=new QLabel(this);
+    renderLabel=new QLabel(tr("2"),this);
     okRenderChangeButton=new QPushButton(tr("确定修改"),this);
     connect(okRenderChangeButton,SIGNAL(clicked()),this,SLOT(clickOkRender()));
     connect(renderSlider,SIGNAL(valueChanged(int)),this,SLOT(renderChange(int)));
     QHBoxLayout *rLayout=new QHBoxLayout;
-    renderSlider->setValue(2);
     rLayout->addWidget(rLabel);
     rLayout->addWidget(renderSlider);
     rLayout->addWidget(renderLabel);
@@ -50,11 +49,7 @@ OptionsWidget::OptionsWidget(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(quitButton);
     mainLayout->addWidget(continueButton);
 
-    //    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
-    this->setAutoFillBackground(true);
-    QPalette palette;
-    palette.setBrush(QPalette::Background, QBrush(QPixmap(":/res/divinecraft/textures/ui/back_pack_bar.png")));
-    this->setPalette(palette);
+    this->setAttribute(Qt::WA_TranslucentBackground,true);          //背景透明
 }
 
 OptionsWidget::~OptionsWidget()
@@ -74,6 +69,13 @@ void OptionsWidget::setMouseLevel(int v)
 void OptionsWidget::setRenderLen(int v)
 {
     renderSlider->setValue(v);
+}
+
+void OptionsWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    QPixmap pix(":/res/divinecraft/textures/ui/back_pack_bar.png");
+    painter.drawPixmap(QRect(0,0,this->width(),this->height()),pix,QRect(0,0,pix.width(),pix.height()));
 }
 
 void OptionsWidget::mouseLevelChange(int v)

@@ -797,10 +797,12 @@ void GameScene::screenShots()
         dir.mkdir("screenshots/");
         dir.cd("screenshots/");
     }
-    QString fileName=tr("%1/%2_%3_%4_%5:%6:%7:%8.jpg").arg(dir.absolutePath()).arg(dtime.date().year()).arg(dtime.date().month())
+    QString fileName=tr("%1/%2-%3-%4_%5-%6-%7-%8.jpg").arg(dir.absolutePath()).arg(dtime.date().year()).arg(dtime.date().month())
             .arg(dtime.date().day()).arg(dtime.time().hour()).arg(dtime.time().minute()).arg(dtime.time().second())
             .arg(dtime.time().msec());
-    pix.save(fileName,"JPG");
-    showMessage("截图保存成功");
+    if(pix.save(fileName,"JPG"))
+        showMessage(tr("截图保存成功"));
+    else
+        showMessage(tr("截图保存失败!"));
 }
 
