@@ -8,7 +8,7 @@
 DCView::DCView()
 {
     QApplication::setApplicationName("DivineCraft");
-    QApplication::setApplicationVersion("0.0020.0");
+    QApplication::setApplicationVersion("0.0030.1");
     this->setWindowTitle(tr("DivineCraft %1").arg(QApplication::applicationVersion()));
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     this->setWindowIcon(QIcon(":/res/divinecraft/image/logo_128x128.png"));
