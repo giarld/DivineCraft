@@ -475,6 +475,7 @@ void GameScene::setRenderLen(int len)
     maxRenderLen=len;
     world->setMaxRenderLen(len);
     emit resetRenderLen();
+    dataPanel->setRenderLen(maxRenderLen);
     showMessage(tr("世界正在加载中\n"
                    "请稍等"),3,10,Qt::white);
 }
