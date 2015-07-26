@@ -53,14 +53,17 @@ class MessagePanel : public QGraphicsItem
 public:
     MessagePanel();
     //显示提示面板，坐标，长宽，信息内容，字体颜色，字体大小，以及显示的时间（showTime>0）
-    void showMessage(GameMessage *message,QGraphicsScene *s);
+    void nextMessage(QGraphicsScene *s);
+    void appendMessage(QString message,int showTime=3, int textSize=10,QColor textColor=Qt::white);    //增加一条消息
 protected:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *);
 private:
+    void showMessage(QGraphicsScene *s);
     void deleteMessage();           //清理消息内存
 private :
     GameMessage *gMessage;
+    QQueue<GameMessage *> gameMessages;
     QRectF rect;
     int alpha;                      //透明度
     QTime beginTime;

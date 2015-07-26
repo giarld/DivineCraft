@@ -75,7 +75,7 @@ public slots:
     void addBlock();
     void setBlockId(int id);
     void removeBlock();
-    void setMouseLevel(int v);
+    void setMouseLevel(int v);              //设置鼠标灵敏度
 
 private:
     void setDefaultValue();                                  //将速度鼠标灵敏度等设置为默认参数

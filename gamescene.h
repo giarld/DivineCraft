@@ -110,7 +110,6 @@ private:
 
     BackPackBar *backPackBar;                   //背包栏
     MessagePanel *messagePanel;
-    QQueue<GameMessage *> gameMessages;
     ItemBar *itemBar;                                       //物品栏
 
     OptionsWidget *opWidget;

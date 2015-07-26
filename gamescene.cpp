@@ -77,12 +77,6 @@ GameScene::~GameScene()
     delete backPackBar;
 
     delete messagePanel;
-    while(!gameMessages.isEmpty()){
-        GameMessage *g=gameMessages.front();
-        if(g)
-            delete g;
-        gameMessages.pop_front();
-    }
 
     delete opWidgetProxy;
 }
@@ -525,7 +519,7 @@ void GameScene::loadOverSlot()
 
 void GameScene::showMessage(QString message, int showTime, int textSize, QColor textColor)
 {
-    gameMessages.push_back(new GameMessage(message,textColor,textSize,showTime));
+    messagePanel->appendMessage(message,showTime,textSize,textColor);
 }
 
 void GameScene::continueGame()
@@ -550,12 +544,7 @@ void GameScene::autoSave()
 
 void GameScene::handleGameMessage()
 {
-    if(messagePanel->isVisible()==false){               //messagePanel处于空闲且队列中有消息，则显示消息
-        if(!gameMessages.isEmpty()){
-            messagePanel->showMessage(gameMessages.front(),this);
-            gameMessages.pop_front();
-        }
-    }
+    messagePanel->nextMessage(this);
 }
 
 void GameScene::initGame()
@@ -647,7 +636,6 @@ void GameScene::initGame()
     backPackBar->setPocket(itemBar);
     //=======================
     //消息面板
-    gameMessages.clear();
     messagePanel=new MessagePanel;
     addItem(messagePanel);
     //===========================

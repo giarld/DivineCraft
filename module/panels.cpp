@@ -66,12 +66,23 @@ void DataPanel::setRenderLen(int r)
 MessagePanel::MessagePanel()
 {
     gMessage=NULL;
+    gameMessages.clear();
     //    this->hide();
 }
 
-void MessagePanel::showMessage(GameMessage *message, QGraphicsScene *s)
+void MessagePanel::nextMessage(QGraphicsScene *s)
 {
-    gMessage=message;
+    if(this->isVisible()==false){               //messagePanel处于空闲且队列中有消息，则显示消息
+        if(!gameMessages.isEmpty()){
+            gMessage=gameMessages.front();
+            showMessage(s);
+            gameMessages.pop_front();
+        }
+    }
+}
+
+void MessagePanel::showMessage(QGraphicsScene *s)
+{
     if(gMessage==NULL){
         this->hide();
         return;
@@ -115,6 +126,11 @@ void MessagePanel::showMessage(GameMessage *message, QGraphicsScene *s)
     alpha=255;
     this->setZValue(0x3f3f3f3f);
     this->show();
+}
+
+void MessagePanel::appendMessage(QString message, int showTime, int textSize, QColor textColor)
+{
+    gameMessages.push_back(new GameMessage(message,textColor,textSize,showTime));
 }
 
 QRectF MessagePanel::boundingRect() const

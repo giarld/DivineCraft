@@ -142,7 +142,7 @@ void Camera::setMouseLevel(int v)
     if(value>1.0)
         value=1.0;
     mouseLevel = GMath::gMax(0.0,GMath::gMin(value,1.0));
-    dlAngle=mouseLevel*0.1f;
+    dlAngle=mouseLevel*0.5f;
 }
 QVector3D Camera::position() const
 {
