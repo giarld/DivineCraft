@@ -41,7 +41,7 @@ struct Face
 };
 
 /*方块，由面组成。标准方块有6个面：FRONT,BACK,LEFT,RIGHT,TOP,DOWN。
- * 花卉一类的方块有4个面：FRONT,BACK,TOP,DOWN，且成对角绘制
+ * 花卉一类的方块有4个面：FRONT,BACK,LEFT,RIGHT，且成对角绘制
 */
 
 class Block
