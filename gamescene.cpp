@@ -316,6 +316,7 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
 
 void GameScene::focusOutEvent(QFocusEvent *event)
 {
+    Q_UNUSED(event)
     //窗口脱离焦点后暂停游戏
     if(inSence){
         inSence=false;

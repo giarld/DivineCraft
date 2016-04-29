@@ -20,6 +20,9 @@ QRectF DataPanel::boundingRect() const
 
 void DataPanel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
     QColor color=QColor(0,0,0,50);
     painter->setPen(color);
     QBrush brush=QBrush(color);
@@ -140,6 +143,9 @@ QRectF MessagePanel::boundingRect() const
 
 void MessagePanel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+
     if(gMessage==NULL){
         this->hide();
         return;
